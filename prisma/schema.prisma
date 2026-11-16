@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SubscriptionTier {
+  TRIAL
+  SOLO_12
+  PRO_19
+}
+
+enum BookingStatus {
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id                 String           @id @default(cuid())
+  email              String           @unique
+  name               String
+  tagline            String           @default("Private Tutor & Coach")
+  bio                String           @default("")
+  slug               String           @unique
+  timezone           String           @default("America/New_York")
+  workStartHour      Int              @default(14)
+  workEndHour        Int              @default(20)
+  googleRefreshToken String?
+  subscriptionTier   SubscriptionTier @default(TRIAL)
+  paddleCustomerId   String?          @unique
+  paddleSubStatus    String?
+  smsEnabled         Boolean          @default(false)
+  upfrontPay         Boolean          @default(true)
+  services           Service[]
+  students           Student[]
+  bookings           Booking[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+}
+
+model Service {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String    @default("")
+  durationMin Int       @default(60)
+  priceCents  Int       @default(0)
+  packageHrs  Int       @default(1)
+  bookings    Booking[]
+  createdAt   DateTime  @default(now())
+}
+
+model Student {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  email          String
+  magicToken     String    @unique
+  hoursRemaining Int       @default(0)
+  totalPaidCents Int       @default(0)
+  bookings       Booking[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([userId, email])
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentId       String
+  student         Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  serviceId       String
+  service         Service       @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  startsAt        DateTime
+  endsAt          DateTime
+  status          BookingStatus @default(CONFIRMED)
+  note            String        @default("")
+  sessionSummary  String        @default("")
+  homeworkUrl     String        @default("")
+  meetingUrl      String        @default("")
+  calendarEventId String?
+  reminderSentAt  DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([userId, startsAt])
+}
