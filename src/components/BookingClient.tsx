@@ -342,24 +342,30 @@ export function BookingClient({
   const step3Done = Boolean(studentName.trim() && studentEmail.trim());
 
   const steps = [
-    { num: '01', label: 'Session', done: step1Done, active: true },
-    { num: '02', label: 'Date & Slot', done: step2Done, active: step1Done },
-    { num: '03', label: 'Student Details', done: step3Done, active: step2Done },
+    { id: 'booking-step-1', num: '01', label: 'Session', done: step1Done, active: true },
+    { id: 'booking-step-2', num: '02', label: 'Date & Slot', done: step2Done, active: step1Done },
+    { id: 'booking-step-3', num: '03', label: 'Student Details', done: step3Done, active: step2Done },
   ];
+
+  function jumpToStep(id: string) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Interactive 3-Step Progress Bar */}
+      {/* Interactive 3-Step Jump Bar */}
       <div className="grid grid-cols-3 gap-2 rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-1.5 font-mono text-[11px]">
         {steps.map((step) => (
-          <div
+          <button
             key={step.num}
-            className={`flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 font-semibold transition ${
+            type="button"
+            onClick={() => jumpToStep(step.id)}
+            className={`flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 font-semibold transition cursor-pointer ${
               step.done
                 ? 'bg-white text-[#141413] shadow-sm border border-[#DCD6C8]'
                 : step.active
-                  ? 'text-[#D94E28]'
-                  : 'text-[#6E685C]'
+                  ? 'text-[#D94E28] hover:bg-white/70'
+                  : 'text-[#6E685C] hover:bg-white/70'
             }`}
           >
             <span
@@ -372,7 +378,7 @@ export function BookingClient({
               {step.done ? <Check className="h-2.5 w-2.5" /> : step.num}
             </span>
             <span className="truncate">{step.label}</span>
-          </div>
+          </button>
         ))}
       </div>
 
@@ -394,7 +400,7 @@ export function BookingClient({
       )}
 
       {/* Step 01: Session */}
-      <div>
+      <div id="booking-step-1" className="scroll-mt-20">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
             01 / Select Session or Pack
@@ -497,7 +503,7 @@ export function BookingClient({
       </div>
 
       {/* Step 02: Quick 7-Day Strip + Grouped Slots + 12H/24H Toggle */}
-      <div className="space-y-4 border-t border-[#EFECE4] pt-6">
+      <div id="booking-step-2" className="space-y-4 border-t border-[#EFECE4] pt-6 scroll-mt-20">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
@@ -624,7 +630,7 @@ export function BookingClient({
       </div>
 
       {/* Step 03: Details (2-Tap Compact Identity when returning via ?token=) */}
-      <div className="space-y-3.5 border-t border-[#EFECE4] pt-6">
+      <div id="booking-step-3" className="space-y-3.5 border-t border-[#EFECE4] pt-6 scroll-mt-20">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
             03 / Your Details
@@ -718,8 +724,12 @@ export function BookingClient({
         </p>
       )}
 
-      {/* Tactile Booking Summary Bar + Submit */}
-      <div className="surface-elevated rounded-xl p-4 space-y-3">
+      {/* Sticky Tactile Booking Summary Bar + Submit */}
+      <div
+        className={`surface-elevated rounded-xl p-4 space-y-3 transition-shadow ${
+          startsAt ? 'sticky bottom-3 z-20 shadow-lg border-[#141413]/30' : ''
+        }`}
+      >
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
           <div>
             <div className="font-semibold text-[#141413]">

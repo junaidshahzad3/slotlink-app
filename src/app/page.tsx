@@ -3,9 +3,14 @@ import { ArrowRight, ArrowUpRight, Check, FileText, Minus, X } from 'lucide-reac
 import { AppTopBar } from '@/components/AppTopBar';
 import {
   CommissionSavingsCalculator,
+  HeroHandleClaimer,
   HeroInteractiveStage,
 } from '@/components/LandingInteractiveHero';
 import { LandingFaqAccordion } from '@/components/LandingFaqAccordion';
+import {
+  ScrollJourneySection,
+  WorkflowComparisonScrubber,
+} from '@/components/ScrollJourneySection';
 
 const COMPARISON_ROWS = [
   {
@@ -52,7 +57,7 @@ export default function LandingPage() {
       <AppTopBar badge="SOLO EDUCATOR OS" />
 
       {/* Editorial Split Hero */}
-      <section className="relative border-b border-[#DCD6C8] bg-grid-pattern">
+      <section className="relative border-b border-[#DCD6C8] bg-editorial-mesh">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-center">
             {/* Left Copy Column */}
@@ -60,7 +65,7 @@ export default function LandingPage() {
               <div className="inline-flex items-center gap-2 border border-[#DCD6C8] bg-white px-3 py-1 rounded-md shadow-sm">
                 <span className="live-dot h-2 w-2 rounded-full bg-[#15803D]" />
                 <span className="font-mono text-[11px] font-medium uppercase tracking-wider text-[#141413]">
-                  01 // Zero-Bloat Scheduling &amp; Pack Ledger
+                  00 // Zero-Bloat Scheduling &amp; Pack Ledger
                 </span>
               </div>
 
@@ -78,7 +83,9 @@ export default function LandingPage() {
                 private zero-login link.
               </p>
 
-              <div className="flex flex-wrap items-center gap-3 pt-1">
+              <HeroHandleClaimer />
+
+              <div className="flex flex-wrap items-center gap-3">
                 <Link
                   href="/login?mode=signup"
                   className="inline-flex items-center gap-2 rounded-lg bg-[#141413] px-5 py-3 text-sm font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
@@ -87,10 +94,10 @@ export default function LandingPage() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
-                  href="/sarah-math"
+                  href="#journey"
                   className="inline-flex items-center gap-2 rounded-lg border border-[#CEC7B6] bg-white px-5 py-3 text-sm font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
                 >
-                  View Sample Booking Page
+                  Explore Scroll Journey
                   <ArrowUpRight className="h-4 w-4 text-[#D94E28]" />
                 </Link>
               </div>
@@ -132,8 +139,14 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Scroll-Driven 4-Chapter Product Journey */}
+      <ScrollJourneySection />
+
+      {/* Interactive Old Stack vs SlotLink Scrubber */}
+      <WorkflowComparisonScrubber />
+
       {/* Architectural 3-Step Workflow Ledger */}
-      <section id="features" className="border-b border-[#DCD6C8] bg-white">
+      <section id="features" className="border-b border-[#DCD6C8] bg-[#F6F4EE]">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
             {/* Step 01 */}
@@ -316,7 +329,7 @@ export default function LandingPage() {
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
               <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                02 // Transparent Studio Pricing
+                03 // Transparent Studio Pricing
               </div>
               <h2 className="mt-2 text-3xl font-semibold tracking-tight text-[#141413]">
                 Start free for 14 days.{' '}
@@ -435,7 +448,7 @@ export default function LandingPage() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                03 // Educator Studio Blueprints
+                04 // Educator Studio Blueprints
               </div>
               <h2 className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight text-[#141413]">
                 How solo specialists{' '}
@@ -514,7 +527,7 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 pt-4">
           <div className="lg:col-span-4 space-y-2">
             <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-              04 // Architecture &amp; FAQ
+              05 // Architecture &amp; FAQ
             </div>
             <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#141413]">
               Common questions from{' '}

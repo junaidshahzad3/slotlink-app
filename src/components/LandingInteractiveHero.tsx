@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -87,6 +88,54 @@ const PORTAL_PERSONAS = {
     takeaway: 'Clean chain-rule execution; 1 prepaid hour remaining before Friday review.',
   },
 } as const;
+
+/**
+ * Interactive studio URL handle claimer for the landing page hero.
+ */
+export function HeroHandleClaimer() {
+  const router = useRouter();
+  const [handle, setHandle] = useState('');
+
+  const cleanSlug =
+    handle
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 48) || 'your-studio';
+
+  function onClaim(e: React.FormEvent) {
+    e.preventDefault();
+    router.push(`/login?mode=signup&slug=${encodeURIComponent(cleanSlug)}`);
+  }
+
+  return (
+    <form
+      onSubmit={onClaim}
+      className="flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl border border-[#CEC7B6] bg-white p-1.5 shadow-sm focus-within:border-[#141413] transition"
+    >
+      <div className="flex flex-1 items-center min-w-0 px-2.5 py-1.5">
+        <span className="shrink-0 font-mono text-xs font-medium text-[#6E685C]">
+          slotlink.app/
+        </span>
+        <input
+          type="text"
+          aria-label="Claim your SlotLink handle"
+          placeholder="sarah-math"
+          value={handle}
+          onChange={(e) => setHandle(e.target.value)}
+          className="w-full min-w-0 bg-transparent font-mono text-xs font-semibold text-[#D94E28] placeholder-[#A8A295] focus:outline-none"
+        />
+      </div>
+      <button
+        type="submit"
+        className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-[#D94E28] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[#B83E1D] transition cursor-pointer"
+      >
+        Claim Studio Link
+        <ArrowRight className="h-3.5 w-3.5" />
+      </button>
+    </form>
+  );
+}
 
 /**
  * Interactive multi-mode product preview for the landing page hero column.
@@ -565,7 +614,7 @@ export function CommissionSavingsCalculator() {
   const netSavedVsMarketplace = Math.max(0, marketplaceAnnualCut - slotlinkAnnualCost);
 
   return (
-    <section className="border-b border-[#DCD6C8] bg-[#F6F4EE] bg-dot-matrix">
+    <section id="calculator" className="border-b border-[#DCD6C8] bg-[#F6F4EE] bg-dot-matrix">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="surface-card rounded-2xl p-6 sm:p-8 lg:p-10 space-y-8">
           <div className="flex flex-wrap items-end justify-between gap-4">

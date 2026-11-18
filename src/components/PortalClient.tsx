@@ -394,7 +394,7 @@ export function PortalClient({
 
       {/* Study Vault & Homework Archive Shelf */}
       {vaultItems.length > 0 && (
-        <section className="surface-card rounded-2xl p-4 sm:p-5 space-y-3">
+        <section id="study-vault" className="surface-card rounded-2xl p-4 sm:p-5 space-y-3 scroll-mt-20">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="inline-flex items-center gap-2">
               <FolderArchive className="h-4 w-4 text-[#D94E28]" />

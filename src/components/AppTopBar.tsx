@@ -1,11 +1,19 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
+const TOP_NAV_LINKS = [
+  { href: '/#journey', label: 'Scroll Journey', mobileLabel: 'Journey' },
+  { href: '/#workflow-compare', label: 'Workflow Compare', mobileLabel: 'Compare' },
+  { href: '/#calculator', label: 'ROI Calculator', mobileLabel: null },
+  { href: '/#pricing', label: 'Pricing', mobileLabel: 'Pricing' },
+  { href: '/sarah-math', label: 'Live Sample Studio', mobileLabel: 'Sample Studio' },
+];
+
 /**
- * Clean public marketing header used strictly on SlotLink marketing, auth, and legal pages.
- * Client-facing tutor booking (/[slug]) and student passbook (/p/[token]) routes use dedicated white-label headers.
+ * Sticky editorial top bar with passive document scroll progress bar and mobile jump links.
  */
 export function AppTopBar({
   badge = 'SOLO EDUCATOR OS',
@@ -14,8 +22,27 @@ export function AppTopBar({
   badge?: string;
   rightSlot?: React.ReactNode;
 }) {
+  const [scrollPct, setScrollPct] = useState(0);
+
+  useEffect(() => {
+    function handleScroll() {
+      const doc = document.documentElement;
+      const scrollable = doc.scrollHeight - window.innerHeight;
+      if (scrollable <= 0) {
+        setScrollPct(0);
+        return;
+      }
+      const next = Math.min(100, Math.max(0, Math.round((window.scrollY / scrollable) * 100)));
+      setScrollPct(next);
+    }
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-40 border-b border-[#DCD6C8] bg-[#F6F4EE]/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 surface-glass border-b border-[#DCD6C8]">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
         {/* Brand + Contextual Badge */}
         <div className="flex items-center gap-3">
@@ -35,17 +62,13 @@ export function AppTopBar({
         {/* Public Navigation */}
         <nav
           aria-label="Primary Navigation"
-          className="hidden md:flex items-center gap-6 text-xs font-semibold text-[#575248]"
+          className="hidden md:flex items-center gap-5 text-xs font-semibold text-[#575248]"
         >
-          <Link href="/#features" className="hover:text-[#141413] transition">
-            How It Works
-          </Link>
-          <Link href="/#pricing" className="hover:text-[#141413] transition">
-            Pricing
-          </Link>
-          <Link href="/sarah-math" className="hover:text-[#141413] transition">
-            Sample Studio
-          </Link>
+          {TOP_NAV_LINKS.map((item) => (
+            <Link key={item.href} href={item.href} className="hover:text-[#141413] transition">
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
         {/* Right Actions */}
@@ -68,6 +91,35 @@ export function AppTopBar({
             </>
           )}
         </div>
+      </div>
+
+      {/* Compact Mobile Scroll-Journey Strip */}
+      {!rightSlot && (
+        <nav
+          aria-label="Mobile Quick Jump"
+          className="flex md:hidden items-center gap-1.5 overflow-x-auto border-t border-[#DCD6C8]/80 bg-[#F6F4EE]/95 px-4 py-2 font-mono text-[11px] font-semibold text-[#575248]"
+        >
+          {TOP_NAV_LINKS.filter((item) => item.mobileLabel).map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="shrink-0 rounded-md border border-[#DCD6C8] bg-white px-2.5 py-1 hover:border-[#141413] hover:text-[#141413] transition"
+            >
+              {item.mobileLabel}
+            </Link>
+          ))}
+        </nav>
+      )}
+
+      {/* Document Scroll Progress Rail */}
+      <div
+        aria-hidden="true"
+        className="h-[2px] w-full bg-[#E6E0D2]"
+      >
+        <div
+          className="h-full bg-[#D94E28] transition-[width] duration-150 ease-out"
+          style={{ width: `${scrollPct}%` }}
+        />
       </div>
     </header>
   );

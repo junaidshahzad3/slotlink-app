@@ -35,9 +35,11 @@ function slugifyHandle(input: string): string {
 export function LoginClient({
   notice,
   initialMode = 'signin',
+  initialSlug,
 }: {
   notice?: string;
   initialMode?: 'signin' | 'signup';
+  initialSlug?: string;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
@@ -48,11 +50,12 @@ export function LoginClient({
   const [loginLoading, setLoginLoading] = useState(false);
 
   // Create Studio state
+  const sanitizedInitialSlug = initialSlug ? slugifyHandle(initialSlug) : '';
   const [name, setName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [tagline, setTagline] = useState('');
-  const [slug, setSlug] = useState('');
-  const [slugTouched, setSlugTouched] = useState(false);
+  const [slug, setSlug] = useState(sanitizedInitialSlug);
+  const [slugTouched, setSlugTouched] = useState(Boolean(sanitizedInitialSlug));
   const [singlePriceDollars, setSinglePriceDollars] = useState('60');
   const [packPriceDollars, setPackPriceDollars] = useState('275');
   const [timezone, setTimezone] = useState('America/New_York');
@@ -62,6 +65,16 @@ export function LoginClient({
   useEffect(() => {
     setMode(initialMode);
   }, [initialMode]);
+
+  useEffect(() => {
+    if (initialSlug) {
+      const clean = slugifyHandle(initialSlug);
+      if (clean) {
+        setSlug(clean);
+        setSlugTouched(true);
+      }
+    }
+  }, [initialSlug]);
 
   useEffect(() => {
     try {
@@ -473,8 +486,64 @@ export function LoginClient({
             </p>
           </section>
 
-          {/* Right: What Your Studio Includes */}
+          {/* Right: Live Interactive Studio Card Preview & Studio Checklist */}
           <aside className="space-y-4">
+            {/* Live Public Studio Card Preview */}
+            <div className="surface-card rounded-2xl p-5 sm:p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-[#EFECE4] pb-3">
+                <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
+                  Live Public Studio Card Preview
+                </span>
+                <span className="rounded-md border border-[#DCD6C8] bg-[#F6F4EE] px-2 py-0.5 font-mono text-[10px] text-[#575248]">
+                  /{slug || 'your-studio'}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#141413] font-mono text-xs font-semibold text-[#F6F4EE]">
+                  {(name.trim() || 'Your Studio')
+                    .split(/\s+/)
+                    .slice(0, 2)
+                    .map((n) => n[0]?.toUpperCase() ?? '')
+                    .join('') || 'SL'}
+                </div>
+                <div className="min-w-0">
+                  <div className="truncate font-serif text-2xl leading-tight text-[#141413]">
+                    {name.trim() || 'David Miller'}
+                  </div>
+                  <div className="truncate text-xs text-[#6E685C]">
+                    {tagline.trim() || 'Private 1-on-1 Tutor & Coach'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5 text-xs">
+                <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-3">
+                  <div className="font-mono text-[10px] uppercase text-[#6E685C]">
+                    1-on-1 Session
+                  </div>
+                  <div className="mt-1 font-mono text-base font-semibold text-[#141413]">
+                    ${Math.max(5, Number(singlePriceDollars) || 60)}
+                  </div>
+                  <div className="text-[11px] text-[#575248]">60 min · Single hr</div>
+                </div>
+                <div className="rounded-xl border-2 border-[#141413] bg-[#EFECE4]/70 p-3">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="font-mono text-[10px] uppercase text-[#D94E28] font-semibold">
+                      5-Pack
+                    </span>
+                    <span className="font-mono text-[10px] font-semibold text-[#15803D]">
+                      ${Math.round((Math.max(20, Number(packPriceDollars) || 275)) / 5)}/hr
+                    </span>
+                  </div>
+                  <div className="mt-1 font-mono text-base font-semibold text-[#141413]">
+                    ${Math.max(20, Number(packPriceDollars) || 275)}
+                  </div>
+                  <div className="text-[11px] text-[#575248]">Auto passbook tracking</div>
+                </div>
+              </div>
+            </div>
+
             <div className="surface-ink rounded-2xl p-6 sm:p-7 space-y-5">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[10px] uppercase tracking-widest text-[#F3B09A]">

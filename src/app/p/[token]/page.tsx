@@ -161,6 +161,43 @@ export default async function ClientMagicPortalPage({
             </div>
           )}
 
+          {/* Pack Session Journey Checkpoint Strip & Anchor Pills */}
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs">
+            <div className="flex flex-wrap items-center gap-2 font-mono text-[11px]">
+              <span className="inline-flex items-center gap-1.5 text-[#4ADE80]">
+                <span className="h-2 w-2 rounded-full bg-[#4ADE80]" />
+                {completedCount} Done
+              </span>
+              <span className="text-white/25">→</span>
+              <span className="inline-flex items-center gap-1.5 text-[#F6F4EE] font-semibold">
+                <span className="live-dot h-2 w-2 rounded-full bg-[#D94E28]" />
+                {upcomingCount} Upcoming
+              </span>
+              <span className="text-white/25">→</span>
+              <span className={isLowBalance ? 'text-[#FBBF24]' : 'text-[#A8A295]'}>
+                {student.hoursRemaining} Pack Credits Left
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5 font-mono text-[11px]">
+              {upcomingCount > 0 && (
+                <a
+                  href="#next-session-spotlight"
+                  className="rounded-md border border-white/15 bg-white/10 px-2.5 py-1 text-[#F6F4EE] hover:bg-white/20 transition"
+                >
+                  Next Session ↓
+                </a>
+              )}
+              {serialized.some((b) => b.homeworkUrl || b.sessionSummary) && (
+                <a
+                  href="#study-vault"
+                  className="rounded-md border border-white/15 bg-white/10 px-2.5 py-1 text-[#F6F4EE] hover:bg-white/20 transition"
+                >
+                  Study Vault ↓
+                </a>
+              )}
+            </div>
+          </div>
+
           {/* 3-Stat Mini Strip (100% Database-Backed) */}
           <div className="grid grid-cols-3 divide-x divide-white/10 rounded-xl border border-white/10 bg-white/[0.04]">
             <div className="px-4 py-3">

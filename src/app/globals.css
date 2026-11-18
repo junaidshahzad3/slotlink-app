@@ -6,6 +6,10 @@
   color-scheme: light;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: #f6f4ee;
   color: #141413;
@@ -123,4 +127,42 @@ body {
   outline: none;
   border-color: #141413;
   box-shadow: 0 0 0 3px rgba(20, 20, 19, 0.08);
+}
+
+.bg-editorial-mesh {
+  background-image:
+    radial-gradient(48% 55% at 88% 12%, rgba(217, 78, 40, 0.08), transparent 70%),
+    radial-gradient(42% 50% at 10% 88%, rgba(21, 128, 61, 0.05), transparent 72%),
+    linear-gradient(to right, rgba(20, 20, 19, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(20, 20, 19, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+}
+
+.surface-glass {
+  background-color: rgba(246, 244, 238, 0.88);
+  border: 1px solid #dcd6c8;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.chapter-card-active {
+  position: relative;
+  border-color: #141413;
+  box-shadow:
+    inset 4px 0 0 #d94e28,
+    0 16px 36px -20px rgba(20, 20, 19, 0.22);
+}
+
+@keyframes float-subtle {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-float-subtle {
+  animation: float-subtle 4.5s ease-in-out infinite;
 }
