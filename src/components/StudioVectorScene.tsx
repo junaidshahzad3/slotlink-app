@@ -1,7 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CalendarCheck2, ShieldCheck, Sparkles, Video } from 'lucide-react';
+import Link from 'next/link';
+import {
+  ArrowRight,
+  ArrowUpRight,
+  CalendarCheck2,
+  Check,
+  Clock,
+  FileText,
+  Layers,
+  Orbit,
+  RotateCcw,
+  ShieldCheck,
+  Sparkles,
+  Video,
+} from 'lucide-react';
 
 /**
  * Scroll-driven ambient 3D geometric objects & architectural vectors positioned in vw/vh viewport coordinates.
@@ -435,5 +449,615 @@ export function Exploded3DPassbookPrism({ progress = 0.45 }: { progress?: number
         </div>
       </div>
     </div>
+  );
+}
+
+const MARQUEE_ITEMS = [
+  { tag: 'STEM STUDIO', text: 'SAT & AP Calculus · 5-Pack $250 ($50/hr)', metric: '0% Commission' },
+  { tag: 'CONSERVATORY', text: 'Violin & Piano Coach · 4-Pack $320', metric: 'GCal Conflict Guard' },
+  { tag: 'EXEC PREP', text: 'GMAT & Fluency · 10-Pack $950', metric: '128-Bit Magic Passbook' },
+  { tag: 'LANGUAGE LAB', text: 'Spanish & IELTS · 5-Pack $225', metric: '.ics + Instant Video' },
+  { tag: 'PHYSICS COACH', text: 'AP Physics C · 5-Pack $375', metric: '1-Tap Credit Ledger' },
+  { tag: 'ARCHITECTURE', text: 'PostgreSQL ACID Locks · 0 Passwords', metric: '< 20s Client Booking' },
+];
+
+/**
+ * Full-viewport infinite horizontal studio ticker inspired by Magic UI Marquee.
+ */
+export function StudioLiveTickerMarquee() {
+  const repeated = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
+
+  return (
+    <div className="relative z-10 w-full border-b border-[#DCD6C8] bg-[#141413] text-[#F6F4EE] overflow-hidden py-3">
+      <div className="animate-marquee-left items-center gap-4">
+        {repeated.map((item, idx) => (
+          <div
+            key={`${item.tag}-${idx}`}
+            className="flex shrink-0 items-center gap-3 rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 font-mono text-[11px]"
+          >
+            <span className="rounded bg-[#D94E28] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white">
+              {item.tag}
+            </span>
+            <span className="text-[#F6F4EE] font-medium">{item.text}</span>
+            <span className="text-[#4ADE80] font-semibold">· {item.metric}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Reusable 3D perspective mouse-tilt wrapper inspired by Aceternity UI 3D Card Effect.
+ */
+export function Interactive3DCard({
+  children,
+  className = '',
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
+
+  function handleMove(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const nx = (e.clientX - rect.left) / rect.width - 0.5;
+    const ny = (e.clientY - rect.top) / rect.height - 0.5;
+    setTilt({
+      rx: Number((-ny * 6).toFixed(2)),
+      ry: Number((nx * 7).toFixed(2)),
+    });
+  }
+
+  return (
+    <div
+      onMouseMove={handleMove}
+      onMouseLeave={() => setTilt({ rx: 0, ry: 0 })}
+      className={`scene-3d-stage h-full ${className}`}
+    >
+      <div
+        className="preserve-3d h-full transition-transform duration-150 ease-out"
+        style={{
+          transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Multi-node animated SVG beam diagram inspired by Magic UI AnimatedBeam.
+ */
+export function AnimatedBeamIntegrationHub() {
+  const intakeSources = [
+    { y: 36, label: 'WhatsApp Bio' },
+    { y: 92, label: 'Instagram Link' },
+    { y: 148, label: 'Mobile QR Pass' },
+    { y: 204, label: 'Email Signature' },
+  ];
+  const downstreamTargets = [
+    { y: 36, label: '2-Way Google FreeBusy', tone: '#15803D' },
+    { y: 92, label: 'Auto Meet / Jitsi Video', tone: '#D94E28' },
+    { y: 148, label: '128-Bit Client Passbook', tone: '#141413' },
+    { y: 204, label: 'Atomic Hour & Notes Vault', tone: '#15803D' },
+  ];
+
+  return (
+    <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE]/90 p-3.5 sm:p-4 overflow-hidden">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-[#DCD6C8]">
+        <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
+          REAL-TIME VECTOR BEAM TOPOLOGY
+        </span>
+        <span className="font-mono text-[10px] font-semibold text-[#15803D]">
+          4 INTAKES → 1 CORE → ZERO ADMIN
+        </span>
+      </div>
+
+      <svg
+        viewBox="0 0 860 248"
+        role="img"
+        aria-label="Real-Time Vector Beam Topology Hub"
+        className="w-full h-auto mt-2"
+      >
+        <defs>
+          <linearGradient id="hubBeamLeft" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#D94E28" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#141413" stopOpacity="0.9" />
+          </linearGradient>
+          <linearGradient id="hubBeamRight" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#141413" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#15803D" stopOpacity="0.9" />
+          </linearGradient>
+          {intakeSources.map((src, idx) => (
+            <path
+              key={`left-def-${idx}`}
+              id={`hubInPath-${idx}`}
+              d={`M 164 ${src.y} C 265 ${src.y}, 305 124, 385 124`}
+            />
+          ))}
+          {downstreamTargets.map((dst, idx) => (
+            <path
+              key={`right-def-${idx}`}
+              id={`hubOutPath-${idx}`}
+              d={`M 475 124 C 555 124, 595 ${dst.y}, 680 ${dst.y}`}
+            />
+          ))}
+        </defs>
+
+        {intakeSources.map((src, idx) => (
+          <g key={`src-${idx}`}>
+            <rect
+              x="12"
+              y={src.y - 16}
+              width="152"
+              height="32"
+              rx="8"
+              fill="#FFFFFF"
+              stroke="#CEC7B6"
+            />
+            <text
+              x="88"
+              y={src.y + 4}
+              textAnchor="middle"
+              fontSize="10.5"
+              fontWeight="600"
+              fontFamily="monospace"
+              fill="#141413"
+            >
+              {src.label}
+            </text>
+            <use href={`#hubInPath-${idx}`} fill="none" stroke="#E2DCCE" strokeWidth="2.5" />
+            <use
+              href={`#hubInPath-${idx}`}
+              fill="none"
+              stroke="url(#hubBeamLeft)"
+              strokeWidth="2"
+              className="animate-vector-dash"
+            />
+            <circle r="3.5" fill="#D94E28">
+              <animateMotion dur={`${3 + idx * 0.4}s`} repeatCount="indefinite">
+                <mpath href={`#hubInPath-${idx}`} />
+              </animateMotion>
+            </circle>
+          </g>
+        ))}
+
+        {/* Center SlotLink Core Prism */}
+        <g>
+          <circle
+            cx="430"
+            cy="124"
+            r="52"
+            fill="rgba(217, 78, 40, 0.08)"
+            stroke="#D94E28"
+            strokeWidth="1.2"
+            strokeDasharray="4 4"
+          />
+          <rect
+            x="385"
+            y="90"
+            width="90"
+            height="68"
+            rx="14"
+            fill="#141413"
+            stroke="#D94E28"
+            strokeWidth="2"
+          />
+          <text
+            x="430"
+            y="120"
+            textAnchor="middle"
+            fontSize="12"
+            fontWeight="700"
+            fontFamily="monospace"
+            fill="#F6F4EE"
+          >
+            SLOTLINK
+          </text>
+          <text
+            x="430"
+            y="138"
+            textAnchor="middle"
+            fontSize="9"
+            fontFamily="monospace"
+            fill="#4ADE80"
+          >
+            1-LINK CORE
+          </text>
+        </g>
+
+        {downstreamTargets.map((dst, idx) => (
+          <g key={`dst-${idx}`}>
+            <use href={`#hubOutPath-${idx}`} fill="none" stroke="#E2DCCE" strokeWidth="2.5" />
+            <use
+              href={`#hubOutPath-${idx}`}
+              fill="none"
+              stroke="url(#hubBeamRight)"
+              strokeWidth="2"
+              className="animate-vector-dash"
+            />
+            <circle r="3.5" fill={dst.tone}>
+              <animateMotion dur={`${2.7 + idx * 0.35}s`} begin="0.4s" repeatCount="indefinite">
+                <mpath href={`#hubOutPath-${idx}`} />
+              </animateMotion>
+            </circle>
+            <rect
+              x="680"
+              y={dst.y - 16}
+              width="168"
+              height="32"
+              rx="8"
+              fill="#FFFFFF"
+              stroke={dst.tone}
+              strokeWidth="1.4"
+            />
+            <text
+              x="764"
+              y={dst.y + 4}
+              textAnchor="middle"
+              fontSize="10"
+              fontWeight="600"
+              fontFamily="monospace"
+              fill={dst.tone}
+            >
+              {dst.label}
+            </text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+/**
+ * Asymmetric animated Bento Grid combining a 3D Isometric Turntable Workbench, Vector Radar,
+ * Interactive 3D Magic Passbook, and Live Animated Beam Hub.
+ */
+export function AnimatedArchitectureBentoGrid() {
+  const [orbitDeg, setOrbitDeg] = useState(-16);
+  const [explodePct, setExplodePct] = useState(55);
+  const [scrollPitchDeg, setScrollPitchDeg] = useState(14);
+  const [radarConflictBlocked, setRadarConflictBlocked] = useState(true);
+  const [passbookHours, setPassbookHours] = useState<5 | 3 | 1>(3);
+
+  useEffect(() => {
+    let rafId = 0;
+    const updatePitch = () => {
+      rafId = 0;
+      const doc = document.documentElement;
+      const ratio = Math.min(
+        1,
+        Math.max(0, (window.scrollY || 0) / Math.max(1, doc.scrollHeight - window.innerHeight))
+      );
+      setScrollPitchDeg(14 - ratio * 10);
+    };
+    const onScroll = () => {
+      if (!rafId) rafId = window.requestAnimationFrame(updatePitch);
+    };
+    updatePitch();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  const zStep = (explodePct / 100) * 42;
+
+  function cyclePassbookHours() {
+    setPassbookHours((curr) => (curr === 5 ? 3 : curr === 3 ? 1 : 5));
+  }
+
+  return (
+    <section
+      id="features"
+      className="relative z-10 border-b border-[#DCD6C8] bg-[#F6F4EE]/95 viewport-section"
+    >
+      <div className="viewport-container space-y-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="max-w-3xl">
+            <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
+              02 // Spatial Bento Architecture
+            </div>
+            <h2 className="mt-2 text-fluid-h2 font-semibold tracking-tight text-[#141413]">
+              Every scheduling primitive{' '}
+              <span className="font-serif italic font-normal text-[#D94E28]">
+                interactive in 3D space.
+              </span>
+            </h2>
+          </div>
+          <Link
+            href="/login?mode=signup"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#141413] px-4 py-2.5 text-xs font-semibold text-[#F6F4EE] hover:bg-[#D94E28] transition"
+          >
+            Launch Your Studio Free
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        {/* 12-Column Asymmetric Bento Grid */}
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+          {/* Bento Card 1 (col-span-7): Interactive 360° 3D Isometric Turntable */}
+          <div className="lg:col-span-7 surface-card rounded-2xl p-6 flex flex-col justify-between space-y-5">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
+                  <Orbit className="h-3.5 w-3.5" />
+                  3D ISOMETRIC ENGINE WORKBENCH
+                </div>
+                <h3 className="mt-1 font-serif text-2xl text-[#141413]">
+                  Inspect all 4 transactional stack planes
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:min-w-[290px]">
+                <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] px-3 py-2">
+                  <div className="flex justify-between font-mono text-[10px] font-semibold mb-1">
+                    <span>3D ORBIT ANGLE</span>
+                    <span className="text-[#D94E28]">{orbitDeg}°</span>
+                  </div>
+                  <input
+                    type="range"
+                    aria-label="3D Orbit Angle"
+                    min={-42}
+                    max={42}
+                    value={orbitDeg}
+                    onChange={(e) => setOrbitDeg(Number(e.target.value))}
+                    className="w-full accent-[#141413] cursor-pointer"
+                  />
+                </div>
+                <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] px-3 py-2">
+                  <div className="flex justify-between font-mono text-[10px] font-semibold mb-1">
+                    <span>Z-AXIS LAYER EXPLOSION</span>
+                    <span className="text-[#15803D]">{explodePct}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    aria-label="Z-Axis Layer Explosion"
+                    min={0}
+                    max={100}
+                    value={explodePct}
+                    onChange={(e) => setExplodePct(Number(e.target.value))}
+                    className="w-full accent-[#D94E28] cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="scene-3d-stage min-h-[340px] flex items-center justify-center rounded-xl border border-[#DCD6C8] bg-[#EFECE4]/60 bg-grid-pattern p-5 overflow-hidden">
+              <div
+                className="relative preserve-3d w-full max-w-[460px] h-[250px] transition-transform duration-150 ease-out"
+                style={{
+                  transform: `rotateX(${scrollPitchDeg.toFixed(1)}deg) rotateY(${orbitDeg}deg)`,
+                }}
+              >
+                <div
+                  className="absolute inset-0 rounded-2xl border-2 border-[#CEC7B6] bg-white p-4 shadow-sm flex flex-col justify-between"
+                  style={{ transform: 'translateZ(0px)' }}
+                >
+                  <div className="flex justify-between font-mono text-[10px] font-semibold text-[#575248]">
+                    <span>PLANE 01 // POSTGRESQL ACID ENGINE</span>
+                    <span className="text-[#15803D]">LOCKED</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 font-mono text-[10px]">
+                    <span className="rounded border border-[#BBF7D0] bg-[#DCFCE7] px-2 py-1 text-[#15803D]">
+                      09:00 OPEN
+                    </span>
+                    <span className="rounded border border-[#E5C6BE] bg-[#FDF2EF] px-2 py-1 text-[#9F2D12]">
+                      14:00 BUSY
+                    </span>
+                    <span className="rounded border border-[#141413] bg-[#F6F4EE] px-2 py-1 text-[#141413]">
+                      15:00 TX SYNC
+                    </span>
+                  </div>
+                </div>
+
+                <div
+                  className="absolute inset-x-3 top-4 bottom-4 rounded-2xl border border-[#15803D] bg-white/95 p-4 shadow-md flex flex-col justify-between"
+                  style={{ transform: `translateZ(${(zStep * 1.1).toFixed(1)}px)` }}
+                >
+                  <div className="flex items-center justify-between font-mono text-[10px] font-semibold text-[#15803D]">
+                    <span className="inline-flex items-center gap-1">
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                      PLANE 02 // 2-WAY FREEBUSY + VIDEO ROOM
+                    </span>
+                    <Video className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="rounded border border-[#DCD6C8] bg-[#F6F4EE] px-2.5 py-1.5 font-mono text-[10px]">
+                    meet.jit.si/slotlink-sarah-9f4a
+                  </div>
+                </div>
+
+                <div
+                  className="surface-ink absolute inset-x-6 top-8 bottom-8 rounded-2xl p-4 shadow-xl flex flex-col justify-between"
+                  style={{ transform: `translateZ(${(zStep * 2.2).toFixed(1)}px)` }}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[9px] uppercase tracking-widest text-[#4ADE80]">
+                      PLANE 03 // CRYPTOGRAPHIC PASSBOOK
+                    </span>
+                    <Clock className="h-3.5 w-3.5 text-[#F3B09A]" />
+                  </div>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {[0, 1, 2, 3, 4].map((idx) => (
+                      <span
+                        key={idx}
+                        className={`h-1.5 rounded-sm ${idx < 3 ? 'bg-[#4ADE80]' : 'bg-white/20'}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div
+                  className="absolute inset-x-10 top-12 bottom-12 rounded-2xl border-2 border-[#D94E28] bg-white/95 p-3.5 shadow-2xl flex flex-col justify-between"
+                  style={{ transform: `translateZ(${(zStep * 3.3).toFixed(1)}px)` }}
+                >
+                  <div className="flex items-center justify-between font-mono text-[10px] font-semibold text-[#D94E28]">
+                    <span className="inline-flex items-center gap-1">
+                      <Layers className="h-3.5 w-3.5" />
+                      PLANE 04 // STUDIO NOTES &amp; LEDGER
+                    </span>
+                    <FileText className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#141413]">
+                    <span>SAT Module 2 Sheet</span>
+                    <span className="inline-flex items-center gap-1 font-mono text-[10px] text-[#15803D]">
+                      <Check className="h-3 w-3" />
+                      Synced
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bento Card 2 (col-span-5): Animated Vector Radar & Calendar Conflict Guard */}
+          <div className="lg:col-span-5 surface-card rounded-2xl p-6 flex flex-col justify-between space-y-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
+                  2-WAY CALENDAR RADAR
+                </span>
+                <h3 className="mt-1 font-serif text-2xl text-[#141413]">
+                  Blocks personal conflicts automatically
+                </h3>
+              </div>
+
+              <svg viewBox="0 0 64 64" className="h-14 w-14 shrink-0">
+                <circle cx="32" cy="32" r="28" fill="#F6F4EE" stroke="#DCD6C8" strokeWidth="1.2" />
+                <circle cx="32" cy="32" r="18" fill="none" stroke="#15803D" strokeWidth="1" strokeDasharray="3 3" />
+                <g className="animate-radar-sweep">
+                  <path d="M 32 32 L 32 6 A 26 26 0 0 1 56 26 Z" fill="rgba(21, 128, 61, 0.18)" />
+                  <line x1="32" y1="32" x2="32" y2="6" stroke="#15803D" strokeWidth="1.5" />
+                </g>
+                <circle cx="32" cy="32" r="3" fill="#141413" />
+              </svg>
+            </div>
+
+            <div className="space-y-2.5 font-mono text-xs">
+              <div
+                className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 transition ${
+                  radarConflictBlocked
+                    ? 'border-[#E5C6BE] bg-[#FDF2EF] text-[#9F2D12]'
+                    : 'border-[#BBF7D0] bg-[#F0FDF4] text-[#15803D]'
+                }`}
+              >
+                <span>2:00 PM · Dentist Appointment</span>
+                <span className="font-semibold">
+                  {radarConflictBlocked ? 'BLOCKED' : 'OPEN ✓'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between rounded-xl border border-[#BBF7D0] bg-[#F0FDF4] px-3.5 py-2.5 text-[#15803D]">
+                <span>3:00 PM · SAT Math Studio</span>
+                <span className="font-semibold">OPEN ✓</span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#EFECE4]">
+              <button
+                type="button"
+                onClick={() => setRadarConflictBlocked((v) => !v)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#CEC7B6] bg-[#F6F4EE] px-3 py-1.5 font-mono text-[11px] font-semibold text-[#141413] hover:border-[#141413] transition cursor-pointer"
+              >
+                <RotateCcw className="h-3 w-3 text-[#D94E28]" />
+                {radarConflictBlocked ? 'Clear 2:00 PM Busy Event' : 'Simulate Personal Event'}
+              </button>
+              <Link
+                href="/sarah-math"
+                className="font-mono text-[11px] font-semibold text-[#D94E28] hover:underline"
+              >
+                Check Live Slots →
+              </Link>
+            </div>
+          </div>
+
+          {/* Bento Card 3 (col-span-5): Interactive 3D Magic Passbook Card */}
+          <Interactive3DCard className="lg:col-span-5">
+            <div className="surface-ink rounded-2xl p-6 h-full flex flex-col justify-between space-y-5">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#4ADE80]">
+                  3D CLIENT PASSBOOK
+                </span>
+                <button
+                  type="button"
+                  onClick={cyclePassbookHours}
+                  className="rounded-md border border-white/20 bg-white/10 px-2.5 py-1 font-mono text-[10px] font-semibold text-[#F6F4EE] hover:bg-white/20 transition cursor-pointer"
+                >
+                  Tap to Cycle Hours ({passbookHours}/5)
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="font-serif text-3xl text-[#F6F4EE]">
+                  Zero-login student hour packs
+                </h3>
+                <div className="rounded-xl border border-white/15 bg-white/[0.06] p-4 space-y-2.5">
+                  <div className="flex items-center justify-between font-mono text-xs">
+                    <span className="text-[#C8C2B6]">Remaining Balance</span>
+                    <span
+                      className={`font-semibold ${
+                        passbookHours <= 1 ? 'text-[#FBBF24]' : 'text-[#4ADE80]'
+                      }`}
+                    >
+                      {passbookHours} of 5 hrs {passbookHours <= 1 ? '· Low Balance' : 'left'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {[0, 1, 2, 3, 4].map((idx) => (
+                      <span
+                        key={idx}
+                        className={`h-2 rounded-sm transition-all ${
+                          idx < passbookHours
+                            ? passbookHours <= 1
+                              ? 'bg-[#FBBF24]'
+                              : 'bg-[#4ADE80]'
+                            : 'bg-white/15'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-white/10 text-xs">
+                <span className="text-[#B6B0A4]">Includes 24h reschedule &amp; .ics downloads</span>
+                <Link
+                  href="/p/sl_demo_alex_94a2k"
+                  className="inline-flex items-center gap-1 font-mono font-semibold text-[#4ADE80] hover:underline"
+                >
+                  Open Portal
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
+          </Interactive3DCard>
+
+          {/* Bento Card 4 (col-span-7): Live Multi-Channel Animated Beam Integration Hub */}
+          <div className="lg:col-span-7 surface-card rounded-2xl p-6 flex flex-col justify-between space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
+                  OMNICHANNEL BOOKING BEAMS
+                </span>
+                <h3 className="mt-0.5 font-serif text-2xl text-[#141413]">
+                  One slug turns DMs &amp; QR scans into booked revenue
+                </h3>
+              </div>
+              <Link
+                href="/sarah-math"
+                className="inline-flex items-center gap-1 rounded-lg border border-[#CEC7B6] bg-[#F6F4EE] px-3 py-1.5 font-mono text-[11px] font-semibold text-[#141413] hover:border-[#141413] transition"
+              >
+                Try /sarah-math
+                <ArrowUpRight className="h-3.5 w-3.5 text-[#D94E28]" />
+              </Link>
+            </div>
+
+            <AnimatedBeamIntegrationHub />
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }

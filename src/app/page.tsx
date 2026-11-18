@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, ArrowUpRight, Check, FileText, Minus, X } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Check, Minus, X } from 'lucide-react';
 import { AppTopBar } from '@/components/AppTopBar';
 import {
   CommissionSavingsCalculator,
@@ -11,8 +11,12 @@ import {
   ScrollJourneySection,
   WorkflowComparisonScrubber,
 } from '@/components/ScrollJourneySection';
-import { ScrollAmbient3DObjects } from '@/components/StudioVectorScene';
-import { LandingVersionShowcase } from '@/components/LandingVersionShowcase';
+import {
+  AnimatedArchitectureBentoGrid,
+  Interactive3DCard,
+  ScrollAmbient3DObjects,
+  StudioLiveTickerMarquee,
+} from '@/components/StudioVectorScene';
 
 const COMPARISON_ROWS = [
   {
@@ -59,7 +63,6 @@ export default function LandingPage() {
       <ScrollAmbient3DObjects />
       <AppTopBar badge="SOLO EDUCATOR OS" />
 
-      <LandingVersionShowcase>
       {/* Full-Viewport Editorial Split Hero */}
       <section className="relative z-10 border-b border-[#DCD6C8] bg-editorial-mesh/95 min-h-[calc(100dvh-4.5rem)] flex items-center">
         <div className="viewport-container py-[clamp(2.5rem,6vh,5rem)]">
@@ -143,126 +146,17 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Magic-UI Style Infinite Studio Telemetry Marquee */}
+      <StudioLiveTickerMarquee />
+
       {/* Scroll-Driven 4-Chapter Product Journey */}
       <ScrollJourneySection />
 
       {/* Interactive Old Stack vs SlotLink Scrubber */}
       <WorkflowComparisonScrubber />
 
-      {/* Architectural 3-Step Workflow Ledger */}
-      <section id="features" className="relative z-10 border-b border-[#DCD6C8] bg-[#F6F4EE]/95">
-        <div className="viewport-container py-[clamp(3rem,6vh,5rem)]">
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-            {/* Step 01 */}
-            <div className="surface-card surface-card-interactive rounded-2xl p-6 flex flex-col justify-between space-y-5">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                    Step 01 / Share One Slug
-                  </span>
-                  <Link
-                    href="/sarah-math"
-                    className="font-mono text-[11px] font-semibold text-[#141413] hover:text-[#D94E28]"
-                  >
-                    Try Step Live →
-                  </Link>
-                </div>
-                <h2 className="text-xl font-semibold tracking-tight text-[#141413]">
-                  Your public booking studio in one clean URL
-                </h2>
-                <p className="text-sm leading-relaxed text-[#575248]">
-                  Drop a single link in your WhatsApp bio or email signature. Students pick a single
-                  lesson or prepaid pack without ever creating an account.
-                </p>
-              </div>
-              <div className="surface-elevated rounded-xl p-3.5 space-y-2.5">
-                <div className="rounded-lg border border-[#CEC7B6] bg-white px-3 py-1.5 font-mono text-xs text-[#141413]">
-                  slotlink.app/<span className="font-semibold text-[#D94E28]">sarah-math</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5 font-mono text-[11px]">
-                  <span className="rounded-md border border-[#CEC7B6] bg-white px-2 py-0.5 text-[#141413]">
-                    15m Intro
-                  </span>
-                  <span className="rounded-md border border-[#CEC7B6] bg-white px-2 py-0.5 text-[#141413]">
-                    1h Session
-                  </span>
-                  <span className="rounded-md bg-[#141413] px-2 py-0.5 text-[#F6F4EE]">
-                    5-Pack
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 02 */}
-            <div className="surface-card surface-card-interactive rounded-2xl p-6 flex flex-col justify-between space-y-5">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                    Step 02 / Conflict Guard
-                  </span>
-                  <Link
-                    href="/login?mode=signup"
-                    className="font-mono text-[11px] font-semibold text-[#141413] hover:text-[#D94E28]"
-                  >
-                    Create Studio →
-                  </Link>
-                </div>
-                <h2 className="text-xl font-semibold tracking-tight text-[#141413]">
-                  Real-time 2-way Google Calendar sync
-                </h2>
-                <p className="text-sm leading-relaxed text-[#575248]">
-                  FreeBusy queries block personal appointments automatically and attach unique Google
-                  Meet links the moment a slot is confirmed.
-                </p>
-              </div>
-              <div className="surface-elevated rounded-xl p-3.5 space-y-2 font-mono text-[11px]">
-                <div className="flex items-center justify-between rounded-lg border border-[#E5C6BE] bg-[#FDF2EF] px-3 py-2 text-[#9F2D12]">
-                  <span>2:00 PM — Personal Busy</span>
-                  <span className="font-semibold">BLOCKED</span>
-                </div>
-                <div className="flex items-center justify-between rounded-lg border border-[#BBF7D0] bg-[#F0FDF4] px-3 py-2 text-[#15803D]">
-                  <span>3:00 PM — Available Slot</span>
-                  <span className="font-semibold">OPEN ✓</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 03 */}
-            <div className="surface-card surface-card-interactive rounded-2xl p-6 flex flex-col justify-between space-y-5">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                    Step 03 / Magic Passbook
-                  </span>
-                  <Link
-                    href="/p/sl_demo_alex_94a2k"
-                    className="font-mono text-[11px] font-semibold text-[#141413] hover:text-[#D94E28]"
-                  >
-                    Try Step Live →
-                  </Link>
-                </div>
-                <h2 className="text-xl font-semibold tracking-tight text-[#141413]">
-                  Automated pack hours &amp; homework ledger
-                </h2>
-                <p className="text-sm leading-relaxed text-[#575248]">
-                  Mark a lesson complete on your dashboard to deduct one hour, log takeaways, and
-                  publish homework files straight to the student&apos;s magic link.
-                </p>
-              </div>
-              <div className="surface-elevated rounded-xl p-3.5 space-y-2">
-                <div className="flex items-center justify-between rounded-lg border border-[#CEC7B6] bg-white px-3 py-2 font-mono text-[11px] text-[#141413]">
-                  <span>5-Pack Ledger</span>
-                  <span className="font-semibold text-[#15803D]">4 hrs → 3 hrs left</span>
-                </div>
-                <div className="inline-flex items-center gap-1.5 rounded-md border border-[#CEC7B6] bg-white px-2.5 py-1 font-mono text-[11px] text-[#575248]">
-                  <FileText className="h-3 w-3 text-[#D94E28]" />
-                  Practice_Test_4_Notes.pdf
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Asymmetric Animated 3D Bento Grid & Animated Beam Hub */}
+      <AnimatedArchitectureBentoGrid />
 
       {/* Studio Economics Calculator */}
       <CommissionSavingsCalculator />
@@ -349,7 +243,8 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* Solo Tier */}
-            <div className="surface-card surface-card-interactive rounded-2xl p-7 sm:p-8 flex flex-col justify-between space-y-6">
+            <Interactive3DCard>
+            <div className="surface-card surface-card-interactive h-full rounded-2xl p-7 sm:p-8 flex flex-col justify-between space-y-6">
               <div>
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-xs font-semibold uppercase tracking-widest text-[#6E685C]">
@@ -391,9 +286,11 @@ export default function LandingPage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
+            </Interactive3DCard>
 
             {/* Pro Tier */}
-            <div className="surface-ink rounded-2xl p-7 sm:p-8 flex flex-col justify-between space-y-6">
+            <Interactive3DCard>
+            <div className="surface-ink h-full rounded-2xl p-7 sm:p-8 flex flex-col justify-between space-y-6">
               <div>
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-xs font-semibold uppercase tracking-widest text-[#A8A295]">
@@ -444,6 +341,7 @@ export default function LandingPage() {
                 </Link>
               </div>
             </div>
+            </Interactive3DCard>
           </div>
         </div>
 
@@ -500,10 +398,8 @@ export default function LandingPage() {
                 cta: 'Open Magic Portal →',
               },
             ].map((bp) => (
-              <div
-                key={bp.studio}
-                className="surface-card surface-card-interactive rounded-2xl p-6 flex flex-col justify-between space-y-5"
-              >
+              <Interactive3DCard key={bp.studio}>
+              <div className="surface-card surface-card-interactive h-full rounded-2xl p-6 flex flex-col justify-between space-y-5">
                 <div className="space-y-3">
                   <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
                     {bp.tag}
@@ -523,6 +419,7 @@ export default function LandingPage() {
                   {bp.cta}
                 </Link>
               </div>
+              </Interactive3DCard>
             ))}
           </div>
         </div>
@@ -579,7 +476,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-[#DCD6C8] bg-white pb-20">
+      <footer className="relative z-10 border-t border-[#DCD6C8] bg-white">
         <div className="viewport-container flex flex-wrap items-center justify-between gap-4 py-6 text-xs text-[#6E685C]">
           <div className="flex items-center gap-2">
             <span className="font-mono font-semibold text-[#141413]">SlotLink</span>
@@ -598,7 +495,6 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
-      </LandingVersionShowcase>
     </div>
   );
 }
