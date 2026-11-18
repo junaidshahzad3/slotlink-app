@@ -1,3 +1,5 @@
+import { isSafeHttpUrl } from './security';
+
 export interface StudyFormula {
   label: string;
   formula: string;
@@ -382,10 +384,9 @@ export const STUDY_SHEET_TABS = [
   { slug: 'diagnostic-roadmap', label: 'Diagnostic Roadmap' },
 ];
 
-export function getStudySheet(slug: string): StudySheet {
+export function getStudySheet(slug: string): StudySheet | null {
   const clean = slug.replace(/\.pdf$/i, '');
-  if (STUDY_SHEETS[clean]) return STUDY_SHEETS[clean];
-  return STUDY_SHEETS['sat-module-2-drill'];
+  return STUDY_SHEETS[clean] ?? null;
 }
 
 /**
@@ -404,6 +405,10 @@ export function resolveHomeworkHref(url: string | null | undefined): {
   );
   if (internalMatch && internalMatch[1]) {
     return { href: `/notes/${internalMatch[1]}`, isInternal: true };
+  }
+
+  if (!isSafeHttpUrl(trimmed)) {
+    return { href: '', isInternal: false };
   }
 
   return { href: trimmed, isInternal: false };

@@ -90,7 +90,7 @@ export function TutorShareCard({ slug, name }: { slug: string; name: string }) {
               slotlink.app/{slug}
             </div>
             <p className="text-[11px] leading-snug text-[#575248]">
-              Share directly with clients or save for quick mobile booking.
+              Scan with your phone camera to book or bookmark on mobile.
             </p>
           </div>
         </div>

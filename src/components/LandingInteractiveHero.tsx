@@ -413,10 +413,10 @@ export function HeroInteractiveStage() {
                 </div>
               </div>
               <Link
-                href="/dashboard"
+                href="/login?mode=signup"
                 className="rounded-md border border-[#DCD6C8] bg-[#F6F4EE] px-2.5 py-1 font-mono text-[11px] font-medium text-[#141413] hover:bg-[#EFECE4]"
               >
-                Open Studio →
+                Launch Studio →
               </Link>
             </div>
 

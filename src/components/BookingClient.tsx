@@ -49,30 +49,17 @@ export function BookingClient({
   services: ServiceDTO[];
   prefillStudent?: PrefillStudentDTO | null;
 }) {
-  const upcomingDays = useMemo(() => {
-    const days: { iso: string; dayName: string; dayNum: string }[] = [];
-    const base = new Date();
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(base.getTime() + i * 86_400_000);
-      days.push({
-        iso: d.toISOString().slice(0, 10),
-        dayName:
-          i === 0 ? 'Today' : i === 1 ? 'Tmrw' : d.toLocaleDateString('en-US', { weekday: 'short' }),
-        dayNum: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      });
-    }
-    return days;
-  }, []);
+  const [upcomingDays, setUpcomingDays] = useState<
+    { iso: string; dayName: string; dayNum: string }[]
+  >([]);
 
-  const todayIso = upcomingDays[0].iso;
-  const defaultDateIso = upcomingDays[1]?.iso ?? todayIso;
   const defaultServiceId =
     prefillStudent && prefillStudent.hoursRemaining > 0
       ? (services.find((s) => s.packageHrs === 1)?.id ?? services[0]?.id ?? '')
       : (services[0]?.id ?? '');
 
   const [selectedServiceId, setSelectedServiceId] = useState(defaultServiceId);
-  const [selectedDate, setSelectedDate] = useState(defaultDateIso);
+  const [selectedDate, setSelectedDate] = useState('');
   const [openSlots, setOpenSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [use24Hour, setUse24Hour] = useState(false);
@@ -80,6 +67,7 @@ export function BookingClient({
   const [studentName, setStudentName] = useState(prefillStudent?.name ?? '');
   const [studentEmail, setStudentEmail] = useState(prefillStudent?.email ?? '');
   const [note, setNote] = useState('');
+  const [confirmed, setConfirmed] = useState(false);
   const [magicUrl, setMagicUrl] = useState<string | null>(null);
   const [confirmedSlotIso, setConfirmedSlotIso] = useState<string>('');
   const [bookingRef, setBookingRef] = useState<string>('SL-PASS');
@@ -100,9 +88,26 @@ export function BookingClient({
     try {
       setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
     } catch {}
+    const days: { iso: string; dayName: string; dayNum: string }[] = [];
+    const base = new Date();
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(base.getTime() + i * 86_400_000);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      days.push({
+        iso: `${yyyy}-${mm}-${dd}`,
+        dayName:
+          i === 0 ? 'Today' : i === 1 ? 'Tmrw' : d.toLocaleDateString('en-US', { weekday: 'short' }),
+        dayNum: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      });
+    }
+    setUpcomingDays(days);
+    setSelectedDate((curr) => curr || days[1]?.iso || days[0].iso);
   }, []);
 
   useEffect(() => {
+    if (!selectedDate) return;
     let active = true;
     async function loadSlots() {
       setLoadingSlots(true);
@@ -162,8 +167,10 @@ export function BookingClient({
       }
       setConfirmedSlotIso(startsAt);
       const tokenStr = typeof data.magicToken === 'string' ? data.magicToken : '';
-      setBookingRef(`SL-${tokenStr.slice(-4).toUpperCase() || '2026'}`);
-      setMagicUrl(`${window.location.origin}/p/${tokenStr}`);
+      const bookingIdStr = typeof data?.booking?.id === 'string' ? data.booking.id : '';
+      setBookingRef(`SL-${(tokenStr || bookingIdStr).slice(-4).toUpperCase() || '2026'}`);
+      setMagicUrl(tokenStr ? `${window.location.origin}/p/${tokenStr}` : null);
+      setConfirmed(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -172,6 +179,7 @@ export function BookingClient({
   }
 
   function resetBookingForm() {
+    setConfirmed(false);
     setMagicUrl(null);
     setConfirmedSlotIso('');
     setNote('');
@@ -179,7 +187,7 @@ export function BookingClient({
     setReloadNonce((n) => n + 1);
   }
 
-  if (magicUrl) {
+  if (confirmed) {
     return (
       <div className="rounded-2xl border border-[#DCD6C8] bg-[#F6F4EE] p-4 sm:p-6">
         <div className="surface-card overflow-hidden rounded-2xl">
@@ -198,8 +206,9 @@ export function BookingClient({
             <div>
               <h3 className="font-serif text-3xl text-[#141413]">You&apos;re booked!</h3>
               <p className="mt-1 text-sm leading-relaxed text-[#425245]">
-                Your private zero-login student portal is ready. Bookmark it anytime to track pack
-                hours, join Google Meet, or reschedule.
+                {magicUrl
+                  ? 'Your private zero-login student portal is ready. Bookmark it anytime to track pack hours, join video calls, or reschedule.'
+                  : `Your private student passbook link has been emailed to ${studentEmail} for your security.`}
               </p>
             </div>
           </div>
@@ -239,18 +248,22 @@ export function BookingClient({
           {/* Perforated Boarding-Pass Divider & Actions */}
           <div className="ticket-perforated bg-white px-6 py-5 sm:px-8 space-y-4">
             <div className="flex flex-wrap items-center gap-2.5">
-              <a
-                href={magicUrl}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[#141413] px-4 py-2.5 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
-              >
-                Open Student Portal →
-              </a>
+              {magicUrl && (
+                <a
+                  href={magicUrl}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#141413] px-4 py-2.5 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
+                >
+                  Open Student Portal →
+                </a>
+              )}
               <button
                 type="button"
                 onClick={() =>
                   downloadSessionIcs({
                     title: `${selectedService?.name ?? 'Tutoring Session'} (${proSlug})`,
-                    description: `Booked with ${studentName}. Magic Portal: ${magicUrl}`,
+                    description: magicUrl
+                      ? `Booked with ${studentName}. Magic Portal: ${magicUrl}`
+                      : `Booked with ${studentName}.`,
                     startsAtIso: confirmedSlotIso,
                     durationMin: selectedService?.durationMin ?? 60,
                     filename: `slotlink-${bookingRef.toLowerCase()}.ics`,
@@ -261,18 +274,20 @@ export function BookingClient({
                 <CalendarPlus className="h-3.5 w-3.5 text-[#D94E28]" />
                 Add to Calendar (.ics)
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard?.writeText(magicUrl);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                }}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-[#CEC7B6] bg-white px-3.5 py-2.5 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
-              >
-                <Copy className="h-3.5 w-3.5 text-[#575248]" />
-                {copied ? 'Copied Link ✓' : 'Copy Magic Link'}
-              </button>
+              {magicUrl && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(magicUrl);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#CEC7B6] bg-white px-3.5 py-2.5 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
+                >
+                  <Copy className="h-3.5 w-3.5 text-[#575248]" />
+                  {copied ? 'Copied Link ✓' : 'Copy Magic Link'}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={resetBookingForm}
@@ -396,6 +411,11 @@ export function BookingClient({
               : 'No account required'}
           </span>
         </div>
+        {services.length === 0 ? (
+          <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-5 text-center text-xs text-[#6E685C]">
+            No session types are currently listed. Check back soon or contact your instructor directly.
+          </div>
+        ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {services.map((svc) => {
             const active = selectedServiceId === svc.id;
@@ -460,6 +480,7 @@ export function BookingClient({
             );
           })}
         </div>
+        )}
 
         {selectedService && selectedService.packageHrs > 1 && (
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-2.5 text-xs text-[#14532D]">
@@ -513,7 +534,10 @@ export function BookingClient({
         </div>
 
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {upcomingDays.map((d) => {
+          {upcomingDays.length === 0 ? (
+            <div className="h-14 w-full animate-pulse rounded-xl bg-[#EFECE4]" />
+          ) : (
+          upcomingDays.map((d) => {
             const active = selectedDate === d.iso;
             return (
               <button
@@ -536,12 +560,13 @@ export function BookingClient({
                 <div className="font-mono text-xs font-semibold">{d.dayNum}</div>
               </button>
             );
-          })}
+          })
+          )}
           <input
             id="booking-date"
             aria-label="Choose custom date"
             type="date"
-            min={todayIso}
+            min={upcomingDays[0]?.iso || undefined}
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
             className="surface-input shrink-0 rounded-xl px-3 py-2 font-mono text-xs"

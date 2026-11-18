@@ -1,9 +1,10 @@
+import { randomBytes } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getAuthenticatedPro } from '@/lib/auth';
 import { generateMagicToken } from '@/lib/magic-token';
-import { createGoogleCalendarEvent } from '@/lib/google-calendar';
+import { createGoogleCalendarEvent, deleteGoogleCalendarEvent } from '@/lib/google-calendar';
 import { sendEmail, buildBookingConfirmationEmail } from '@/lib/email';
 
 const CreateBookingSchema = z.object({
@@ -19,14 +20,11 @@ const CreateBookingSchema = z.object({
 
 export async function GET(req: NextRequest) {
   const authed = await getAuthenticatedPro();
-  if (!authed && process.env.NODE_ENV !== 'development') {
+  if (!authed) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const proId = req.nextUrl.searchParams.get('proId') ?? authed?.id;
-  if (!proId) {
-    return NextResponse.json({ error: 'proId is required' }, { status: 400 });
-  }
-  if (authed && authed.id !== proId) {
+  const proId = req.nextUrl.searchParams.get('proId') ?? authed.id;
+  if (authed.id !== proId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
   const bookings = await prisma.booking.findMany({
@@ -79,6 +77,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Time slot is already booked' }, { status: 409 });
   }
 
+  const authed = await getAuthenticatedPro();
+  const isOwnerTutor = Boolean(authed && authed.id === pro.id);
+
   const cal = await createGoogleCalendarEvent({
     refreshToken: pro.googleRefreshToken,
     summary: `${service.name} — ${studentName}`,
@@ -88,54 +89,109 @@ export async function POST(req: NextRequest) {
     attendeeEmail: studentEmail,
   });
 
-  const result = await prisma.$transaction(async (tx) => {
-    const existingStudent = await tx.student.findUnique({
-      where: { userId_email: { userId: pro.id, email: studentEmail.toLowerCase() } },
-    });
+  const roomEntropy = randomBytes(4).toString('hex');
+  const fallbackMeetUrl = `https://meet.jit.si/slotlink-${pro.slug}-${start.getTime().toString(36)}-${roomEntropy}`;
+  const finalMeetingUrl = cal?.meetingUrl || fallbackMeetUrl;
 
-    const redeemExistingPack =
-      Boolean(useExistingCredit) &&
-      Boolean(existingStudent) &&
-      existingStudent!.hoursRemaining > 0 &&
-      (!magicToken || existingStudent!.magicToken === magicToken);
+  let result: {
+    booking: Awaited<ReturnType<typeof prisma.booking.create>>;
+    magicToken: string;
+    exposeToken: boolean;
+  };
+  try {
+    result = await prisma.$transaction(async (tx) => {
+      const txConflict = await tx.booking.findFirst({
+        where: {
+          userId: pro.id,
+          status: 'CONFIRMED',
+          startsAt: { lt: end },
+          endsAt: { gt: start },
+        },
+      });
+      if (txConflict) {
+        throw new Error('SLOT_CONFLICT');
+      }
 
-    const student = existingStudent
-      ? redeemExistingPack
-        ? existingStudent
-        : await tx.student.update({
-            where: { id: existingStudent.id },
-            data: {
-              hoursRemaining: { increment: service.packageHrs },
-              totalPaidCents: { increment: service.priceCents },
-            },
-          })
-      : await tx.student.create({
-          data: {
-            userId: pro.id,
-            name: studentName,
-            email: studentEmail.toLowerCase(),
-            magicToken: generateMagicToken(),
-            hoursRemaining: service.packageHrs,
-            totalPaidCents: service.priceCents,
-          },
+      const normalizedEmail = studentEmail.trim().toLowerCase();
+      const existingStudent = await tx.student.findUnique({
+        where: { userId_email: { userId: pro.id, email: normalizedEmail } },
+      });
+
+      const hasValidToken = Boolean(
+        existingStudent && magicToken && existingStudent.magicToken === magicToken
+      );
+
+      if (useExistingCredit) {
+        if (!existingStudent || (!hasValidToken && !isOwnerTutor)) {
+          throw new Error('NO_CREDIT_REMAINING');
+        }
+        const activeConfirmedCount = await tx.booking.count({
+          where: { studentId: existingStudent.id, status: 'CONFIRMED' },
         });
+        if (existingStudent.hoursRemaining <= activeConfirmedCount) {
+          throw new Error('NO_CREDIT_REMAINING');
+        }
+      }
 
-    const booking = await tx.booking.create({
-      data: {
-        userId: pro.id,
-        studentId: student.id,
-        serviceId: service.id,
-        startsAt: start,
-        endsAt: end,
-        status: 'CONFIRMED',
-        note,
-        calendarEventId: cal?.eventId ?? null,
-        meetingUrl: cal?.meetingUrl ?? '',
-      },
+      const redeemExistingPack =
+        Boolean(useExistingCredit) && Boolean(existingStudent) && (hasValidToken || isOwnerTutor);
+
+      const student = existingStudent
+        ? redeemExistingPack
+          ? existingStudent
+          : await tx.student.update({
+              where: { id: existingStudent.id },
+              data: {
+                hoursRemaining: { increment: service.packageHrs },
+                totalPaidCents: { increment: service.priceCents },
+              },
+            })
+        : await tx.student.create({
+            data: {
+              userId: pro.id,
+              name: studentName,
+              email: normalizedEmail,
+              magicToken: generateMagicToken(),
+              hoursRemaining: service.packageHrs,
+              totalPaidCents: service.priceCents,
+            },
+          });
+
+      const booking = await tx.booking.create({
+        data: {
+          userId: pro.id,
+          studentId: student.id,
+          serviceId: service.id,
+          startsAt: start,
+          endsAt: end,
+          status: 'CONFIRMED',
+          note,
+          calendarEventId: cal?.eventId ?? null,
+          meetingUrl: finalMeetingUrl,
+        },
+      });
+
+      return {
+        booking,
+        magicToken: student.magicToken,
+        exposeToken: !existingStudent || hasValidToken || isOwnerTutor,
+      };
     });
-
-    return { booking, magicToken: student.magicToken };
-  });
+  } catch (err) {
+    if (cal?.eventId) {
+      await deleteGoogleCalendarEvent(pro.googleRefreshToken, cal.eventId).catch(() => false);
+    }
+    if (err instanceof Error && err.message === 'SLOT_CONFLICT') {
+      return NextResponse.json({ error: 'Time slot is already booked' }, { status: 409 });
+    }
+    if (err instanceof Error && err.message === 'NO_CREDIT_REMAINING') {
+      return NextResponse.json(
+        { error: 'No available prepaid pack credits remaining. Please purchase or select a package.' },
+        { status: 400 }
+      );
+    }
+    throw err;
+  }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
   const magicUrl = `${appUrl}/p/${result.magicToken}`;
@@ -149,9 +205,16 @@ export async function POST(req: NextRequest) {
       serviceName: service.name,
       startsAtIso: start.toISOString(),
       magicUrl,
-      meetingUrl: cal?.meetingUrl,
+      meetingUrl: finalMeetingUrl,
     }),
   }).catch(() => false);
 
-  return NextResponse.json(result, { status: 201 });
+  return NextResponse.json(
+    {
+      booking: result.booking,
+      magicToken: result.exposeToken ? result.magicToken : null,
+      tokenSentViaEmail: !result.exposeToken,
+    },
+    { status: 201 }
+  );
 }

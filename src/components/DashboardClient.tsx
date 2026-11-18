@@ -11,9 +11,12 @@ import {
   Copy,
   FileText,
   List,
+  Pencil,
   Plus,
+  RefreshCw,
   Search,
   Sparkles,
+  UserPlus,
   Video,
   X,
 } from 'lucide-react';
@@ -66,8 +69,11 @@ function getInitials(name: string): string {
     .join('');
 }
 
-function formatSessionDate(iso: string): string {
+function formatSessionDate(iso: string, mounted = false): string {
   const d = new Date(iso);
+  if (!mounted) {
+    return `${iso.slice(0, 10)} · ${iso.slice(11, 16)} UTC`;
+  }
   const datePart = d.toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',
@@ -130,6 +136,7 @@ export function DashboardClient({
   const [newSvcDesc, setNewSvcDesc] = useState('');
   const [newSvcPrice, setNewSvcPrice] = useState('55');
   const [newSvcHrs, setNewSvcHrs] = useState('1');
+  const [newSvcDuration, setNewSvcDuration] = useState('60');
   const [quickBookOpen, setQuickBookOpen] = useState(false);
   const [qbStudentSelect, setQbStudentSelect] = useState<string>('new');
   const [qbName, setQbName] = useState('');
@@ -141,14 +148,45 @@ export function DashboardClient({
   const [qbUseCredit, setQbUseCredit] = useState(true);
   const [qbSubmitting, setQbSubmitting] = useState(false);
   const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const [clientSearch, setClientSearch] = useState('');
+  const [addClientOpen, setAddClientOpen] = useState(false);
+  const [newClientName, setNewClientName] = useState('');
+  const [newClientEmail, setNewClientEmail] = useState('');
+  const [newClientHours, setNewClientHours] = useState('5');
+  const [newClientPaidDollars, setNewClientPaidDollars] = useState('250');
+  const [newClientSubmitting, setNewClientSubmitting] = useState(false);
+
+  const [editingBookingId, setEditingBookingId] = useState<string | null>(null);
+  const [editBkDate, setEditBkDate] = useState('');
+  const [editBkTime, setEditBkTime] = useState('15:00');
+  const [editBkMeetingUrl, setEditBkMeetingUrl] = useState('');
+  const [editBkNote, setEditBkNote] = useState('');
+  const [editBkSubmitting, setEditBkSubmitting] = useState(false);
+
+  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+  const [editSvcName, setEditSvcName] = useState('');
+  const [editSvcDesc, setEditSvcDesc] = useState('');
+  const [editSvcPrice, setEditSvcPrice] = useState('');
+  const [editSvcHrs, setEditSvcHrs] = useState('1');
+  const [editSvcDuration, setEditSvcDuration] = useState('60');
+  const [editSvcSubmitting, setEditSvcSubmitting] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   useEffect(() => {
     const now = Date.now();
     setGridAnchorMs(now);
-    const tmrw = new Date(now + 86_400_000).toISOString().slice(0, 10);
-    setQbDate(tmrw);
+    const tomorrow = new Date(now + 86_400_000);
+    const yyyy = tomorrow.getFullYear();
+    const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const dd = String(tomorrow.getDate()).padStart(2, '0');
+    setQbDate(`${yyyy}-${mm}-${dd}`);
   }, []);
+
+  useEffect(() => {
+    if (!services.some((s) => s.id === qbServiceId)) {
+      setQbServiceId(services[0]?.id ?? '');
+    }
+  }, [services, qbServiceId]);
 
   const confirmedBookings = bookings.filter((b) => b.status === 'CONFIRMED');
   const completedBookings = bookings.filter((b) => b.status === 'COMPLETED');
@@ -163,6 +201,15 @@ export function DashboardClient({
       b.studentName.toLowerCase().includes(query) ||
       b.serviceName.toLowerCase().includes(query) ||
       b.note.toLowerCase().includes(query)
+    );
+  });
+
+  const clientQuery = clientSearch.trim().toLowerCase();
+  const filteredStudents = students.filter((s) => {
+    if (!clientQuery) return true;
+    return (
+      s.name.toLowerCase().includes(clientQuery) ||
+      s.email.toLowerCase().includes(clientQuery)
     );
   });
 
@@ -191,12 +238,14 @@ export function DashboardClient({
     return cols;
   })();
 
-  function notify(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast((curr) => (curr === msg ? null : curr)), 2800);
+  function notify(message: string, type: 'success' | 'error' = 'success') {
+    setToast({ type, message });
+    setTimeout(() => setToast((curr) => (curr?.message === message ? null : curr)), 3200);
   }
 
   function openCompleteDrawer(bookingId: string) {
+    const target = bookings.find((b) => b.id === bookingId);
+    if (!target || target.status !== 'CONFIRMED') return;
     setActiveTab('schedule');
     setQueueView('list');
     setFilter('ALL');
@@ -250,7 +299,7 @@ export function DashboardClient({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
-        return notify(extractError(data, 'Could not create quick booking'));
+        return notify(extractError(data, 'Could not create quick booking'), 'error');
       }
 
       const svc = services.find((s) => s.id === qbServiceId);
@@ -319,7 +368,7 @@ export function DashboardClient({
       }),
     });
     const data = await res.json().catch(() => null);
-    if (!res.ok) return notify(extractError(data, 'Failed to update booking'));
+    if (!res.ok) return notify(extractError(data, 'Failed to update booking'), 'error');
 
     setBookings((prev) =>
       prev.map((b) =>
@@ -358,8 +407,29 @@ export function DashboardClient({
       body: JSON.stringify({ hours }),
     });
     const data = await res.json().catch(() => null);
-    if (!res.ok) return notify(extractError(data, 'Failed to add hours'));
-    const addedCents = hours === 5 ? 25000 : hours * 5500;
+    if (!res.ok) return notify(extractError(data, 'Failed to adjust hours'), 'error');
+
+    let addedCents = 0;
+    if (hours > 0) {
+      const exactPack = services.find((svc) => svc.packageHrs === hours);
+      if (exactPack) {
+        addedCents = exactPack.priceCents;
+      } else {
+        const singleUnit =
+          services.find((svc) => svc.packageHrs === 1) ??
+          services.find((svc) => svc.packageHrs > 0);
+        if (singleUnit) {
+          addedCents = Math.round(singleUnit.priceCents / singleUnit.packageHrs) * hours;
+        }
+      }
+    }
+
+    const prevStudent = students.find((s) => s.id === id);
+    const finalAddedCents =
+      typeof data?.student?.totalPaidCents === 'number' && prevStudent
+        ? Math.max(0, data.student.totalPaidCents - prevStudent.totalPaidCents)
+        : addedCents;
+
     setStudents((prev) =>
       prev.map((s) =>
         s.id === id
@@ -368,7 +438,7 @@ export function DashboardClient({
               hoursRemaining:
                 typeof data?.student?.hoursRemaining === 'number'
                   ? data.student.hoursRemaining
-                  : s.hoursRemaining + hours,
+                  : Math.max(0, s.hoursRemaining + hours),
               totalPaidCents:
                 typeof data?.student?.totalPaidCents === 'number'
                   ? data.student.totalPaidCents
@@ -377,7 +447,161 @@ export function DashboardClient({
           : s
       )
     );
-    notify(`Added +${hours} hr${hours > 1 ? 's' : ''} (+$${(addedCents / 100).toFixed(0)})`);
+    notify(
+      hours > 0
+        ? `Added +${hours} hr${hours > 1 ? 's' : ''}${
+            finalAddedCents > 0 ? ` (+$${(finalAddedCents / 100).toFixed(0)})` : ''
+          }`
+        : `Adjusted ${hours} hr`
+    );
+  }
+
+  async function rotateStudentToken(id: string) {
+    const res = await fetch(`/api/students/${id}/topup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rotateToken: true }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) return notify(extractError(data, 'Could not rotate passbook link'), 'error');
+    if (data?.student?.magicToken) {
+      setStudents((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, magicToken: data.student.magicToken } : s))
+      );
+      notify('Rotated private passbook link');
+    }
+  }
+
+  async function handleAddClient(e: React.FormEvent) {
+    e.preventDefault();
+    setNewClientSubmitting(true);
+    try {
+      const res = await fetch('/api/students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newClientName,
+          email: newClientEmail,
+          hoursRemaining: Math.max(0, Number(newClientHours) || 0),
+          totalPaidCents: Math.max(0, Math.round((Number(newClientPaidDollars) || 0) * 100)),
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) return notify(extractError(data, 'Could not add client'), 'error');
+
+      const saved = data.student as StudentDTO;
+      setStudents((prev) => {
+        const exists = prev.some((s) => s.id === saved.id);
+        return exists
+          ? prev.map((s) => (s.id === saved.id ? saved : s))
+          : [saved, ...prev];
+      });
+      setAddClientOpen(false);
+      setNewClientName('');
+      setNewClientEmail('');
+      setNewClientHours('5');
+      setNewClientPaidDollars('250');
+      notify(`Saved client ${saved.name}`);
+      router.refresh();
+    } finally {
+      setNewClientSubmitting(false);
+    }
+  }
+
+  function startEditBooking(b: BookingDTO) {
+    const d = new Date(b.startsAtIso);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    setEditBkDate(`${yyyy}-${mm}-${dd}`);
+    setEditBkTime(`${hh}:${min}`);
+    setEditBkMeetingUrl(b.meetingUrl || '');
+    setEditBkNote(b.note || '');
+    setEditingBookingId(b.id);
+    setCompletingId(null);
+  }
+
+  async function saveBookingEdit(e: React.FormEvent, id: string) {
+    e.preventDefault();
+    if (!editBkDate || !editBkTime) return;
+    setEditBkSubmitting(true);
+    try {
+      const existing = bookings.find((b) => b.id === id);
+      const nextIso = new Date(`${editBkDate}T${editBkTime}:00`).toISOString();
+      const timeChanged = existing
+        ? Math.abs(new Date(existing.startsAtIso).getTime() - new Date(nextIso).getTime()) >= 60_000
+        : true;
+
+      const res = await fetch(`/api/bookings/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...(timeChanged ? { startsAt: nextIso } : {}),
+          meetingUrl: editBkMeetingUrl.trim(),
+          note: editBkNote,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) return notify(extractError(data, 'Could not update session'), 'error');
+
+      setBookings((prev) =>
+        prev
+          .map((b) =>
+            b.id === id
+              ? {
+                  ...b,
+                  startsAtIso: data?.booking?.startsAt ?? nextIso,
+                  meetingUrl: editBkMeetingUrl.trim(),
+                  note: editBkNote,
+                }
+              : b
+          )
+          .sort(
+            (a, b) => new Date(a.startsAtIso).getTime() - new Date(b.startsAtIso).getTime()
+          )
+      );
+      setEditingBookingId(null);
+      notify('Session updated');
+    } finally {
+      setEditBkSubmitting(false);
+    }
+  }
+
+  function startEditService(svc: ServiceDTO) {
+    setEditSvcName(svc.name);
+    setEditSvcDesc(svc.description);
+    setEditSvcPrice(String(Math.round(svc.priceCents / 100)));
+    setEditSvcHrs(String(svc.packageHrs));
+    setEditSvcDuration(String(svc.durationMin));
+    setEditingServiceId(svc.id);
+  }
+
+  async function saveServiceEdit(e: React.FormEvent, id: string) {
+    e.preventDefault();
+    setEditSvcSubmitting(true);
+    try {
+      const res = await fetch(`/api/services/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editSvcName,
+          description: editSvcDesc,
+          durationMin: Math.max(10, Math.min(240, Number(editSvcDuration) || 60)),
+          priceCents: Math.max(0, Math.round(Number(editSvcPrice) * 100)),
+          packageHrs: Math.max(0, Number(editSvcHrs) || 0),
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) return notify(extractError(data, 'Could not update service'), 'error');
+      setServices((prev) => prev.map((s) => (s.id === id ? data.service : s)));
+      setEditingServiceId(null);
+      notify('Service updated');
+      router.refresh();
+    } finally {
+      setEditSvcSubmitting(false);
+    }
   }
 
   async function addService(e: React.FormEvent) {
@@ -389,25 +613,26 @@ export function DashboardClient({
         userId,
         name: newSvcName,
         description: newSvcDesc,
-        durationMin: 60,
+        durationMin: Math.max(10, Math.min(240, Number(newSvcDuration) || 60)),
         priceCents: Math.round(Number(newSvcPrice) * 100),
         packageHrs: Number(newSvcHrs),
       }),
     });
     const data = await res.json().catch(() => null);
-    if (!res.ok) return notify(extractError(data, 'Could not create service'));
+    if (!res.ok) return notify(extractError(data, 'Could not create service'), 'error');
     setServices((prev) => [...prev, data.service]);
     setNewSvcName('');
     setNewSvcDesc('');
     setNewSvcPrice('55');
     setNewSvcHrs('1');
+    setNewSvcDuration('60');
     notify('Service added');
   }
 
   async function deleteService(id: string) {
     const res = await fetch(`/api/services/${id}`, { method: 'DELETE' });
     const data = await res.json().catch(() => null);
-    if (!res.ok) return notify(extractError(data, 'Could not delete service'));
+    if (!res.ok) return notify(extractError(data, 'Could not delete service'), 'error');
     setServices((prev) => prev.filter((s) => s.id !== id));
     notify('Service removed');
   }
@@ -426,7 +651,7 @@ export function DashboardClient({
     });
     const data = await res.json().catch(() => null);
     if (!res.ok) {
-      return notify(extractError(data, 'Failed to save settings'));
+      return notify(extractError(data, 'Failed to save settings'), 'error');
     }
     notify('Portal settings saved');
     router.refresh();
@@ -487,9 +712,16 @@ export function DashboardClient({
         </div>
 
         {toast && (
-          <span className="rounded-lg border border-[#BBF7D0] bg-[#DCFCE7] px-3 py-1.5 font-mono text-xs font-semibold text-[#15803D]">
-            {toast}
-          </span>
+          <div
+            role={toast.type === 'error' ? 'alert' : 'status'}
+            className={`fixed bottom-5 right-5 z-50 rounded-xl border px-4 py-2.5 font-mono text-xs font-semibold shadow-lg ${
+              toast.type === 'error'
+                ? 'border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]'
+                : 'border-[#BBF7D0] bg-[#DCFCE7] text-[#15803D]'
+            }`}
+          >
+            {toast.message}
+          </div>
         )}
       </div>
 
@@ -563,7 +795,7 @@ export function DashboardClient({
                     <div className="text-xs text-[#C8C2B6] mt-0.5">
                       {nextBooking.serviceName} ·{' '}
                       <span className="font-mono">
-                        {formatSessionDate(nextBooking.startsAtIso)}
+                        {formatSessionDate(nextBooking.startsAtIso, gridAnchorMs !== null)}
                       </span>
                     </div>
                     {nextBooking.note && (
@@ -951,7 +1183,11 @@ export function DashboardClient({
                             <button
                               key={`grid-${s.id}`}
                               type="button"
-                              onClick={() => openCompleteDrawer(s.id)}
+                              onClick={() =>
+                                s.status === 'CONFIRMED'
+                                  ? openCompleteDrawer(s.id)
+                                  : setQueueView('list')
+                              }
                               className="w-full rounded-lg border border-[#DCD6C8] bg-white p-2 text-left hover:border-[#141413] transition space-y-1"
                             >
                               <div className="flex items-center justify-between gap-1 font-mono text-[10px]">
@@ -992,7 +1228,9 @@ export function DashboardClient({
               <div className="space-y-2.5">
               {filteredBookings.length === 0 ? (
                 <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-6 text-center text-xs text-[#6E685C]">
-                  No {filter === 'ALL' ? '' : `${filter.toLowerCase()} `}sessions match your filter.
+                  {bookings.length === 0
+                    ? 'No sessions booked yet. Share your link or click + Quick Book to add one.'
+                    : `No ${filter === 'ALL' ? '' : `${filter.toLowerCase()} `}sessions match your filter.`}
                 </div>
               ) : (
                 filteredBookings.map((b) => {
@@ -1029,7 +1267,7 @@ export function DashboardClient({
                             )}
                           </div>
                           <div className="flex flex-wrap items-center gap-2.5 font-mono text-[#6E685C]">
-                            <span>{formatSessionDate(b.startsAtIso)}</span>
+                            <span>{formatSessionDate(b.startsAtIso, gridAnchorMs !== null)}</span>
                             {studentRecord && (
                               <Link
                                 href={`/p/${studentRecord.magicToken}`}
@@ -1098,8 +1336,21 @@ export function DashboardClient({
                               <button
                                 type="button"
                                 onClick={() =>
-                                  setCompletingId(completingId === b.id ? null : b.id)
+                                  editingBookingId === b.id
+                                    ? setEditingBookingId(null)
+                                    : startEditBooking(b)
                                 }
+                                className="inline-flex items-center gap-1 rounded-lg border border-[#CEC7B6] bg-white px-2.5 py-1.5 font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
+                              >
+                                <Pencil className="h-3 w-3 text-[#575248]" />
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingBookingId(null);
+                                  setCompletingId(completingId === b.id ? null : b.id);
+                                }}
                                 className="rounded-lg bg-[#141413] px-3 py-1.5 font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
                               >
                                 Mark Done
@@ -1116,7 +1367,103 @@ export function DashboardClient({
                         </div>
                       </div>
 
-                      {completingId === b.id && (
+                      {editingBookingId === b.id && (
+                        <form
+                          onSubmit={(e) => saveBookingEdit(e, b.id)}
+                          className="surface-elevated rounded-xl p-4 space-y-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#D94E28]">
+                              Reschedule &amp; Edit Meeting Link
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setEditingBookingId(null)}
+                              className="inline-flex items-center gap-1 text-xs font-medium text-[#575248] hover:text-[#141413]"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                              Cancel
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-4 items-end">
+                            <div>
+                              <label
+                                htmlFor={`edit-bk-date-${b.id}`}
+                                className="block text-[11px] font-medium text-[#575248] mb-1"
+                              >
+                                New Date
+                              </label>
+                              <input
+                                id={`edit-bk-date-${b.id}`}
+                                type="date"
+                                required
+                                value={editBkDate}
+                                onChange={(e) => setEditBkDate(e.target.value)}
+                                className="surface-input w-full rounded-lg px-2.5 py-2 font-mono text-xs"
+                              />
+                            </div>
+                            <div>
+                              <label
+                                htmlFor={`edit-bk-time-${b.id}`}
+                                className="block text-[11px] font-medium text-[#575248] mb-1"
+                              >
+                                New Time
+                              </label>
+                              <input
+                                id={`edit-bk-time-${b.id}`}
+                                type="time"
+                                required
+                                value={editBkTime}
+                                onChange={(e) => setEditBkTime(e.target.value)}
+                                className="surface-input w-full rounded-lg px-2.5 py-2 font-mono text-xs"
+                              />
+                            </div>
+                            <div>
+                              <label
+                                htmlFor={`edit-bk-meet-${b.id}`}
+                                className="block text-[11px] font-medium text-[#575248] mb-1"
+                              >
+                                Video Meeting URL
+                              </label>
+                              <input
+                                id={`edit-bk-meet-${b.id}`}
+                                type="url"
+                                placeholder="https://meet.google.com/..."
+                                value={editBkMeetingUrl}
+                                onChange={(e) => setEditBkMeetingUrl(e.target.value)}
+                                className="surface-input w-full rounded-lg px-2.5 py-2 text-xs"
+                              />
+                            </div>
+                            <div>
+                              <label
+                                htmlFor={`edit-bk-note-${b.id}`}
+                                className="block text-[11px] font-medium text-[#575248] mb-1"
+                              >
+                                Topic Note
+                              </label>
+                              <input
+                                id={`edit-bk-note-${b.id}`}
+                                type="text"
+                                placeholder="Session focus..."
+                                value={editBkNote}
+                                onChange={(e) => setEditBkNote(e.target.value)}
+                                className="surface-input w-full rounded-lg px-2.5 py-2 text-xs"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex justify-end">
+                            <button
+                              type="submit"
+                              disabled={editBkSubmitting}
+                              className="rounded-lg bg-[#141413] px-4 py-2 font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] disabled:opacity-50 transition"
+                            >
+                              {editBkSubmitting ? 'Saving...' : 'Save Session Changes'}
+                            </button>
+                          </div>
+                        </form>
+                      )}
+
+                      {completingId === b.id && b.status === 'CONFIRMED' && (
                         <div className="surface-elevated rounded-xl p-4 space-y-3">
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <div className="flex flex-wrap items-center gap-1.5">
@@ -1206,40 +1553,167 @@ export function DashboardClient({
                   Clients &amp; Package Balances
                 </h2>
                 <p className="text-xs text-[#6E685C]">
-                  Manage active prepaid packs, copy private magic portals, or inspect client history.
+                  Manage active prepaid packs, import existing clients, or rotate private portal
+                  links.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('schedule');
-                  setQuickBookOpen(true);
-                }}
-                className="inline-flex items-center gap-1 rounded-lg bg-[#D94E28] px-3 py-1.5 font-mono text-[11px] font-semibold text-white hover:bg-[#B83E1D] transition"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                Add / Quick-Book Client
-              </button>
-            </div>
-
-            {students.length === 0 ? (
-              <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-8 text-center space-y-3">
-                <p className="text-sm font-medium text-[#141413]">No clients in your ledger yet.</p>
-                <p className="text-xs text-[#6E685C]">
-                  Share your booking link or add your first client directly to start tracking pack
-                  hours.
-                </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#6E685C]" />
+                  <input
+                    type="search"
+                    aria-label="Search clients"
+                    placeholder="Search clients..."
+                    value={clientSearch}
+                    onChange={(e) => setClientSearch(e.target.value)}
+                    className="surface-input w-44 sm:w-52 rounded-lg pl-8 pr-3 py-1.5 text-xs"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAddClientOpen((v) => !v)}
+                  className="inline-flex items-center gap-1 rounded-lg border border-[#141413] bg-white px-3 py-1.5 font-mono text-[11px] font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
+                >
+                  <UserPlus className="h-3.5 w-3.5 text-[#D94E28]" />
+                  + Add Existing Client
+                </button>
                 <button
                   type="button"
                   onClick={() => {
                     setActiveTab('schedule');
                     setQuickBookOpen(true);
                   }}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#141413] px-4 py-2 text-xs font-semibold text-[#F6F4EE] hover:bg-[#D94E28] transition"
+                  className="inline-flex items-center gap-1 rounded-lg bg-[#D94E28] px-3 py-1.5 font-mono text-[11px] font-semibold text-white hover:bg-[#B83E1D] transition"
                 >
                   <Plus className="h-3.5 w-3.5" />
-                  Quick-Book First Client
+                  Quick-Book Client
                 </button>
+              </div>
+            </div>
+
+            {addClientOpen && (
+              <form
+                onSubmit={handleAddClient}
+                className="surface-elevated rounded-xl p-4 sm:p-5 space-y-3.5"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
+                    Import or Add Existing Client
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setAddClientOpen(false)}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-[#575248] hover:text-[#141413]"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                    Close
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-4 items-end">
+                  <div>
+                    <label
+                      htmlFor="add-cli-name"
+                      className="block text-[11px] font-medium text-[#575248] mb-1"
+                    >
+                      Full Name
+                    </label>
+                    <input
+                      id="add-cli-name"
+                      type="text"
+                      required
+                      placeholder="Jordan Lee"
+                      value={newClientName}
+                      onChange={(e) => setNewClientName(e.target.value)}
+                      className="surface-input w-full rounded-lg px-2.5 py-2 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="add-cli-email"
+                      className="block text-[11px] font-medium text-[#575248] mb-1"
+                    >
+                      Email Address
+                    </label>
+                    <input
+                      id="add-cli-email"
+                      type="email"
+                      required
+                      placeholder="jordan@example.com"
+                      value={newClientEmail}
+                      onChange={(e) => setNewClientEmail(e.target.value)}
+                      className="surface-input w-full rounded-lg px-2.5 py-2 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="add-cli-hrs"
+                      className="block text-[11px] font-medium text-[#575248] mb-1"
+                    >
+                      Starting Hours
+                    </label>
+                    <input
+                      id="add-cli-hrs"
+                      type="number"
+                      min="0"
+                      max="200"
+                      required
+                      value={newClientHours}
+                      onChange={(e) => setNewClientHours(e.target.value)}
+                      className="surface-input w-full rounded-lg px-2.5 py-2 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="add-cli-paid"
+                      className="block text-[11px] font-medium text-[#575248] mb-1"
+                    >
+                      Amount Paid ($)
+                    </label>
+                    <input
+                      id="add-cli-paid"
+                      type="number"
+                      min="0"
+                      required
+                      value={newClientPaidDollars}
+                      onChange={(e) => setNewClientPaidDollars(e.target.value)}
+                      className="surface-input w-full rounded-lg px-2.5 py-2 font-mono text-xs"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={newClientSubmitting}
+                    className="rounded-lg bg-[#141413] px-4 py-2 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] disabled:opacity-50 transition"
+                  >
+                    {newClientSubmitting ? 'Saving...' : 'Save Client & Generate Passbook'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {filteredStudents.length === 0 ? (
+              <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-8 text-center space-y-3">
+                <p className="text-sm font-medium text-[#141413]">
+                  {students.length === 0
+                    ? 'No clients in your ledger yet.'
+                    : `No clients match "${clientSearch}".`}
+                </p>
+                <p className="text-xs text-[#6E685C]">
+                  {students.length === 0
+                    ? 'Import an existing client or add your first booking directly to start tracking pack hours.'
+                    : 'Clear your search filter or import a new client above.'}
+                </p>
+                {students.length === 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setAddClientOpen(true)}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#141413] px-4 py-2 text-xs font-semibold text-[#F6F4EE] hover:bg-[#D94E28] transition"
+                  >
+                    <UserPlus className="h-3.5 w-3.5" />
+                    Import Existing Client
+                  </button>
+                )}
               </div>
             ) : (
             <div className="overflow-x-auto">
@@ -1254,7 +1728,7 @@ export function DashboardClient({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#EFECE4]">
-                  {students.map((s) => {
+                  {filteredStudents.map((s) => {
                     const barPct = Math.min(100, Math.round((s.hoursRemaining / 5) * 100));
                     const studentHistory = bookings.filter((b) => b.studentId === s.id);
                     const isExpanded = expandedStudentId === s.id;
@@ -1363,20 +1837,37 @@ export function DashboardClient({
                                   <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#575248]">
                                     Session Ledger for {s.name}
                                   </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const portalUrl = `${window.location.origin}/p/${s.magicToken}`;
-                                      navigator.clipboard?.writeText(
-                                        `Hi ${s.name} — quick heads-up that you have ${s.hoursRemaining} hr${s.hoursRemaining === 1 ? '' : 's'} left in your package. You can check your session notes or book your next pack anytime here: ${portalUrl}`
-                                      );
-                                      notify(`Copied renewal note for ${s.name}`);
-                                    }}
-                                    className="inline-flex items-center gap-1.5 rounded-lg border border-[#CEC7B6] bg-white px-2.5 py-1 font-mono text-[11px] font-semibold text-[#141413] hover:border-[#D94E28] hover:text-[#D94E28] transition"
-                                  >
-                                    <Copy className="h-3 w-3 text-[#D94E28]" />
-                                    Copy Renewal Note
-                                  </button>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => topUpStudent(s.id, -1)}
+                                      className="rounded-lg border border-[#FECACA] bg-white px-2.5 py-1 font-mono text-[11px] font-semibold text-[#B91C1C] hover:bg-[#FEF2F2] transition"
+                                    >
+                                      -1 hr
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => rotateStudentToken(s.id)}
+                                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#CEC7B6] bg-white px-2.5 py-1 font-mono text-[11px] font-semibold text-[#141413] hover:border-[#141413] transition"
+                                    >
+                                      <RefreshCw className="h-3 w-3 text-[#575248]" />
+                                      Rotate Magic Link
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const portalUrl = `${window.location.origin}/p/${s.magicToken}`;
+                                        navigator.clipboard?.writeText(
+                                          `Hi ${s.name} — quick heads-up that you have ${s.hoursRemaining} hr${s.hoursRemaining === 1 ? '' : 's'} left in your package. You can check your session notes or book your next pack anytime here: ${portalUrl}`
+                                        );
+                                        notify(`Copied renewal note for ${s.name}`);
+                                      }}
+                                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#CEC7B6] bg-white px-2.5 py-1 font-mono text-[11px] font-semibold text-[#141413] hover:border-[#D94E28] hover:text-[#D94E28] transition"
+                                    >
+                                      <Copy className="h-3 w-3 text-[#D94E28]" />
+                                      Copy Renewal Note
+                                    </button>
+                                  </div>
                                 </div>
 
                                 {studentHistory.length === 0 ? (
@@ -1436,29 +1927,108 @@ export function DashboardClient({
                 {services.map((svc) => (
                   <div
                     key={svc.id}
-                    className="flex items-center justify-between rounded-xl border border-[#DCD6C8] bg-[#F6F4EE]/60 p-3.5 text-xs"
+                    className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE]/60 p-3.5 text-xs space-y-3"
                   >
-                    <div>
-                      <div className="font-semibold text-[#141413]">
-                        {svc.name}{' '}
-                        <span className="font-mono text-[#6E685C]">({svc.packageHrs}h)</span>
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <div className="font-semibold text-[#141413]">
+                          {svc.name}{' '}
+                          <span className="font-mono text-[#6E685C]">({svc.packageHrs}h)</span>
+                        </div>
+                        {svc.description && (
+                          <div className="text-[#575248] mt-0.5">{svc.description}</div>
+                        )}
                       </div>
-                      {svc.description && (
-                        <div className="text-[#575248] mt-0.5">{svc.description}</div>
-                      )}
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono font-semibold text-[#141413]">
+                          ${(svc.priceCents / 100).toFixed(0)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            editingServiceId === svc.id
+                              ? setEditingServiceId(null)
+                              : startEditService(svc)
+                          }
+                          className="font-semibold text-[#141413] hover:text-[#D94E28] hover:underline"
+                        >
+                          {editingServiceId === svc.id ? 'Close' : 'Edit'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteService(svc.id)}
+                          className="font-semibold text-[#B91C1C] hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono font-semibold text-[#141413]">
-                        ${(svc.priceCents / 100).toFixed(0)}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => deleteService(svc.id)}
-                        className="font-semibold text-[#B91C1C] hover:underline"
+
+                    {editingServiceId === svc.id && (
+                      <form
+                        onSubmit={(e) => saveServiceEdit(e, svc.id)}
+                        className="surface-elevated rounded-lg p-3 space-y-2.5 border-t border-[#DCD6C8]"
                       >
-                        Delete
-                      </button>
-                    </div>
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                          <input
+                            type="text"
+                            required
+                            aria-label="Edit service name"
+                            value={editSvcName}
+                            onChange={(e) => setEditSvcName(e.target.value)}
+                            className="surface-input w-full rounded-lg px-2.5 py-1.5 text-xs"
+                          />
+                          <input
+                            type="text"
+                            aria-label="Edit service description"
+                            placeholder="Description (optional)"
+                            value={editSvcDesc}
+                            onChange={(e) => setEditSvcDesc(e.target.value)}
+                            className="surface-input w-full rounded-lg px-2.5 py-1.5 text-xs"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-center">
+                          <input
+                            type="number"
+                            min="0"
+                            required
+                            aria-label="Edit service price"
+                            value={editSvcPrice}
+                            onChange={(e) => setEditSvcPrice(e.target.value)}
+                            className="surface-input w-full rounded-lg px-2.5 py-1.5 font-mono text-xs"
+                          />
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            required
+                            aria-label="Edit pack hours"
+                            value={editSvcHrs}
+                            onChange={(e) => setEditSvcHrs(e.target.value)}
+                            className="surface-input w-full rounded-lg px-2.5 py-1.5 font-mono text-xs"
+                          />
+                          <select
+                            aria-label="Edit duration minutes"
+                            value={editSvcDuration}
+                            onChange={(e) => setEditSvcDuration(e.target.value)}
+                            className="surface-input w-full rounded-lg px-2 py-1.5 font-mono text-xs"
+                          >
+                            {[15, 30, 45, 60, 90, 120].map((m) => (
+                              <option key={m} value={String(m)}>
+                                {m} min
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            type="submit"
+                            disabled={editSvcSubmitting}
+                            className="rounded-lg bg-[#141413] px-3 py-1.5 font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] disabled:opacity-50 transition"
+                          >
+                            {editSvcSubmitting ? 'Saving...' : 'Save'}
+                          </button>
+                        </div>
+                      </form>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1499,7 +2069,7 @@ export function DashboardClient({
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2.5 items-end">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 items-end">
                   <div>
                     <label
                       htmlFor="svc-price"
@@ -1534,6 +2104,26 @@ export function DashboardClient({
                       onChange={(e) => setNewSvcHrs(e.target.value)}
                       className="surface-input w-full rounded-lg px-2.5 py-2 font-mono text-xs"
                     />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="svc-duration"
+                      className="block text-[11px] font-medium text-[#575248] mb-1"
+                    >
+                      Duration
+                    </label>
+                    <select
+                      id="svc-duration"
+                      value={newSvcDuration}
+                      onChange={(e) => setNewSvcDuration(e.target.value)}
+                      className="surface-input w-full rounded-lg px-2 py-2 font-mono text-xs"
+                    >
+                      {[15, 30, 45, 60, 90, 120].map((m) => (
+                        <option key={m} value={String(m)}>
+                          {m} min
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <button
                     type="submit"
@@ -1702,7 +2292,7 @@ export function DashboardClient({
               <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE]/80 p-3.5 space-y-2">
                 <div className="flex items-center justify-between font-mono text-[10px] text-[#575248]">
                   <span className="uppercase tracking-wider font-semibold">
-                    24h Availability Window (UTC)
+                    24h Availability Window (UTC · Display TZ: {settings.timezone})
                   </span>
                   <span className="font-semibold text-[#D94E28]">
                     {String(settings.workStartHour).padStart(2, '0')}:00 –{' '}

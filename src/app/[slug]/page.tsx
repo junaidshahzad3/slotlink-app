@@ -23,6 +23,7 @@ export default async function PublicPortalPage({
   if (!pro) notFound();
 
   let prefillStudent: PrefillStudentDTO | null = null;
+  const invalidTokenSupplied = Boolean(token && token.trim().length > 0);
   if (token) {
     const matched = await prisma.student.findUnique({
       where: { magicToken: token },
@@ -56,7 +57,7 @@ export default async function PublicPortalPage({
 
   const highlights = [
     `${pro.services.length} session option${pro.services.length === 1 ? '' : 's'} available`,
-    '1-on-1 Google Meet + 24h free reschedule',
+    '1-on-1 Live Video + 24h free reschedule',
     'Zero-login client passbook & hour ledger',
   ];
 
@@ -147,7 +148,9 @@ export default async function PublicPortalPage({
                   <span className="font-mono text-[11px] uppercase tracking-wider text-[#6E685C]">
                     Format
                   </span>
-                  <span className="font-mono font-medium text-[#141413]">Google Meet</span>
+                  <span className="font-mono font-medium text-[#141413]">
+                    Video Call (Google Meet / Web)
+                  </span>
                 </div>
                 <div className="flex items-center justify-between py-2.5">
                   <span className="font-mono text-[11px] uppercase tracking-wider text-[#6E685C]">
@@ -177,22 +180,33 @@ export default async function PublicPortalPage({
                     <ArrowUpRight className="h-3.5 w-3.5" />
                   </Link>
                 ) : (
-                  <form method="GET" action={`/${pro.slug}`} className="flex gap-1.5">
-                    <input
-                      type="text"
-                      name="token"
-                      required
-                      aria-label="Enter passbook token"
-                      placeholder="Paste token (sl_...)"
-                      className="min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-2.5 py-1.5 font-mono text-[11px] text-[#F6F4EE] placeholder-[#A8A295] focus:border-[#4ADE80] focus:outline-none"
-                    />
-                    <button
-                      type="submit"
-                      className="shrink-0 rounded-lg bg-[#F6F4EE] px-2.5 py-1.5 font-mono text-[11px] font-semibold text-[#141413] hover:bg-white transition"
-                    >
-                      Apply
-                    </button>
-                  </form>
+                  <div className="space-y-2">
+                    {invalidTokenSupplied && (
+                      <div
+                        role="alert"
+                        className="rounded-lg border border-[#FCA5A5]/40 bg-[#7F1D1D]/40 px-2.5 py-1.5 text-[11px] text-[#FECACA]"
+                      >
+                        Passbook token not recognized for this instructor. Please check your link.
+                      </div>
+                    )}
+                    <form method="GET" action={`/${pro.slug}`} className="flex gap-1.5">
+                      <input
+                        type="text"
+                        name="token"
+                        required
+                        defaultValue={invalidTokenSupplied ? token : ''}
+                        aria-label="Enter passbook token"
+                        placeholder="Paste token (sl_...)"
+                        className="min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-2.5 py-1.5 font-mono text-[11px] text-[#F6F4EE] placeholder-[#A8A295] focus:border-[#4ADE80] focus:outline-none"
+                      />
+                      <button
+                        type="submit"
+                        className="shrink-0 rounded-lg bg-[#F6F4EE] px-2.5 py-1.5 font-mono text-[11px] font-semibold text-[#141413] hover:bg-white transition"
+                      >
+                        Apply
+                      </button>
+                    </form>
+                  </div>
                 )}
               </div>
             </div>

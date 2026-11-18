@@ -41,13 +41,17 @@ export async function PATCH(
   }
 
   if (parsed.data.action === 'CANCEL') {
+    const cancelled = await prisma.booking.updateMany({
+      where: { id: booking.id, studentId: student.id, status: 'CONFIRMED' },
+      data: { status: 'CANCELLED' },
+    });
+    if (cancelled.count === 0) {
+      return NextResponse.json({ error: 'Booking can no longer be cancelled' }, { status: 409 });
+    }
     if (booking.calendarEventId) {
       await deleteGoogleCalendarEvent(booking.user.googleRefreshToken, booking.calendarEventId).catch(() => false);
     }
-    const updated = await prisma.booking.update({
-      where: { id: booking.id },
-      data: { status: 'CANCELLED' },
-    });
+    const updated = await prisma.booking.findUniqueOrThrow({ where: { id: booking.id } });
     return NextResponse.json({ booking: updated });
   }
 
@@ -64,22 +68,35 @@ export async function PATCH(
   }
   const newEnd = new Date(newStart.getTime() + booking.service.durationMin * 60_000);
 
-  const conflict = await prisma.booking.findFirst({
-    where: {
-      userId: booking.userId,
-      id: { not: booking.id },
-      status: 'CONFIRMED',
-      startsAt: { lt: newEnd },
-      endsAt: { gt: newStart },
-    },
-  });
-  if (conflict) {
-    return NextResponse.json({ error: 'Selected slot is no longer available' }, { status: 409 });
-  }
+  try {
+    const updated = await prisma.$transaction(async (tx) => {
+      const conflict = await tx.booking.findFirst({
+        where: {
+          userId: booking.userId,
+          id: { not: booking.id },
+          status: 'CONFIRMED',
+          startsAt: { lt: newEnd },
+          endsAt: { gt: newStart },
+        },
+      });
+      if (conflict) throw new Error('CONFLICT');
 
-  const updated = await prisma.booking.update({
-    where: { id: booking.id },
-    data: { startsAt: newStart, endsAt: newEnd },
-  });
-  return NextResponse.json({ booking: updated });
+      const claimed = await tx.booking.updateMany({
+        where: { id: booking.id, studentId: student.id, status: 'CONFIRMED' },
+        data: { startsAt: newStart, endsAt: newEnd },
+      });
+      if (claimed.count === 0) throw new Error('NOT_CONFIRMED');
+
+      return tx.booking.findUniqueOrThrow({ where: { id: booking.id } });
+    });
+    return NextResponse.json({ booking: updated });
+  } catch (err) {
+    if (err instanceof Error && err.message === 'CONFLICT') {
+      return NextResponse.json({ error: 'Selected slot is no longer available' }, { status: 409 });
+    }
+    if (err instanceof Error && err.message === 'NOT_CONFIRMED') {
+      return NextResponse.json({ error: 'Booking is no longer confirmed' }, { status: 409 });
+    }
+    throw err;
+  }
 }

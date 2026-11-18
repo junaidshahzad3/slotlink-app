@@ -50,23 +50,31 @@ export function PortalClient({
   proName?: string;
   initialBookings: PortalBookingDTO[];
 }) {
-  const todayIso = getDayIso(0);
-  const tomorrowIso = getDayIso(1);
+  const [mounted, setMounted] = useState(false);
+  const [todayIso, setTodayIso] = useState('');
+  const [tomorrowIso, setTomorrowIso] = useState('');
 
   const [bookings, setBookings] = useState(initialBookings);
   const [viewFilter, setViewFilter] = useState<'ALL' | 'UPCOMING' | 'COMPLETED'>('ALL');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rescheduleId, setRescheduleId] = useState<string | null>(null);
-  const [rescheduleDate, setRescheduleDate] = useState(tomorrowIso);
+  const [rescheduleDate, setRescheduleDate] = useState('');
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState('');
   const [copiedMeetId, setCopiedMeetId] = useState<string | null>(null);
   const [nowMs, setNowMs] = useState<number | null>(null);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(
+    null
+  );
 
   useEffect(() => {
     setNowMs(Date.now());
+    setTodayIso(getDayIso(0));
+    const tmrw = getDayIso(1);
+    setTomorrowIso(tmrw);
+    setRescheduleDate(tmrw);
+    setMounted(true);
   }, []);
 
   const activeBooking = bookings.find((b) => b.id === rescheduleId) ?? null;
@@ -131,9 +139,12 @@ export function PortalClient({
       setBookings((prev) =>
         prev.map((b) => (b.id === bookingId ? { ...b, status: 'CANCELLED' } : b))
       );
-      setFeedback('Session cancelled and slot reopened.');
+      setFeedback({ type: 'success', message: 'Session cancelled and slot reopened.' });
     } catch (err) {
-      setFeedback(err instanceof Error ? err.message : 'Action failed');
+      setFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Action failed',
+      });
     } finally {
       setBusyId(null);
     }
@@ -158,9 +169,12 @@ export function PortalClient({
       );
       setRescheduleId(null);
       setSelectedSlot('');
-      setFeedback('Session rescheduled.');
+      setFeedback({ type: 'success', message: 'Session rescheduled.' });
     } catch (err) {
-      setFeedback(err instanceof Error ? err.message : 'Reschedule failed');
+      setFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Reschedule failed',
+      });
     } finally {
       setBusyId(null);
     }
@@ -184,15 +198,32 @@ export function PortalClient({
 
   return (
     <div className="space-y-5">
+      {feedback && (
+        <div
+          role={feedback.type === 'error' ? 'alert' : 'status'}
+          className={
+            feedback.type === 'error'
+              ? 'rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-2.5 text-xs font-medium text-[#B91C1C]'
+              : 'rounded-xl border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-2.5 text-xs font-medium text-[#15803D]'
+          }
+        >
+          {feedback.message}
+        </div>
+      )}
+
       {/* Next Upcoming Session Spotlight Card */}
       {nextUpcomingBooking && (() => {
         const dt = new Date(nextUpcomingBooking.startsAtIso);
-        const dateStr = dt.toLocaleDateString('en-US', {
-          weekday: 'long',
-          month: 'short',
-          day: 'numeric',
-        });
-        const timeStr = dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const dateStr = mounted
+          ? dt.toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'short',
+              day: 'numeric',
+            })
+          : dt.toISOString().slice(0, 10);
+        const timeStr = mounted
+          ? dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : `${dt.toISOString().slice(11, 16)} UTC`;
         const timingBadge = formatRelativeTiming(nextUpcomingBooking.startsAtIso, nowMs);
 
         return (
@@ -236,7 +267,9 @@ export function PortalClient({
                     className="inline-flex items-center gap-1.5 rounded-xl bg-[#141413] px-4 py-2.5 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
                   >
                     <Video className="h-3.5 w-3.5 text-[#4ADE80]" />
-                    Join Google Meet
+                    {nextUpcomingBooking.meetingUrl.includes('meet.google.com')
+                      ? 'Join Google Meet'
+                      : 'Join Video Call'}
                   </a>
                 )}
                 <button
@@ -259,7 +292,7 @@ export function PortalClient({
                     downloadSessionIcs({
                       title: nextUpcomingBooking.serviceName,
                       description: nextUpcomingBooking.note || `Session with ${proName}`,
-                      location: nextUpcomingBooking.meetingUrl || 'Google Meet',
+                      location: nextUpcomingBooking.meetingUrl || 'Live Video Call',
                       startsAtIso: nextUpcomingBooking.startsAtIso,
                       durationMin: nextUpcomingBooking.durationMin,
                       filename: `slotlink-${nextUpcomingBooking.id}.ics`,
@@ -294,7 +327,7 @@ export function PortalClient({
                     <input
                       id={`spotlight-resched-date-${nextUpcomingBooking.id}`}
                       type="date"
-                      min={todayIso}
+                      min={todayIso || undefined}
                       value={rescheduleDate}
                       onChange={(e) => setRescheduleDate(e.target.value)}
                       className="surface-input rounded-lg px-2.5 py-1.5 font-mono text-xs"
@@ -481,12 +514,6 @@ export function PortalClient({
         </span>
       </div>
 
-      {feedback && (
-        <div className="rounded-xl border border-[#D5CFC0] bg-[#EFECE4] px-4 py-2.5 text-xs font-medium text-[#141413]">
-          {feedback}
-        </div>
-      )}
-
       {filteredBookings.length === 0 ? (
         <div className="surface-card rounded-2xl p-8 text-center text-xs text-[#6E685C]">
           No {viewFilter === 'UPCOMING' ? 'upcoming' : 'completed'} sessions in this view.
@@ -494,9 +521,15 @@ export function PortalClient({
       ) : (
         filteredBookings.map((b) => {
           const dt = new Date(b.startsAtIso);
-          const monthLabel = dt.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-          const dayNum = dt.toLocaleDateString('en-US', { day: '2-digit' });
-          const timeLabel = dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const monthLabel = mounted
+            ? dt.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
+            : dt.toISOString().slice(5, 7);
+          const dayNum = mounted
+            ? dt.toLocaleDateString('en-US', { day: '2-digit' })
+            : dt.toISOString().slice(8, 10);
+          const timeLabel = mounted
+            ? dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : `${dt.toISOString().slice(11, 16)} UTC`;
           const isNext = b.id === nextUpcomingId;
           const timingLabel = b.status === 'CONFIRMED' ? formatRelativeTiming(b.startsAtIso, nowMs) : null;
 
@@ -573,7 +606,9 @@ export function PortalClient({
                         className="inline-flex items-center gap-1.5 rounded-lg bg-[#141413] px-3.5 py-2 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
                       >
                         <Video className="h-3.5 w-3.5 text-[#4ADE80]" />
-                        Join Google Meet
+                        {b.meetingUrl.includes('meet.google.com')
+                          ? 'Join Google Meet'
+                          : 'Join Video Call'}
                       </a>
                       <button
                         type="button"
@@ -586,7 +621,7 @@ export function PortalClient({
                         className="inline-flex items-center gap-1 rounded-lg border border-[#CEC7B6] bg-white px-2.5 py-2 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
                       >
                         <Copy className="h-3 w-3 text-[#575248]" />
-                        {copiedMeetId === b.id ? 'Meet Copied ✓' : 'Copy Meet'}
+                        {copiedMeetId === b.id ? 'Link Copied ✓' : 'Copy Link'}
                       </button>
                     </>
                   )}
@@ -598,7 +633,7 @@ export function PortalClient({
                           downloadSessionIcs({
                             title: b.serviceName,
                             description: b.note || `Tutoring session via ${proSlug}`,
-                            location: b.meetingUrl || 'Google Meet',
+                            location: b.meetingUrl || 'Live Video Call',
                             startsAtIso: b.startsAtIso,
                             durationMin: b.durationMin,
                             filename: `slotlink-${b.id}.ics`,
@@ -654,7 +689,7 @@ export function PortalClient({
                       <input
                         id={`resched-date-${b.id}`}
                         type="date"
-                        min={todayIso}
+                        min={todayIso || undefined}
                         value={rescheduleDate}
                         onChange={(e) => setRescheduleDate(e.target.value)}
                         className="surface-input rounded-lg px-2.5 py-1.5 font-mono text-xs"

@@ -184,10 +184,10 @@ export default function LandingPage() {
                     Step 02 / Conflict Guard
                   </span>
                   <Link
-                    href="/dashboard"
+                    href="/login?mode=signup"
                     className="font-mono text-[11px] font-semibold text-[#141413] hover:text-[#D94E28]"
                   >
-                    Try Step Live →
+                    Create Studio →
                   </Link>
                 </div>
                 <h2 className="text-xl font-semibold tracking-tight text-[#141413]">
@@ -367,7 +367,7 @@ export default function LandingPage() {
               </div>
 
               <Link
-                href="/api/integrations/google/connect"
+                href="/login?mode=signup"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#141413] bg-white px-4 py-3 text-sm font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
               >
                 Start Solo Trial
@@ -412,17 +412,17 @@ export default function LandingPage() {
 
               <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                 <Link
-                  href="/api/integrations/google/connect"
+                  href="/login?mode=signup"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#F6F4EE] px-4 py-3 text-sm font-semibold text-[#141413] hover:bg-white transition"
                 >
                   Start Pro Trial
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
-                  href="/dashboard"
+                  href="/login"
                   className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm font-medium text-[#F6F4EE] hover:bg-white/10 transition"
                 >
-                  Test Pro Dashboard
+                  Tutor Sign In
                   <ArrowUpRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -469,8 +469,8 @@ export default function LandingPage() {
                 volume: '$4,200 / mo take-home',
                 summary:
                   'Replaces text-message rescheduling with automatic Google Calendar conflict blocks and practice drill links.',
-                href: '/notes/diagnostic-roadmap',
-                cta: 'Open Sample Blueprint →',
+                href: '/login?mode=signup',
+                cta: 'Launch Similar Studio →',
               },
               {
                 tag: 'GRAD PREP · GMAT & LANGUAGE',

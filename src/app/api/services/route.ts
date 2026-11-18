@@ -14,20 +14,23 @@ const CreateServiceSchema = z.object({
 
 export async function POST(req: NextRequest) {
   const authed = await getAuthenticatedPro();
+  if (!authed) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const body = await req.json().catch(() => null);
   const parsed = CreateServiceSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const targetUserId = authed?.id ?? (process.env.NODE_ENV === 'development' ? parsed.data.userId : undefined);
-  if (!targetUserId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (parsed.data.userId && parsed.data.userId !== authed.id) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const service = await prisma.service.create({
     data: {
-      userId: targetUserId,
+      userId: authed.id,
       name: parsed.data.name,
       description: parsed.data.description,
       durationMin: parsed.data.durationMin,

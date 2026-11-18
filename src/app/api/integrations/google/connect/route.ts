@@ -15,6 +15,7 @@ export async function GET() {
   store.set('google_oauth_state', signValue(csrf), {
     httpOnly: true,
     sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
     path: '/',
     maxAge: 600,
   });

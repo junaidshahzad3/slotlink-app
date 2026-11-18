@@ -1,7 +1,8 @@
+import { randomBytes } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
-import { setSessionCookie, verifySignedValue } from '@/lib/auth';
+import { getAuthenticatedPro, setSessionCookie, verifySignedValue } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code');
@@ -32,31 +33,96 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${appUrl}/dashboard?error=token_exchange`);
   }
 
-  const tokens = await tokenRes.json();
+  const tokens = await tokenRes.json().catch(() => null);
+  if (!tokens?.access_token) {
+    return NextResponse.redirect(`${appUrl}/dashboard?error=token_exchange`);
+  }
+
   const profileRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
   });
-  const profile = await profileRes.json();
-  if (!profile?.email) {
-    return NextResponse.redirect(`${appUrl}/dashboard?error=no_email`);
+  if (!profileRes.ok) {
+    return NextResponse.redirect(`${appUrl}/dashboard?error=profile_fetch`);
   }
 
-  const baseSlug = String(profile.email.split('@')[0])
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-');
+  const profile = await profileRes.json().catch(() => null);
+  if (!profile?.email || profile.verified_email !== true) {
+    return NextResponse.redirect(`${appUrl}/dashboard?error=unverified_email`);
+  }
 
-  const user = await prisma.user.upsert({
-    where: { email: profile.email.toLowerCase() },
-    update: {
-      ...(tokens.refresh_token ? { googleRefreshToken: tokens.refresh_token } : {}),
-    },
-    create: {
-      email: profile.email.toLowerCase(),
-      name: profile.name ?? 'Tutor',
-      slug: `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`,
-      googleRefreshToken: tokens.refresh_token ?? null,
-    },
-  });
+  const authed = await getAuthenticatedPro();
+  if (authed) {
+    if (tokens.refresh_token) {
+      await prisma.user.update({
+        where: { id: authed.id },
+        data: { googleRefreshToken: tokens.refresh_token },
+      });
+    }
+    return NextResponse.redirect(`${appUrl}/dashboard?connected=google`);
+  }
+
+  const normalizedEmail = String(profile.email).trim().toLowerCase();
+  const baseSlug =
+    normalizedEmail
+      .split('@')[0]
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'tutor';
+
+  let user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+  if (user) {
+    if (tokens.refresh_token) {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { googleRefreshToken: tokens.refresh_token },
+      });
+    }
+  } else {
+    user = await prisma.$transaction(async (tx) => {
+      const candidateSlug = `${baseSlug}-${randomBytes(3).toString('hex')}`;
+      const created = await tx.user.create({
+        data: {
+          email: normalizedEmail,
+          name: profile.name ? String(profile.name).slice(0, 100) : 'Tutor',
+          slug: candidateSlug,
+          googleRefreshToken: tokens.refresh_token ?? null,
+          subscriptionTier: 'TRIAL',
+          workStartHour: 13,
+          workEndHour: 20,
+        },
+      });
+
+      await tx.service.createMany({
+        data: [
+          {
+            userId: created.id,
+            name: '15m Intro Call',
+            description: 'Free goal & level check',
+            durationMin: 15,
+            priceCents: 0,
+            packageHrs: 0,
+          },
+          {
+            userId: created.id,
+            name: '1-on-1 Session',
+            description: '60-minute private session',
+            durationMin: 60,
+            priceCents: 6000,
+            packageHrs: 1,
+          },
+          {
+            userId: created.id,
+            name: '5-Session Pack',
+            description: '5 prepaid hours · Auto-tracked in client passbook',
+            durationMin: 60,
+            priceCents: 27500,
+            packageHrs: 5,
+          },
+        ],
+      });
+
+      return created;
+    });
+  }
 
   await setSessionCookie(user.id);
   return NextResponse.redirect(`${appUrl}/dashboard?connected=google`);

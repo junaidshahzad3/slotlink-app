@@ -5,7 +5,15 @@ import { prisma } from './prisma';
 const COOKIE_NAME = 'slotlink_session';
 
 function getSecret(): string {
-  return process.env.AUTH_SECRET ?? 'dev-insecure-secret-change-in-prod';
+  const secret = process.env.AUTH_SECRET?.trim();
+  const isProd = process.env.NODE_ENV === 'production';
+  if (!secret || secret === 'dev-insecure-secret-change-in-prod' || secret.startsWith('replace-')) {
+    if (isProd) {
+      throw new Error('AUTH_SECRET must be set to a strong secret in production.');
+    }
+    return 'dev-insecure-secret-change-in-prod';
+  }
+  return secret;
 }
 
 export function signValue(payload: string): string {

@@ -11,7 +11,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'slug and valid date (YYYY-MM-DD) are required' }, { status: 400 });
   }
 
-  const safeDurationMin = Number.isFinite(durationMin) && durationMin > 0 ? durationMin : 60;
+  const rawDuration = Number.isFinite(durationMin) && durationMin > 0 ? Math.floor(durationMin) : 60;
+  const safeDurationMin = Math.min(240, Math.max(10, rawDuration));
 
   const pro = await prisma.user.findUnique({ where: { slug } });
   if (!pro) return NextResponse.json({ error: 'Portal not found' }, { status: 404 });
@@ -20,7 +21,7 @@ export async function GET(req: NextRequest) {
   if (Number.isNaN(dayStart.getTime())) {
     return NextResponse.json({ error: 'Invalid date' }, { status: 400 });
   }
-  const dayEnd = new Date(`${dateStr}T23:59:59.999Z`);
+  const dayEnd = new Date(dayStart.getTime() + 24 * 3_600_000);
   const workEnd = new Date(dayStart.getTime() + pro.workEndHour * 3_600_000);
 
   const [dbBookings, gcalBusy] = await Promise.all([
@@ -28,7 +29,8 @@ export async function GET(req: NextRequest) {
       where: {
         userId: pro.id,
         status: 'CONFIRMED',
-        startsAt: { gte: dayStart, lte: dayEnd },
+        startsAt: { lt: dayEnd },
+        endsAt: { gt: dayStart },
       },
       select: { startsAt: true, endsAt: true },
     }),

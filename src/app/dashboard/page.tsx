@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { ArrowUpRight, Calendar } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 import { getAuthenticatedPro } from '@/lib/auth';
@@ -11,73 +12,18 @@ export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
   const authed = await getAuthenticatedPro();
-  const pro = authed
-    ? await prisma.user.findUnique({
-        where: { id: authed.id },
-        include: {
-          services: true,
-          students: { orderBy: { createdAt: 'desc' } },
-          bookings: { include: { student: true, service: true }, orderBy: { startsAt: 'asc' } },
-        },
-      })
-    : await prisma.user.findFirst({
-        include: {
-          services: true,
-          students: { orderBy: { createdAt: 'desc' } },
-          bookings: { include: { student: true, service: true }, orderBy: { startsAt: 'asc' } },
-        },
-      });
+  if (!authed) redirect('/login');
 
-  if (!pro) {
-    return (
-      <div className="min-h-screen bg-[#F6F4EE] text-[#141413]">
-        <header className="sticky top-0 z-40 border-b border-[#DCD6C8] bg-[#F6F4EE]/95 backdrop-blur-md">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-            <Link href="/" className="flex items-center gap-2.5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[#141413] font-mono text-xs font-semibold text-[#F6F4EE]">
-                SL
-              </span>
-              <span className="text-base font-semibold tracking-tight text-[#141413]">
-                SlotLink Studio
-              </span>
-            </Link>
-            <Link
-              href="/login?mode=signup"
-              className="rounded-lg bg-[#141413] px-3.5 py-2 text-xs font-semibold text-[#F6F4EE] hover:bg-[#D94E28] transition"
-            >
-              Create Studio
-            </Link>
-          </div>
-        </header>
-        <main className="mx-auto max-w-2xl px-4 py-16">
-          <div className="surface-card rounded-2xl p-8 space-y-4">
-            <span className="font-mono text-[11px] uppercase tracking-widest text-[#D94E28]">
-              Studio Setup
-            </span>
-            <h1 className="font-serif text-3xl text-[#141413]">Welcome to SlotLink Studio</h1>
-            <p className="text-sm text-[#575248]">
-              Create your studio profile in 60 seconds or connect Google Calendar to start
-              accepting bookings.
-            </p>
-            <div className="flex flex-wrap gap-2.5">
-              <Link
-                href="/login?mode=signup"
-                className="inline-block rounded-lg bg-[#141413] px-4 py-2.5 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
-              >
-                Create Your Studio
-              </Link>
-              <a
-                href="/api/integrations/google/connect"
-                className="inline-block rounded-lg border border-[#CEC7B6] bg-white px-4 py-2.5 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
-              >
-                Connect Google Calendar
-              </a>
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
+  const pro = await prisma.user.findUnique({
+    where: { id: authed.id },
+    include: {
+      services: { orderBy: { priceCents: 'asc' } },
+      students: { orderBy: { createdAt: 'desc' } },
+      bookings: { include: { student: true, service: true }, orderBy: { startsAt: 'asc' } },
+    },
+  });
+
+  if (!pro) redirect('/login');
 
   return (
     <div className="min-h-screen bg-[#F6F4EE] text-[#141413]">
@@ -118,6 +64,7 @@ export default async function DashboardPage() {
               userId={pro.id}
               priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_PRO ?? 'pri_pro_19'}
               label="Upgrade ($19/mo)"
+              currentTier={pro.subscriptionTier}
             />
             <SignOutButton />
           </div>

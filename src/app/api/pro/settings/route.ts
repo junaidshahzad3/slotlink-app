@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getAuthenticatedPro } from '@/lib/auth';
+import { canUseSmsReminders } from '@/lib/plan-limits';
 
 const RESERVED_SLUGS = new Set([
   'dashboard',
@@ -30,7 +31,7 @@ const SettingsSchema = z.object({
 
 export async function PATCH(req: NextRequest) {
   const authed = await getAuthenticatedPro();
-  if (!authed && process.env.NODE_ENV !== 'development') {
+  if (!authed) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -47,7 +48,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   const { userId, ...data } = parsed.data;
-  if (authed && authed.id !== userId) {
+  if (authed.id !== userId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -59,11 +60,36 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Work end hour must be after start hour' }, { status: 400 });
   }
 
+  if (data.smsEnabled && !canUseSmsReminders(authed.subscriptionTier)) {
+    return NextResponse.json(
+      { error: 'SMS reminders require a Pro ($19/mo) subscription.' },
+      { status: 403 }
+    );
+  }
+
   const slugOwner = await prisma.user.findUnique({ where: { slug: data.slug } });
   if (slugOwner && slugOwner.id !== userId) {
     return NextResponse.json({ error: 'Slug is already taken' }, { status: 409 });
   }
 
-  const user = await prisma.user.update({ where: { id: userId }, data });
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      slug: true,
+      tagline: true,
+      bio: true,
+      timezone: true,
+      workStartHour: true,
+      workEndHour: true,
+      smsEnabled: true,
+      upfrontPay: true,
+      subscriptionTier: true,
+      paddleSubStatus: true,
+    },
+  });
   return NextResponse.json({ user });
 }
