@@ -66,6 +66,20 @@ function getInitials(name: string): string {
     .join('');
 }
 
+function formatSessionDate(iso: string): string {
+  const d = new Date(iso);
+  const datePart = d.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+  const timePart = d.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  return `${datePart} · ${timePart}`;
+}
+
 function getStatusBadgeClass(status: string): string {
   if (status === 'CONFIRMED') {
     return 'border-[#BBF7D0] bg-[#DCFCE7] text-[#15803D]';
@@ -100,7 +114,7 @@ export function DashboardClient({
   };
 }) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'overview' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'schedule' | 'clients' | 'settings'>('schedule');
   const [queueView, setQueueView] = useState<'list' | 'grid'>('list');
   const [gridAnchorMs, setGridAnchorMs] = useState<number | null>(null);
   const [bookings, setBookings] = useState(initialBookings);
@@ -183,6 +197,7 @@ export function DashboardClient({
   }
 
   function openCompleteDrawer(bookingId: string) {
+    setActiveTab('schedule');
     setQueueView('list');
     setFilter('ALL');
     setSearchQuery('');
@@ -423,22 +438,43 @@ export function DashboardClient({
 
   return (
     <div className="space-y-6">
-      {/* Top View Switcher */}
+      {/* 3-Tab Focused Workspace Switcher */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DCD6C8] pb-4">
-        <div className="inline-flex gap-1 rounded-xl border border-[#DCD6C8] bg-[#EFECE4] p-1 text-xs font-semibold">
+        <div
+          role="tablist"
+          aria-label="Studio Workspace Sections"
+          className="inline-flex flex-wrap gap-1 rounded-xl border border-[#DCD6C8] bg-[#EFECE4] p-1 text-xs font-semibold"
+        >
           <button
             type="button"
-            onClick={() => setActiveTab('overview')}
+            role="tab"
+            aria-selected={activeTab === 'schedule'}
+            onClick={() => setActiveTab('schedule')}
             className={`rounded-lg px-3.5 py-1.5 transition ${
-              activeTab === 'overview'
+              activeTab === 'schedule'
                 ? 'bg-[#141413] text-[#F6F4EE] shadow-sm'
                 : 'text-[#575248] hover:text-[#141413]'
             }`}
           >
-            Overview &amp; Queue
+            Schedule &amp; Queue ({confirmedBookings.length})
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={activeTab === 'clients'}
+            onClick={() => setActiveTab('clients')}
+            className={`rounded-lg px-3.5 py-1.5 transition ${
+              activeTab === 'clients'
+                ? 'bg-[#141413] text-[#F6F4EE] shadow-sm'
+                : 'text-[#575248] hover:text-[#141413]'
+            }`}
+          >
+            Clients &amp; Pack Balances ({students.length})
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'settings'}
             onClick={() => setActiveTab('settings')}
             className={`rounded-lg px-3.5 py-1.5 transition ${
               activeTab === 'settings'
@@ -457,8 +493,53 @@ export function DashboardClient({
         )}
       </div>
 
-      {activeTab === 'overview' ? (
+      {activeTab === 'schedule' ? (
         <>
+          {/* Studio Quick-Start Launch Bar for New or Empty Studios */}
+          {(bookings.length === 0 || students.length === 0) && (
+            <div className="surface-card rounded-2xl border border-[#E5C6BE] bg-[#FDF2EF]/70 p-4 sm:p-5 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
+                    Studio Quick-Start Checklist
+                  </div>
+                  <p className="text-xs text-[#575248] mt-0.5">
+                    Complete these 3 steps to accept your first paid session or pack booking.
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(`${window.location.origin}/${settings.slug}`);
+                    notify(`Copied ${window.location.origin}/${settings.slug}`);
+                  }}
+                  className="flex items-center justify-between rounded-xl border border-[#DCD6C8] bg-white px-3.5 py-2.5 text-left text-xs font-semibold text-[#141413] hover:border-[#141413] transition"
+                >
+                  <span>1. Copy Your Public 1-Link</span>
+                  <Copy className="h-3.5 w-3.5 text-[#D94E28]" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setQuickBookOpen(true)}
+                  className="flex items-center justify-between rounded-xl border border-[#DCD6C8] bg-white px-3.5 py-2.5 text-left text-xs font-semibold text-[#141413] hover:border-[#141413] transition"
+                >
+                  <span>2. + Quick-Book First Client</span>
+                  <Plus className="h-3.5 w-3.5 text-[#15803D]" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('settings')}
+                  className="flex items-center justify-between rounded-xl border border-[#DCD6C8] bg-white px-3.5 py-2.5 text-left text-xs font-semibold text-[#141413] hover:border-[#141413] transition"
+                >
+                  <span>3. Customize Packages &amp; Hours</span>
+                  <ArrowUpRight className="h-3.5 w-3.5 text-[#575248]" />
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* 4-Card Executive Bento Row */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
             {/* Carbon Ink Next Up Priority Card */}
@@ -482,7 +563,7 @@ export function DashboardClient({
                     <div className="text-xs text-[#C8C2B6] mt-0.5">
                       {nextBooking.serviceName} ·{' '}
                       <span className="font-mono">
-                        {new Date(nextBooking.startsAtIso).toLocaleString()}
+                        {formatSessionDate(nextBooking.startsAtIso)}
                       </span>
                     </div>
                     {nextBooking.note && (
@@ -914,191 +995,253 @@ export function DashboardClient({
                   No {filter === 'ALL' ? '' : `${filter.toLowerCase()} `}sessions match your filter.
                 </div>
               ) : (
-                filteredBookings.map((b) => (
-                  <div
-                    key={b.id}
-                    className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE]/55 p-4 text-xs space-y-3"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="space-y-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-sm font-semibold text-[#141413]">
-                            {b.studentName}
-                          </span>
-                          <span className="text-[#575248]">· {b.serviceName}</span>
-                          <span
-                            className={`rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase ${getStatusBadgeClass(
-                              b.status
-                            )}`}
-                          >
-                            {b.status}
-                          </span>
-                        </div>
-                        <div className="font-mono text-[#6E685C]">
-                          {new Date(b.startsAtIso).toLocaleString()}
-                        </div>
-                        {b.note && (
-                          <div className="text-[#141413]">
-                            <span className="font-mono text-[#6E685C]">Topic: </span>
-                            {b.note}
-                          </div>
-                        )}
-                        {(b.sessionSummary || b.homeworkUrl) && (
-                          <div className="flex flex-wrap items-center gap-2 pt-0.5 text-[#141413]">
-                            {b.sessionSummary && (
-                              <span>
-                                <span className="font-mono text-[#6E685C]">Summary: </span>
-                                {b.sessionSummary}
+                filteredBookings.map((b) => {
+                  const studentRecord = students.find((st) => st.id === b.studentId);
+                  return (
+                    <div
+                      key={b.id}
+                      className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE]/55 p-4 text-xs space-y-3"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-sm font-semibold text-[#141413]">
+                              {b.studentName}
+                            </span>
+                            <span className="text-[#575248]">· {b.serviceName}</span>
+                            <span
+                              className={`rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase ${getStatusBadgeClass(
+                                b.status
+                              )}`}
+                            >
+                              {b.status}
+                            </span>
+                            {studentRecord && (
+                              <span
+                                className={`rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold ${
+                                  studentRecord.hoursRemaining <= 1
+                                    ? 'border-[#FDE68A] bg-[#FEF3C7] text-[#B45309]'
+                                    : 'border-[#BBF7D0] bg-[#DCFCE7] text-[#15803D]'
+                                }`}
+                              >
+                                {studentRecord.hoursRemaining} hrs left
                               </span>
                             )}
-                            {b.homeworkUrl && (() => {
-                              const resolved = resolveHomeworkHref(b.homeworkUrl);
-                              if (!resolved.href) return null;
-                              return resolved.isInternal ? (
-                                <Link
-                                  href={resolved.href}
-                                  className="inline-flex items-center gap-1 rounded border border-[#CEC7B6] bg-white px-2 py-0.5 font-mono text-[11px] font-semibold text-[#D94E28] hover:border-[#141413] transition"
-                                >
-                                  <FileText className="h-3 w-3" />
-                                  Open Study Sheet
-                                </Link>
-                              ) : (
-                                <a
-                                  href={resolved.href}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="inline-flex items-center gap-1 rounded border border-[#CEC7B6] bg-white px-2 py-0.5 font-mono text-[11px] font-semibold text-[#D94E28] hover:bg-[#EFECE4]"
-                                >
-                                  <FileText className="h-3 w-3" />
-                                  Homework Link
-                                </a>
-                              );
-                            })()}
                           </div>
-                        )}
+                          <div className="flex flex-wrap items-center gap-2.5 font-mono text-[#6E685C]">
+                            <span>{formatSessionDate(b.startsAtIso)}</span>
+                            {studentRecord && (
+                              <Link
+                                href={`/p/${studentRecord.magicToken}`}
+                                className="inline-flex items-center gap-0.5 font-semibold text-[#D94E28] hover:underline"
+                              >
+                                Passbook
+                                <ArrowUpRight className="h-3 w-3" />
+                              </Link>
+                            )}
+                          </div>
+                          {b.note && (
+                            <div className="text-[#141413]">
+                              <span className="font-mono text-[#6E685C]">Topic: </span>
+                              {b.note}
+                            </div>
+                          )}
+                          {(b.sessionSummary || b.homeworkUrl) && (
+                            <div className="flex flex-wrap items-center gap-2 pt-0.5 text-[#141413]">
+                              {b.sessionSummary && (
+                                <span>
+                                  <span className="font-mono text-[#6E685C]">Summary: </span>
+                                  {b.sessionSummary}
+                                </span>
+                              )}
+                              {b.homeworkUrl && (() => {
+                                const resolved = resolveHomeworkHref(b.homeworkUrl);
+                                if (!resolved.href) return null;
+                                return resolved.isInternal ? (
+                                  <Link
+                                    href={resolved.href}
+                                    className="inline-flex items-center gap-1 rounded border border-[#CEC7B6] bg-white px-2 py-0.5 font-mono text-[11px] font-semibold text-[#D94E28] hover:border-[#141413] transition"
+                                  >
+                                    <FileText className="h-3 w-3" />
+                                    Open Study Sheet
+                                  </Link>
+                                ) : (
+                                  <a
+                                    href={resolved.href}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-1 rounded border border-[#CEC7B6] bg-white px-2 py-0.5 font-mono text-[11px] font-semibold text-[#D94E28] hover:bg-[#EFECE4]"
+                                  >
+                                    <FileText className="h-3 w-3" />
+                                    Homework Link
+                                  </a>
+                                );
+                              })()}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          {b.meetingUrl && b.status === 'CONFIRMED' && (
+                            <a
+                              href={b.meetingUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-[#CEC7B6] bg-white px-3 py-1.5 font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
+                            >
+                              <Video className="h-3.5 w-3.5 text-[#15803D]" />
+                              Join Call
+                            </a>
+                          )}
+                          {b.status === 'CONFIRMED' && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setCompletingId(completingId === b.id ? null : b.id)
+                                }
+                                className="rounded-lg bg-[#141413] px-3 py-1.5 font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
+                              >
+                                Mark Done
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => updateBooking(b.id, 'CANCELLED')}
+                                className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-3 py-1.5 font-semibold text-[#B91C1C] hover:bg-[#FEE2E2] transition"
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2">
-                        {b.meetingUrl && b.status === 'CONFIRMED' && (
-                          <a
-                            href={b.meetingUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-[#CEC7B6] bg-white px-3 py-1.5 font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
-                          >
-                            <Video className="h-3.5 w-3.5 text-[#15803D]" />
-                            Join Call
-                          </a>
-                        )}
-                        {b.status === 'CONFIRMED' && (
-                          <>
+                      {completingId === b.id && (
+                        <div className="surface-elevated rounded-xl p-4 space-y-3">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#575248] mr-1">
+                                Templates:
+                              </span>
+                              {TAKEAWAY_PRESETS.map((preset) => (
+                                <button
+                                  key={preset.label}
+                                  type="button"
+                                  onClick={() => {
+                                    setSummaryNote(preset.summary);
+                                  }}
+                                  className="inline-flex items-center gap-1 rounded-md border border-[#CEC7B6] bg-white px-2.5 py-1 font-mono text-[11px] text-[#141413] hover:border-[#D94E28] hover:text-[#D94E28] transition"
+                                >
+                                  <Sparkles className="h-3 w-3 text-[#D94E28]" />
+                                  {preset.label}
+                                </button>
+                              ))}
+                            </div>
                             <button
                               type="button"
-                              onClick={() =>
-                                setCompletingId(completingId === b.id ? null : b.id)
-                              }
-                              className="rounded-lg bg-[#141413] px-3 py-1.5 font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
+                              onClick={() => setCompletingId(null)}
+                              className="inline-flex items-center gap-1 text-xs font-medium text-[#575248] hover:text-[#141413]"
                             >
-                              Mark Done
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => updateBooking(b.id, 'CANCELLED')}
-                              className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-3 py-1.5 font-semibold text-[#B91C1C] hover:bg-[#FEE2E2] transition"
-                            >
+                              <X className="h-3.5 w-3.5" />
                               Cancel
                             </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                          </div>
 
-                    {completingId === b.id && (
-                      <div className="surface-elevated rounded-xl p-4 space-y-3">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#575248] mr-1">
-                              Templates:
-                            </span>
-                            {TAKEAWAY_PRESETS.map((preset) => (
-                              <button
-                                key={preset.label}
-                                type="button"
-                                onClick={() => {
-                                  setSummaryNote(preset.summary);
-                                }}
-                                className="inline-flex items-center gap-1 rounded-md border border-[#CEC7B6] bg-white px-2.5 py-1 font-mono text-[11px] text-[#141413] hover:border-[#D94E28] hover:text-[#D94E28] transition"
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 items-end">
+                            <div>
+                              <label
+                                htmlFor={`summary-${b.id}`}
+                                className="block text-[11px] font-medium text-[#575248] mb-1"
                               >
-                                <Sparkles className="h-3 w-3 text-[#D94E28]" />
-                                {preset.label}
-                              </button>
-                            ))}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setCompletingId(null)}
-                            className="inline-flex items-center gap-1 text-xs font-medium text-[#575248] hover:text-[#141413]"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                            Cancel
-                          </button>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 items-end">
-                          <div>
-                            <label
-                              htmlFor={`summary-${b.id}`}
-                              className="block text-[11px] font-medium text-[#575248] mb-1"
+                                Session Takeaways
+                              </label>
+                              <input
+                                id={`summary-${b.id}`}
+                                type="text"
+                                placeholder="What you covered (optional)"
+                                value={summaryNote}
+                                onChange={(e) => setSummaryNote(e.target.value)}
+                                className="surface-input w-full rounded-lg px-3 py-2 text-xs"
+                              />
+                            </div>
+                            <div>
+                              <label
+                                htmlFor={`hw-${b.id}`}
+                                className="block text-[11px] font-medium text-[#575248] mb-1"
+                              >
+                                Homework / PDF URL
+                              </label>
+                              <input
+                                id={`hw-${b.id}`}
+                                type="url"
+                                placeholder="https://... (optional)"
+                                value={homeworkUrl}
+                                onChange={(e) => setHomeworkUrl(e.target.value)}
+                                className="surface-input w-full rounded-lg px-3 py-2 text-xs"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => updateBooking(b.id, 'COMPLETED')}
+                              className="rounded-lg bg-[#15803D] px-3 py-2 font-semibold text-white hover:bg-[#166534] transition"
                             >
-                              Session Takeaways
-                            </label>
-                            <input
-                              id={`summary-${b.id}`}
-                              type="text"
-                              placeholder="What you covered (optional)"
-                              value={summaryNote}
-                              onChange={(e) => setSummaryNote(e.target.value)}
-                              className="surface-input w-full rounded-lg px-3 py-2 text-xs"
-                            />
+                              Confirm &amp; Deduct 1 hr
+                            </button>
                           </div>
-                          <div>
-                            <label
-                              htmlFor={`hw-${b.id}`}
-                              className="block text-[11px] font-medium text-[#575248] mb-1"
-                            >
-                              Homework / PDF URL
-                            </label>
-                            <input
-                              id={`hw-${b.id}`}
-                              type="url"
-                              placeholder="https://... (optional)"
-                              value={homeworkUrl}
-                              onChange={(e) => setHomeworkUrl(e.target.value)}
-                              className="surface-input w-full rounded-lg px-3 py-2 text-xs"
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => updateBooking(b.id, 'COMPLETED')}
-                            className="rounded-lg bg-[#15803D] px-3 py-2 font-semibold text-white hover:bg-[#166534] transition"
-                          >
-                            Confirm &amp; Deduct 1 hr
-                          </button>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                ))
+                      )}
+                    </div>
+                  );
+                })
               )}
               </div>
             )}
           </div>
+        </>
+      ) : activeTab === 'clients' ? (
+          <div className="surface-card rounded-2xl p-6 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-base font-semibold text-[#141413]">
+                  Clients &amp; Package Balances
+                </h2>
+                <p className="text-xs text-[#6E685C]">
+                  Manage active prepaid packs, copy private magic portals, or inspect client history.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('schedule');
+                  setQuickBookOpen(true);
+                }}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#D94E28] px-3 py-1.5 font-mono text-[11px] font-semibold text-white hover:bg-[#B83E1D] transition"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add / Quick-Book Client
+              </button>
+            </div>
 
-          {/* Architectural Student & Package Balances Table */}
-          <div className="surface-card rounded-2xl p-6">
-            <h2 className="text-base font-semibold text-[#141413] mb-4">
-              Students &amp; Package Balances
-            </h2>
+            {students.length === 0 ? (
+              <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-8 text-center space-y-3">
+                <p className="text-sm font-medium text-[#141413]">No clients in your ledger yet.</p>
+                <p className="text-xs text-[#6E685C]">
+                  Share your booking link or add your first client directly to start tracking pack
+                  hours.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('schedule');
+                    setQuickBookOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#141413] px-4 py-2 text-xs font-semibold text-[#F6F4EE] hover:bg-[#D94E28] transition"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Quick-Book First Client
+                </button>
+              </div>
+            ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
@@ -1281,8 +1424,8 @@ export function DashboardClient({
                 </tbody>
               </table>
             </div>
+            )}
           </div>
-        </>
       ) : (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           {/* Services & Packs */}

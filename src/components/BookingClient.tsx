@@ -88,6 +88,7 @@ export function BookingClient({
   const [submitting, setSubmitting] = useState(false);
   const [tz, setTz] = useState('Local time');
   const [reloadNonce, setReloadNonce] = useState(0);
+  const [editingPrefill, setEditingPrefill] = useState(false);
 
   const selectedService = services.find((s) => s.id === selectedServiceId);
   const usingExistingCredit = Boolean(
@@ -362,27 +363,38 @@ export function BookingClient({
 
       {prefillStudent && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-3 text-xs">
-          <span className="text-[#14532D]">
-            Booking with your{' '}
-            <span className="font-mono font-semibold">{prefillStudent.hoursRemaining}</span> prepaid
-            pack hrs
-          </span>
+          <div className="text-[#14532D]">
+            <span className="font-semibold">Welcome back, {prefillStudent.name}</span> ·{' '}
+            <span className="font-mono font-semibold">{prefillStudent.hoursRemaining}</span>{' '}
+            prepaid hrs available
+            {usingExistingCredit ? ' (1 hr auto-applied)' : ''}
+          </div>
           <a
             href={`/p/${prefillStudent.magicToken}`}
             className="font-mono text-[11px] font-semibold text-[#15803D] underline hover:text-[#14532D]"
           >
-            Back to Portal →
+            Back to Passbook →
           </a>
         </div>
       )}
 
       {/* Step 01: Session */}
       <div>
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
             01 / Select Session or Pack
           </span>
-          <span className="font-mono text-[11px] text-[#6E685C]">No account required</span>
+          <span className="rounded-full border border-[#DCD6C8] bg-[#F6F4EE] px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#141413]">
+            {selectedService
+              ? `${selectedService.name} · ${
+                  usingExistingCredit
+                    ? '1 Pack Hr'
+                    : selectedService.priceCents === 0
+                      ? 'FREE'
+                      : `$${(selectedService.priceCents / 100).toFixed(0)}`
+                }`
+              : 'No account required'}
+          </span>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {services.map((svc) => {
@@ -466,9 +478,14 @@ export function BookingClient({
       {/* Step 02: Quick 7-Day Strip + Grouped Slots + 12H/24H Toggle */}
       <div className="space-y-4 border-t border-[#EFECE4] pt-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-            02 / Choose Date &amp; Time Slot
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
+              02 / Choose Date &amp; Time Slot
+            </span>
+            <span className="rounded-full border border-[#DCD6C8] bg-[#F6F4EE] px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#141413]">
+              {formattedSlotPreview}
+            </span>
+          </div>
 
           <div className="flex items-center gap-2">
             <span className="font-mono text-[11px] text-[#6E685C]">{tz}</span>
@@ -581,44 +598,80 @@ export function BookingClient({
         )}
       </div>
 
-      {/* Step 03: Details */}
+      {/* Step 03: Details (2-Tap Compact Identity when returning via ?token=) */}
       <div className="space-y-3.5 border-t border-[#EFECE4] pt-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
             03 / Your Details
           </span>
+          <span className="rounded-full border border-[#DCD6C8] bg-[#F6F4EE] px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#141413]">
+            {step3Done ? studentName : 'Name & Email'}
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div>
-            <label htmlFor="student-name" className="mb-1 block text-xs font-medium text-[#575248]">
-              Full Name
-            </label>
-            <input
-              id="student-name"
-              type="text"
-              required
-              placeholder="Alex Rivera"
-              value={studentName}
-              onChange={(e) => setStudentName(e.target.value)}
-              className="surface-input w-full rounded-lg px-3 py-2.5 text-sm"
-            />
+        {prefillStudent && !editingPrefill ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#DCD6C8] bg-[#F6F4EE]/80 px-4 py-3 text-xs">
+            <div>
+              <div className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#15803D]">
+                Verified Passbook Identity · 2-Tap Mode
+              </div>
+              <div className="mt-0.5 font-medium text-[#141413]">
+                Booking as <span className="font-semibold">{studentName}</span> ({studentEmail})
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setEditingPrefill(true)}
+              className="rounded-lg border border-[#CEC7B6] bg-white px-2.5 py-1 font-mono text-[11px] font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
+            >
+              Edit details
+            </button>
           </div>
-          <div>
-            <label htmlFor="student-email" className="mb-1 block text-xs font-medium text-[#575248]">
-              Email for Magic Link
-            </label>
-            <input
-              id="student-email"
-              type="email"
-              required
-              placeholder="alex@example.com"
-              value={studentEmail}
-              onChange={(e) => setStudentEmail(e.target.value)}
-              className="surface-input w-full rounded-lg px-3 py-2.5 text-sm"
-            />
+        ) : (
+          <div className="space-y-3">
+            {prefillStudent && editingPrefill && (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setEditingPrefill(false)}
+                  className="font-mono text-[11px] font-semibold text-[#D94E28] hover:underline"
+                >
+                  Use compact passbook identity ✓
+                </button>
+              </div>
+            )}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label htmlFor="student-name" className="mb-1 block text-xs font-medium text-[#575248]">
+                  Full Name
+                </label>
+                <input
+                  id="student-name"
+                  type="text"
+                  required
+                  placeholder="Alex Rivera"
+                  value={studentName}
+                  onChange={(e) => setStudentName(e.target.value)}
+                  className="surface-input w-full rounded-lg px-3 py-2.5 text-sm"
+                />
+              </div>
+              <div>
+                <label htmlFor="student-email" className="mb-1 block text-xs font-medium text-[#575248]">
+                  Email for Magic Link
+                </label>
+                <input
+                  id="student-email"
+                  type="email"
+                  required
+                  placeholder="alex@example.com"
+                  value={studentEmail}
+                  onChange={(e) => setStudentEmail(e.target.value)}
+                  className="surface-input w-full rounded-lg px-3 py-2.5 text-sm"
+                />
+              </div>
+            </div>
           </div>
-        </div>
+        )}
         <div>
           <label htmlFor="booking-note" className="mb-1 block text-xs font-medium text-[#575248]">
             Session Goal or Topic (Optional)

@@ -56,9 +56,8 @@ export default async function PublicPortalPage({
 
   const highlights = [
     `${pro.services.length} session option${pro.services.length === 1 ? '' : 's'} available`,
-    '1-on-1 live Google Meet link on confirmation',
-    'Free 24-hour self-serve rescheduling via passbook',
-    'Instant prepaid package hour ledger',
+    '1-on-1 Google Meet + 24h free reschedule',
+    'Zero-login client passbook & hour ledger',
   ];
 
   return (
@@ -160,16 +159,16 @@ export default async function PublicPortalPage({
                 </div>
               </div>
 
-              {/* Client Passbook Guidance */}
-              <div className="surface-ink rounded-xl p-4 space-y-2.5">
+              {/* Client Passbook Guidance & Token Lookup */}
+              <div className="surface-ink rounded-xl p-4 space-y-3">
                 <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#A8A295]">
                   Have a Prepaid Passbook?
                 </div>
                 <p className="text-xs leading-relaxed text-[#D8D3C8]">
-                  Returning clients receive a private magic passbook link after their first booking
-                  to redeem remaining pack hours, join calls, or reschedule without a password.
+                  Returning clients receive a private magic link after their first booking to redeem
+                  remaining hours or reschedule in two taps.
                 </p>
-                {prefillStudent && (
+                {prefillStudent ? (
                   <Link
                     href={`/p/${encodeURIComponent(prefillStudent.magicToken)}`}
                     className="inline-flex items-center gap-1 rounded-lg bg-[#F6F4EE] px-3 py-1.5 text-xs font-semibold text-[#141413] hover:bg-white transition"
@@ -177,6 +176,23 @@ export default async function PublicPortalPage({
                     Back to Your Passbook
                     <ArrowUpRight className="h-3.5 w-3.5" />
                   </Link>
+                ) : (
+                  <form method="GET" action={`/${pro.slug}`} className="flex gap-1.5">
+                    <input
+                      type="text"
+                      name="token"
+                      required
+                      aria-label="Enter passbook token"
+                      placeholder="Paste token (sl_...)"
+                      className="min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-2.5 py-1.5 font-mono text-[11px] text-[#F6F4EE] placeholder-[#A8A295] focus:border-[#4ADE80] focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="shrink-0 rounded-lg bg-[#F6F4EE] px-2.5 py-1.5 font-mono text-[11px] font-semibold text-[#141413] hover:bg-white transition"
+                    >
+                      Apply
+                    </button>
+                  </form>
                 )}
               </div>
             </div>

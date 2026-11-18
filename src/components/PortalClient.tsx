@@ -79,6 +79,8 @@ export function PortalClient({
       (a, b) => new Date(a.startsAtIso).getTime() - new Date(b.startsAtIso).getTime()
     )[0]?.id ?? null;
 
+  const nextUpcomingBooking = bookings.find((b) => b.id === nextUpcomingId) ?? null;
+
   const filteredBookings = bookings.filter((b) => {
     if (viewFilter === 'UPCOMING') return b.status === 'CONFIRMED';
     if (viewFilter === 'COMPLETED') return b.status === 'COMPLETED';
@@ -182,6 +184,181 @@ export function PortalClient({
 
   return (
     <div className="space-y-5">
+      {/* Next Upcoming Session Spotlight Card */}
+      {nextUpcomingBooking && (() => {
+        const dt = new Date(nextUpcomingBooking.startsAtIso);
+        const dateStr = dt.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'short',
+          day: 'numeric',
+        });
+        const timeStr = dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const timingBadge = formatRelativeTiming(nextUpcomingBooking.startsAtIso, nowMs);
+
+        return (
+          <section
+            id="next-session-spotlight"
+            className="surface-card rounded-2xl border-2 border-[#141413] p-5 sm:p-6 space-y-4"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="space-y-1.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded bg-[#D94E28] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-white">
+                    Next Session
+                  </span>
+                  <span className="rounded-full border border-[#BBF7D0] bg-[#DCFCE7] px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#15803D]">
+                    {timingBadge}
+                  </span>
+                  <span className="font-mono text-[11px] text-[#6E685C]">
+                    · {nextUpcomingBooking.durationMin} min with {proName}
+                  </span>
+                </div>
+                <h2 className="font-serif text-2xl sm:text-3xl text-[#141413]">
+                  {nextUpcomingBooking.serviceName}
+                </h2>
+                <div className="font-mono text-xs font-semibold text-[#141413]">
+                  {dateStr} · {timeStr}
+                </div>
+                {nextUpcomingBooking.note && (
+                  <p className="text-xs text-[#575248] pt-0.5">
+                    <span className="font-mono text-[#6E685C]">Topic: </span>
+                    {nextUpcomingBooking.note}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {nextUpcomingBooking.meetingUrl && (
+                  <a
+                    href={nextUpcomingBooking.meetingUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#141413] px-4 py-2.5 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
+                  >
+                    <Video className="h-3.5 w-3.5 text-[#4ADE80]" />
+                    Join Google Meet
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (rescheduleId === nextUpcomingBooking.id) {
+                      setRescheduleId(null);
+                    } else {
+                      setRescheduleDate(tomorrowIso);
+                      setRescheduleId(nextUpcomingBooking.id);
+                    }
+                  }}
+                  className="rounded-xl border border-[#CEC7B6] bg-white px-3.5 py-2.5 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
+                >
+                  Reschedule Time
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    downloadSessionIcs({
+                      title: nextUpcomingBooking.serviceName,
+                      description: nextUpcomingBooking.note || `Session with ${proName}`,
+                      location: nextUpcomingBooking.meetingUrl || 'Google Meet',
+                      startsAtIso: nextUpcomingBooking.startsAtIso,
+                      durationMin: nextUpcomingBooking.durationMin,
+                      filename: `slotlink-${nextUpcomingBooking.id}.ics`,
+                    })
+                  }
+                  className="inline-flex items-center gap-1 rounded-xl border border-[#CEC7B6] bg-white px-3 py-2.5 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
+                >
+                  <CalendarPlus className="h-3.5 w-3.5 text-[#D94E28]" />
+                  .ics Invite
+                </button>
+                <button
+                  type="button"
+                  disabled={busyId === nextUpcomingBooking.id}
+                  onClick={() => handleCancel(nextUpcomingBooking.id)}
+                  className="rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-3 py-2.5 text-xs font-semibold text-[#B91C1C] hover:bg-[#FEE2E2] disabled:opacity-50 transition"
+                >
+                  {busyId === nextUpcomingBooking.id ? '...' : 'Cancel'}
+                </button>
+              </div>
+            </div>
+
+            {rescheduleId === nextUpcomingBooking.id && (
+              <div className="surface-elevated rounded-xl p-4 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label
+                      htmlFor={`spotlight-resched-date-${nextUpcomingBooking.id}`}
+                      className="font-mono text-[11px] uppercase tracking-wider text-[#575248]"
+                    >
+                      Pick new date:
+                    </label>
+                    <input
+                      id={`spotlight-resched-date-${nextUpcomingBooking.id}`}
+                      type="date"
+                      min={todayIso}
+                      value={rescheduleDate}
+                      onChange={(e) => setRescheduleDate(e.target.value)}
+                      className="surface-input rounded-lg px-2.5 py-1.5 font-mono text-xs"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setRescheduleId(null)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-[#CEC7B6] bg-white px-2.5 py-1.5 text-xs font-medium text-[#575248] hover:text-[#141413]"
+                    >
+                      <X className="h-3 w-3" />
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busyId === nextUpcomingBooking.id || !selectedSlot}
+                      onClick={() => handleReschedule(nextUpcomingBooking.id)}
+                      className="rounded-lg bg-[#141413] px-3.5 py-1.5 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] disabled:opacity-40 transition"
+                    >
+                      Save New Time
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                  {loadingSlots ? (
+                    <span className="col-span-full font-mono text-xs text-[#6E685C]">
+                      Checking slots...
+                    </span>
+                  ) : availableSlots.length === 0 ? (
+                    <span className="col-span-full text-xs text-[#575248]">
+                      No open slots on this date — pick another day.
+                    </span>
+                  ) : (
+                    availableSlots.map((iso) => {
+                      const label = new Date(iso).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      });
+                      const active = selectedSlot === iso;
+                      return (
+                        <button
+                          key={iso}
+                          type="button"
+                          onClick={() => setSelectedSlot(iso)}
+                          className={`rounded-lg border px-2 py-1.5 font-mono text-[11px] font-medium transition ${
+                            active
+                              ? 'border-[#141413] bg-[#141413] text-[#F6F4EE] font-semibold'
+                              : 'border-[#CEC7B6] bg-white text-[#141413] hover:bg-[#F6F4EE]'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
+        );
+      })()}
+
       {/* Study Vault & Homework Archive Shelf */}
       {vaultItems.length > 0 && (
         <section className="surface-card rounded-2xl p-4 sm:p-5 space-y-3">
@@ -440,6 +617,11 @@ export function PortalClient({
                           } else {
                             setRescheduleDate(tomorrowIso);
                             setRescheduleId(b.id);
+                            if (isNext) {
+                              document
+                                .getElementById('next-session-spotlight')
+                                ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
                           }
                         }}
                         className="rounded-lg border border-[#CEC7B6] bg-white px-3 py-2 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
@@ -459,7 +641,7 @@ export function PortalClient({
                 </div>
               </div>
 
-              {rescheduleId === b.id && (
+              {rescheduleId === b.id && !isNext && (
                 <div className="surface-elevated rounded-xl p-4 space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
