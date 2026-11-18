@@ -12,6 +12,7 @@ import {
   WorkflowComparisonScrubber,
 } from '@/components/ScrollJourneySection';
 import { ScrollAmbient3DObjects } from '@/components/StudioVectorScene';
+import { LandingVersionShowcase } from '@/components/LandingVersionShowcase';
 
 const COMPARISON_ROWS = [
   {
@@ -58,6 +59,7 @@ export default function LandingPage() {
       <ScrollAmbient3DObjects />
       <AppTopBar badge="SOLO EDUCATOR OS" />
 
+      <LandingVersionShowcase>
       {/* Full-Viewport Editorial Split Hero */}
       <section className="relative z-10 border-b border-[#DCD6C8] bg-editorial-mesh/95 min-h-[calc(100dvh-4.5rem)] flex items-center">
         <div className="viewport-container py-[clamp(2.5rem,6vh,5rem)]">
@@ -577,7 +579,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-[#DCD6C8] bg-white">
+      <footer className="relative z-10 border-t border-[#DCD6C8] bg-white pb-20">
         <div className="viewport-container flex flex-wrap items-center justify-between gap-4 py-6 text-xs text-[#6E685C]">
           <div className="flex items-center gap-2">
             <span className="font-mono font-semibold text-[#141413]">SlotLink</span>
@@ -596,6 +598,7 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+      </LandingVersionShowcase>
     </div>
   );
 }
