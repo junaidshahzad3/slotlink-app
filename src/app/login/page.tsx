@@ -3,8 +3,13 @@ import { LoginClient } from '@/components/LoginClient';
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ notice?: string }>;
+  searchParams: Promise<{ notice?: string; mode?: string }>;
 }) {
-  const { notice } = await searchParams;
-  return <LoginClient notice={notice} />;
+  const { notice, mode } = await searchParams;
+  return (
+    <LoginClient
+      notice={notice}
+      initialMode={mode === 'signup' ? 'signup' : 'signin'}
+    />
+  );
 }

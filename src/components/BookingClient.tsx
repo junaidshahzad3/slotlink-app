@@ -5,57 +5,12 @@ import {
   CalendarCheck2,
   CalendarPlus,
   Check,
-  ChevronDown,
-  ChevronUp,
   Clock,
   Copy,
   RotateCcw,
-  Sparkles,
-  Target,
-  TrendingUp,
 } from 'lucide-react';
 import { downloadSessionIcs } from '@/lib/ics';
 import type { PrefillStudentDTO, ServiceDTO } from '@/types/domain';
-
-interface DiagnosticQuestion {
-  id: string;
-  topic: string;
-  prompt: string;
-  options: { id: string; label: string; correct: boolean }[];
-}
-
-const DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = [
-  {
-    id: 'q1',
-    topic: 'Quadratics Vertex',
-    prompt: 'What is the vertex x-coordinate of f(x) = 2(x - 4)² + 7?',
-    options: [
-      { id: 'a', label: 'x = -4', correct: false },
-      { id: 'b', label: 'x = 4', correct: true },
-      { id: 'c', label: 'x = 7', correct: false },
-    ],
-  },
-  {
-    id: 'q2',
-    topic: 'System Discriminant',
-    prompt: 'When does ax² + bx + c = 0 have zero real solutions?',
-    options: [
-      { id: 'a', label: 'b² - 4ac < 0', correct: true },
-      { id: 'b', label: 'b² - 4ac = 0', correct: false },
-      { id: 'c', label: 'b² - 4ac > 0', correct: false },
-    ],
-  },
-  {
-    id: 'q3',
-    topic: 'Rate of Change',
-    prompt: 'If 3x + 2y = 18 represents a line, what is its slope?',
-    options: [
-      { id: 'a', label: '-3/2', correct: true },
-      { id: 'b', label: '3/2', correct: false },
-      { id: 'c', label: '9', correct: false },
-    ],
-  },
-];
 
 interface SlotGroup {
   label: string;
@@ -133,67 +88,12 @@ export function BookingClient({
   const [submitting, setSubmitting] = useState(false);
   const [tz, setTz] = useState('Local time');
   const [reloadNonce, setReloadNonce] = useState(0);
-  const [diagOpen, setDiagOpen] = useState(false);
-  const [diagAnswers, setDiagAnswers] = useState<Record<string, string>>({});
-  const [diagAttached, setDiagAttached] = useState(false);
 
   const selectedService = services.find((s) => s.id === selectedServiceId);
   const usingExistingCredit = Boolean(
     prefillStudent && prefillStudent.hoursRemaining > 0 && selectedService?.packageHrs === 1
   );
   const groupedSlots = useMemo(() => groupSlotsByTimeOfDay(openSlots), [openSlots]);
-
-  const diagMetrics = useMemo(() => {
-    const answeredCount = Object.keys(diagAnswers).length;
-    if (answeredCount === 0) {
-      return {
-        answeredCount: 0,
-        baseline: 620,
-        projected: 750,
-        lift: 130,
-        weakTopic: 'Quadratics & Discriminant Systems',
-      };
-    }
-    let correct = 0;
-    const missedTopics: string[] = [];
-    for (const q of DIAGNOSTIC_QUESTIONS) {
-      const picked = diagAnswers[q.id];
-      const match = q.options.find((o) => o.id === picked);
-      if (match?.correct) {
-        correct += 1;
-      } else {
-        missedTopics.push(q.topic);
-      }
-    }
-    const baseline = correct === 3 ? 690 : correct === 2 ? 640 : correct === 1 ? 620 : 580;
-    const lift = correct === 3 ? 90 : correct === 2 ? 110 : 130;
-    const weakTopic =
-      missedTopics.length > 0
-        ? `${missedTopics.slice(0, 2).join(' & ')} Systems`
-        : 'Timed Pacing & Edge Cases';
-    return {
-      answeredCount,
-      baseline,
-      projected: Math.min(800, baseline + lift),
-      lift,
-      weakTopic,
-    };
-  }, [diagAnswers]);
-
-  function simulateDiagnostic() {
-    setDiagAnswers({ q1: 'a', q2: 'a', q3: 'b' });
-    setDiagOpen(true);
-    setDiagAttached(false);
-  }
-
-  function attachDiagnosticToBooking() {
-    const packSvc = services.find((s) => s.packageHrs > 1) ?? services[0];
-    if (packSvc) setSelectedServiceId(packSvc.id);
-    setNote(
-      `[Diagnostic: ${diagMetrics.baseline} -> ${diagMetrics.projected} Target (+${diagMetrics.lift} pts)] Priority focus: ${diagMetrics.weakTopic}`
-    );
-    setDiagAttached(true);
-  }
 
   useEffect(() => {
     try {
@@ -227,13 +127,6 @@ export function BookingClient({
       active = false;
     };
   }, [proSlug, selectedDate, selectedService?.durationMin, reloadNonce]);
-
-  function fillDemoStudent() {
-    setStudentName('Jordan Lee');
-    setStudentEmail('jordan.lee@example.com');
-    setNote('SAT Algebra & linear systems review');
-    setError(null);
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -483,125 +376,6 @@ export function BookingClient({
         </div>
       )}
 
-      {/* Pillar 1: 60-Second Diagnostic Lead Magnet */}
-      {!prefillStudent && (
-        <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE]/90 p-4 space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="space-y-0.5">
-              <div className="inline-flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                <Target className="h-3.5 w-3.5" />
-                60-Second Diagnostic &amp; Score Predictor
-              </div>
-              <p className="text-xs text-[#575248]">
-                Test 3 SAT Math fundamentals to estimate your baseline and target the highest-ROI
-                topics before booking.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <button
-                type="button"
-                onClick={simulateDiagnostic}
-                className="rounded-lg border border-[#CEC7B6] bg-white px-2.5 py-1.5 font-mono text-[10px] font-semibold text-[#141413] hover:border-[#D94E28] hover:text-[#D94E28] transition"
-              >
-                Simulate Diagnostic (620 → 750)
-              </button>
-              <button
-                type="button"
-                onClick={() => setDiagOpen((v) => !v)}
-                className="inline-flex items-center gap-1 rounded-lg bg-[#141413] px-2.5 py-1.5 font-mono text-[10px] font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
-              >
-                {diagOpen ? 'Hide 3 Qs' : 'Take 3-Q Check'}
-                {diagOpen ? (
-                  <ChevronUp className="h-3 w-3" />
-                ) : (
-                  <ChevronDown className="h-3 w-3" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {diagOpen && (
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 border-t border-[#DCD6C8] pt-3">
-              {DIAGNOSTIC_QUESTIONS.map((q, idx) => (
-                <div
-                  key={q.id}
-                  className="rounded-lg border border-[#DCD6C8] bg-white p-3 space-y-2 text-xs"
-                >
-                  <div className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#D94E28]">
-                    Q{idx + 1} · {q.topic}
-                  </div>
-                  <div className="font-medium text-[#141413] leading-snug">{q.prompt}</div>
-                  <div className="space-y-1">
-                    {q.options.map((opt) => {
-                      const picked = diagAnswers[q.id] === opt.id;
-                      return (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          onClick={() => {
-                            setDiagAnswers((prev) => ({ ...prev, [q.id]: opt.id }));
-                            setDiagAttached(false);
-                          }}
-                          className={`w-full rounded border px-2 py-1 text-left font-mono text-[11px] transition ${
-                            picked
-                              ? 'border-[#141413] bg-[#141413] text-[#F6F4EE] font-semibold'
-                              : 'border-[#DCD6C8] bg-[#F6F4EE]/60 text-[#141413] hover:bg-[#EFECE4]'
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#D5CFC0] bg-white px-3.5 py-2.5 text-xs">
-            <div className="flex flex-wrap items-center gap-4">
-              <div>
-                <div className="font-mono text-[9px] uppercase tracking-wider text-[#6E685C]">
-                  Baseline Estimate
-                </div>
-                <div className="font-mono text-sm font-semibold text-[#141413]">
-                  {diagMetrics.baseline} SAT Math
-                </div>
-              </div>
-              <div className="border-l border-[#EFECE4] pl-3">
-                <div className="font-mono text-[9px] uppercase tracking-wider text-[#6E685C]">
-                  Projected 5-Pack Score
-                </div>
-                <div className="inline-flex items-center gap-1 font-mono text-sm font-semibold text-[#15803D]">
-                  <TrendingUp className="h-3.5 w-3.5" />
-                  {diagMetrics.projected} · +{diagMetrics.lift} pts
-                </div>
-              </div>
-              <div className="border-l border-[#EFECE4] pl-3">
-                <div className="font-mono text-[9px] uppercase tracking-wider text-[#6E685C]">
-                  Priority Weak Topic
-                </div>
-                <div className="text-xs font-semibold text-[#141413]">{diagMetrics.weakTopic}</div>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={attachDiagnosticToBooking}
-              className={`rounded-lg px-3 py-1.5 font-mono text-[11px] font-semibold transition ${
-                diagAttached
-                  ? 'border border-[#BBF7D0] bg-[#DCFCE7] text-[#15803D]'
-                  : 'bg-[#D94E28] text-white hover:bg-[#B83E1D]'
-              }`}
-            >
-              {diagAttached
-                ? 'Attached to 5-Pack Booking ✓'
-                : 'Attach Diagnostic & Select 5-Pack'}
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Step 01: Session */}
       <div>
         <div className="mb-3 flex items-center justify-between">
@@ -807,22 +581,12 @@ export function BookingClient({
         )}
       </div>
 
-      {/* Step 03: Details + Quick Demo Autofill */}
+      {/* Step 03: Details */}
       <div className="space-y-3.5 border-t border-[#EFECE4] pt-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
             03 / Your Details
           </span>
-          {!prefillStudent && (
-            <button
-              type="button"
-              onClick={fillDemoStudent}
-              className="inline-flex items-center gap-1 rounded-full border border-[#D5CFC0] bg-[#EFECE4] px-2.5 py-1 font-mono text-[10px] font-semibold text-[#141413] hover:border-[#D94E28] hover:text-[#D94E28] transition"
-            >
-              <Sparkles className="h-3 w-3 text-[#D94E28]" />
-              Fill Demo Student (Jordan Lee)
-            </button>
-          )}
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

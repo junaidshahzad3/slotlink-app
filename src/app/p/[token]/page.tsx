@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AlertTriangle, ArrowLeft, ArrowUpRight, Plus } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
-import { AppTopBar } from '@/components/AppTopBar';
 import { PortalClient } from '@/components/PortalClient';
 
 export default async function ClientMagicPortalPage({
@@ -42,60 +41,54 @@ export default async function ClientMagicPortalPage({
     .map((n) => n[0]?.toUpperCase() ?? '')
     .join('');
 
+  const proInitials = student.user.name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((n) => n[0]?.toUpperCase() ?? '')
+    .join('');
+
   const isLowBalance = student.hoursRemaining <= 1;
+  const bookHref = `/${student.user.slug}?token=${encodeURIComponent(student.magicToken)}`;
 
   return (
-    <div className="min-h-screen bg-[#F6F4EE] text-[#141413]">
-      <AppTopBar
-        badge="MAGIC PORTAL"
-        rightSlot={
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="hidden sm:inline-flex items-center rounded-lg border border-[#DCD6C8] bg-[#EFECE4] p-0.5 font-mono text-[11px] font-semibold">
-              <Link
-                href="/p/sl_demo_alex_94a2k"
-                className={`rounded-md px-2.5 py-1 transition ${
-                  token === 'sl_demo_alex_94a2k'
-                    ? 'bg-[#141413] text-[#F6F4EE]'
-                    : 'text-[#575248] hover:text-[#141413]'
-                }`}
-              >
-                Alex (3 hrs)
-              </Link>
-              <Link
-                href="/p/sl_demo_maya_77b1x"
-                className={`rounded-md px-2.5 py-1 transition ${
-                  token === 'sl_demo_maya_77b1x'
-                    ? 'bg-[#141413] text-[#F6F4EE]'
-                    : 'text-[#575248] hover:text-[#141413]'
-                }`}
-              >
-                Maya (1 hr)
-              </Link>
+    <div className="min-h-screen bg-[#F6F4EE] text-[#141413] flex flex-col justify-between">
+      {/* White-Label Client Passbook Header */}
+      <header className="sticky top-0 z-40 border-b border-[#DCD6C8] bg-[#F6F4EE]/95 backdrop-blur-md">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#141413] font-mono text-xs font-semibold text-[#F6F4EE]">
+              {proInitials || 'SL'}
             </div>
-
-            <Link
-              href={`/${student.user.slug}?token=${encodeURIComponent(student.magicToken)}`}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#CEC7B6] bg-white px-3 py-1.5 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              {student.user.name}&apos;s Booking Page
-            </Link>
+            <div className="min-w-0">
+              <div className="truncate text-sm font-semibold text-[#141413]">
+                {student.user.name}
+              </div>
+              <div className="truncate text-xs text-[#6E685C]">{student.user.tagline}</div>
+            </div>
           </div>
-        }
-      />
 
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12 space-y-6">
+          <Link
+            href={bookHref}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#141413] px-3.5 py-2 text-xs font-semibold text-[#F6F4EE] hover:bg-[#D94E28] transition"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Book Session
+          </Link>
+        </div>
+      </header>
+
+      <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12 space-y-6">
         {/* Carbon Ink Student Passbook Header */}
         <section className="surface-ink rounded-2xl p-6 sm:p-8 space-y-6">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 font-mono text-sm font-semibold text-[#F6F4EE]">
-                {studentInitials || 'ST'}
+                {studentInitials || 'CL'}
               </div>
               <div className="space-y-1">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-[#4ADE80]">
                   <span className="live-dot h-1.5 w-1.5 rounded-full bg-[#4ADE80]" />
-                  Zero-Login Student Passbook
+                  Private Client Passbook
                 </div>
                 <h1 className="font-serif text-3xl sm:text-4xl text-[#F6F4EE]">{student.name}</h1>
                 <p className="font-mono text-xs text-[#A8A295]">{student.email}</p>
@@ -137,7 +130,7 @@ export default async function ClientMagicPortalPage({
               </div>
 
               <Link
-                href={`/${student.user.slug}?token=${encodeURIComponent(student.magicToken)}`}
+                href={bookHref}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-[#F6F4EE] px-4 py-3 text-xs font-semibold text-[#141413] hover:bg-white transition"
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -151,21 +144,24 @@ export default async function ClientMagicPortalPage({
               <div className="flex items-center gap-2.5 text-[#FEF3C7]">
                 <AlertTriangle className="h-4 w-4 shrink-0 text-[#FBBF24]" />
                 <span>
-                  <strong className="font-semibold">Low pack balance ({student.hoursRemaining} hr remaining).</strong>{' '}
-                  Grab a discounted 5-Lesson Pack to lock in weekly times before finals.
+                  <strong className="font-semibold">
+                    Low pack balance ({student.hoursRemaining} hr remaining).
+                  </strong>{' '}
+                  Book a new multi-session pack on {student.user.name}&rsquo;s studio page to keep
+                  your recurring time slot.
                 </span>
               </div>
               <Link
-                href={`/${student.user.slug}?token=${encodeURIComponent(student.magicToken)}`}
+                href={bookHref}
                 className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-[#FBBF24] px-3 py-1.5 font-mono text-[11px] font-semibold text-[#141413] hover:bg-[#FDE68A] transition"
               >
-                Top Up Pack Hours
+                Book / Renew Pack
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           )}
 
-          {/* 3-Stat Mini Strip */}
+          {/* 3-Stat Mini Strip (100% Database-Backed) */}
           <div className="grid grid-cols-3 divide-x divide-white/10 rounded-xl border border-white/10 bg-white/[0.04]">
             <div className="px-4 py-3">
               <div className="font-mono text-[10px] uppercase tracking-wider text-[#A8A295]">
@@ -198,12 +194,21 @@ export default async function ClientMagicPortalPage({
         <PortalClient
           token={token}
           proSlug={student.user.slug}
-          studentName={student.name}
-          initialHoursRemaining={student.hoursRemaining}
-          initialTotalPaidCents={student.totalPaidCents}
+          proName={student.user.name}
           initialBookings={serialized}
         />
       </main>
+
+      <footer className="border-t border-[#DCD6C8] bg-white/80 py-4 text-center text-xs text-[#6E685C]">
+        Private client portal ·{' '}
+        <Link href={bookHref} className="font-semibold text-[#141413] hover:text-[#D94E28]">
+          {student.user.name}
+        </Link>{' '}
+        · Powered by{' '}
+        <Link href="/" className="font-mono underline hover:text-[#141413]">
+          SlotLink
+        </Link>
+      </footer>
     </div>
   );
 }

@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   ArrowUpRight,
-  BarChart3,
   CalendarDays,
   ChevronDown,
   ChevronUp,
@@ -14,12 +13,9 @@ import {
   List,
   Plus,
   Search,
-  Send,
   Sparkles,
-  TrendingUp,
   Video,
   X,
-  Zap,
 } from 'lucide-react';
 import { resolveHomeworkHref } from '@/lib/notes';
 import type { BookingDTO, ServiceDTO, StudentDTO } from '@/types/domain';
@@ -38,22 +34,19 @@ const TIMEZONE_OPTIONS = [
 
 const TAKEAWAY_PRESETS = [
   {
-    label: 'SAT Math Drill',
+    label: 'Milestone Reached',
     summary:
-      'Mastered quadratic & linear system shortcuts; assign timed Section 3 accuracy drill next.',
-    homeworkUrl: 'https://slotlink.app/notes/sat-math-drill.pdf',
+      'Solid progress on core fundamentals today. Ready to advance to the next module in our upcoming session.',
   },
   {
-    label: 'AP Calc FRQ Review',
+    label: 'Practice Assigned',
     summary:
-      'Reviewed Fundamental Theorem FRQ scoring rubric and justification phrasing for free-response.',
-    homeworkUrl: 'https://slotlink.app/notes/ap-calc-frq-pack.pdf',
+      'Completed guided review; please finish 20 minutes of targeted practice before our next meeting.',
   },
   {
-    label: 'Diagnostic Roadmap',
+    label: 'Next Session Focus',
     summary:
-      'Completed baseline diagnostic & mapped a 4-week milestone plan targeting top-point gains.',
-    homeworkUrl: 'https://slotlink.app/notes/diagnostic-roadmap.pdf',
+      'Identified key areas to strengthen next time and logged a focused warm-up plan in your portal.',
   },
 ];
 
@@ -166,18 +159,6 @@ export function DashboardClient({
   const totalPoolHours = completedBookings.length + totalHours;
   const fulfillmentPct =
     totalPoolHours > 0 ? Math.round((completedBookings.length / totalPoolHours) * 100) : 0;
-  const avgHourlyRate =
-    totalPoolHours > 0 ? Math.round(totalRevenueCents / 100 / totalPoolHours) : 55;
-
-  const weeklyActivityBars = [
-    { day: 'MON', hrs: 3 },
-    { day: 'TUE', hrs: Math.max(2, confirmedBookings.length + 1) },
-    { day: 'WED', hrs: 4 },
-    { day: 'THU', hrs: Math.max(2, completedBookings.length + 1) },
-    { day: 'FRI', hrs: 3 },
-    { day: 'SAT', hrs: 2 },
-  ];
-  const maxWeeklyHrs = Math.max(...weeklyActivityBars.map((d) => d.hrs), 4);
 
   const sevenDayColumns = (() => {
     if (gridAnchorMs === null) return [];
@@ -382,25 +363,6 @@ export function DashboardClient({
       )
     );
     notify(`Added +${hours} hr${hours > 1 ? 's' : ''} (+$${(addedCents / 100).toFixed(0)})`);
-  }
-
-  function copyParentDigest(student: StudentDTO) {
-    const portalUrl =
-      typeof window !== 'undefined'
-        ? `${window.location.origin}/p/${student.magicToken}`
-        : `/p/${student.magicToken}`;
-    const completedForStudent = bookings.filter(
-      (b) => b.studentId === student.id && b.status === 'COMPLETED'
-    ).length;
-    const message = [
-      `Parent ROI Update for ${student.name}:`,
-      `• Trajectory: 580 Baseline -> 710 Current -> 760 Goal (+120 pt SAT projection)`,
-      `• Attendance & Mastery: ${completedForStudent} completed lessons · 92% drill accuracy`,
-      `• Pack Balance: ${student.hoursRemaining} hr${student.hoursRemaining === 1 ? '' : 's'} remaining`,
-      `Review notes or top up +5 hrs in 1 tap (no login): ${portalUrl}`,
-    ].join('\n');
-    navigator.clipboard?.writeText(message);
-    notify(`Copied Parent ROI Digest for ${student.name}`);
   }
 
   async function addService(e: React.FormEvent) {
@@ -620,130 +582,6 @@ export function DashboardClient({
               <p className="text-[11px] text-[#6E685C]">
                 {completedBookings.length} completed lessons · {confirmedBookings.length} upcoming
               </p>
-            </div>
-          </div>
-
-          {/* Studio Telemetry & Weekly Utilization Strip */}
-          <div className="surface-card rounded-2xl p-5 sm:p-6">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center">
-              <div className="lg:col-span-5 space-y-2">
-                <div className="inline-flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                  <BarChart3 className="h-3.5 w-3.5" />
-                  Weekly Studio Telemetry
-                </div>
-                <div className="flex flex-wrap items-baseline gap-6">
-                  <div>
-                    <div className="font-serif text-3xl text-[#141413]">${avgHourlyRate}/hr</div>
-                    <div className="font-mono text-[10px] text-[#6E685C]">
-                      AVG REALIZED RATE
-                    </div>
-                  </div>
-                  <div className="border-l border-[#DCD6C8] pl-5">
-                    <div className="font-serif text-3xl text-[#15803D]">
-                      {String(settings.workStartHour).padStart(2, '0')}–
-                      {String(settings.workEndHour).padStart(2, '0')}h
-                    </div>
-                    <div className="font-mono text-[10px] text-[#6E685C]">
-                      FREEBUSY GUARD ACTIVE
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="lg:col-span-7">
-                <div className="flex items-end justify-between gap-2.5 h-20 rounded-xl border border-[#DCD6C8] bg-[#F6F4EE]/80 px-4 py-3">
-                  {weeklyActivityBars.map((bar) => {
-                    const heightPct = Math.max(22, Math.round((bar.hrs / maxWeeklyHrs) * 100));
-                    return (
-                      <div key={bar.day} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                        <div className="w-full max-w-[34px] flex items-end justify-center h-10">
-                          <div
-                            title={`${bar.day}: ${bar.hrs} hrs`}
-                            className="w-full rounded-t-md bg-[#141413] hover:bg-[#D94E28] transition"
-                            style={{ height: `${heightPct}%` }}
-                          />
-                        </div>
-                        <span className="font-mono text-[9px] font-semibold text-[#6E685C]">
-                          {bar.day} · {bar.hrs}h
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Autonomous Renewal & Parent ROI Autopilot */}
-          <div className="surface-card rounded-2xl p-5 sm:p-6 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div className="inline-flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                  <Zap className="h-3.5 w-3.5" />
-                  Autonomous Renewal &amp; Parent ROI Autopilot
-                </div>
-                <h2 className="mt-1 text-base font-semibold text-[#141413]">
-                  Low-balance triggers &amp; 1-click Parent ROI Digest
-                </h2>
-              </div>
-              <Link
-                href="/blueprint"
-                className="font-mono text-[11px] font-semibold text-[#D94E28] hover:underline"
-              >
-                View 1.5% Autopilot Economics →
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              {(students.some((s) => s.hoursRemaining <= 2)
-                ? students.filter((s) => s.hoursRemaining <= 2)
-                : students.slice(0, 2)
-              ).map((s) => (
-                <div
-                  key={`auto-${s.id}`}
-                  className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE]/75 p-4 flex flex-col justify-between gap-3"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-[#141413]">{s.name}</span>
-                        <span
-                          className={`rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold ${
-                            s.hoursRemaining <= 1
-                              ? 'border-[#FDE68A] bg-[#FEF3C7] text-[#B45309]'
-                              : 'border-[#BBF7D0] bg-[#DCFCE7] text-[#15803D]'
-                          }`}
-                        >
-                          {s.hoursRemaining} hr{s.hoursRemaining === 1 ? '' : 's'} left
-                        </span>
-                      </div>
-                      <div className="mt-0.5 font-mono text-[11px] text-[#6E685C]">{s.email}</div>
-                    </div>
-                    <span className="inline-flex items-center gap-1 rounded-md border border-[#BBF7D0] bg-[#F0FDF4] px-2 py-0.5 font-mono text-[10px] font-semibold text-[#15803D]">
-                      <TrendingUp className="h-3 w-3" />
-                      +120 pts lift · 5-Pack Ready
-                    </span>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => copyParentDigest(s)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#CEC7B6] bg-white px-3 py-1.5 font-mono text-[11px] font-semibold text-[#141413] hover:border-[#D94E28] hover:text-[#D94E28] transition"
-                    >
-                      <Copy className="h-3 w-3" />
-                      Copy Parent ROI Digest
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => topUpStudent(s.id, 5)}
-                      className="rounded-lg bg-[#141413] px-3 py-1.5 font-mono text-[11px] font-semibold text-[#F6F4EE] hover:bg-[#D94E28] transition"
-                    >
-                      Trigger +5h Renewal ($250)
-                    </button>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
 
@@ -1188,7 +1026,6 @@ export function DashboardClient({
                                 type="button"
                                 onClick={() => {
                                   setSummaryNote(preset.summary);
-                                  setHomeworkUrl(preset.homeworkUrl);
                                 }}
                                 className="inline-flex items-center gap-1 rounded-md border border-[#CEC7B6] bg-white px-2.5 py-1 font-mono text-[11px] text-[#141413] hover:border-[#D94E28] hover:text-[#D94E28] transition"
                               >
@@ -1385,13 +1222,17 @@ export function DashboardClient({
                                   </span>
                                   <button
                                     type="button"
-                                    onClick={() =>
-                                      notify(`Renewal reminder sent to ${s.email}`)
-                                    }
+                                    onClick={() => {
+                                      const portalUrl = `${window.location.origin}/p/${s.magicToken}`;
+                                      navigator.clipboard?.writeText(
+                                        `Hi ${s.name} — quick heads-up that you have ${s.hoursRemaining} hr${s.hoursRemaining === 1 ? '' : 's'} left in your package. You can check your session notes or book your next pack anytime here: ${portalUrl}`
+                                      );
+                                      notify(`Copied renewal note for ${s.name}`);
+                                    }}
                                     className="inline-flex items-center gap-1.5 rounded-lg border border-[#CEC7B6] bg-white px-2.5 py-1 font-mono text-[11px] font-semibold text-[#141413] hover:border-[#D94E28] hover:text-[#D94E28] transition"
                                   >
-                                    <Send className="h-3 w-3 text-[#D94E28]" />
-                                    Send Renewal Ping
+                                    <Copy className="h-3 w-3 text-[#D94E28]" />
+                                    Copy Renewal Note
                                   </button>
                                 </div>
 

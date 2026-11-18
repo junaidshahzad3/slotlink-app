@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, ArrowUpRight } from 'lucide-react';
-import { AppTopBar } from '@/components/AppTopBar';
+import { ArrowLeft } from 'lucide-react';
 import { StudySheetClient } from '@/components/StudySheetClient';
 import { getStudySheet } from '@/lib/notes';
 
@@ -14,27 +13,27 @@ export default async function StudySheetPage({
 
   return (
     <div className="min-h-screen bg-[#F6F4EE] bg-grid-pattern text-[#141413]">
-      <AppTopBar
-        badge="STUDY SHEET"
-        rightSlot={
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/p/sl_demo_alex_94a2k"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#CEC7B6] bg-white px-3 py-1.5 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Student Passbook
-            </Link>
-            <Link
-              href="/dashboard"
-              className="hidden sm:inline-flex items-center gap-1 rounded-lg bg-[#141413] px-3 py-1.5 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
-            >
-              Pro Studio
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
+      {/* White-Label Study Resource Header */}
+      <header className="sticky top-0 z-40 border-b border-[#DCD6C8] bg-[#F6F4EE]/95 backdrop-blur-md">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+          <div className="min-w-0">
+            <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
+              Study Packet
+            </div>
+            <div className="truncate text-sm font-semibold text-[#141413]">
+              Prepared by {sheet.tutorName}
+            </div>
           </div>
-        }
-      />
+
+          <Link
+            href="/sarah-math"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#CEC7B6] bg-white px-3 py-1.5 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Instructor Booking Page
+          </Link>
+        </div>
+      </header>
 
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 space-y-6">
         <header className="surface-ink rounded-2xl p-6 sm:p-8 space-y-3">

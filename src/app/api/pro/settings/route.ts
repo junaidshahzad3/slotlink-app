@@ -6,6 +6,8 @@ import { getAuthenticatedPro } from '@/lib/auth';
 const RESERVED_SLUGS = new Set([
   'dashboard',
   'login',
+  'signup',
+  'notes',
   'privacy',
   'terms',
   'refund-policy',

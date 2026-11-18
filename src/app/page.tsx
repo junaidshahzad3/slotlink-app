@@ -80,24 +80,18 @@ export default function LandingPage() {
 
               <div className="flex flex-wrap items-center gap-3 pt-1">
                 <Link
-                  href="/api/integrations/google/connect"
+                  href="/login?mode=signup"
                   className="inline-flex items-center gap-2 rounded-lg bg-[#141413] px-5 py-3 text-sm font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
                 >
-                  Start 14-Day Free Trial
+                  Create Your Studio Free
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/sarah-math"
                   className="inline-flex items-center gap-2 rounded-lg border border-[#CEC7B6] bg-white px-5 py-3 text-sm font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
                 >
-                  Explore Live Demo
+                  View Sample Booking Page
                   <ArrowUpRight className="h-4 w-4 text-[#D94E28]" />
-                </Link>
-                <Link
-                  href="/blueprint"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5C6BE] bg-[#FDF2EF] px-4 py-3 font-mono text-xs font-semibold text-[#D94E28] hover:bg-[#FCE6DF] transition"
-                >
-                  Explore Business Plan 2.0 &amp; Unit Economics →
                 </Link>
               </div>
 
@@ -139,7 +133,7 @@ export default function LandingPage() {
       </section>
 
       {/* Architectural 3-Step Workflow Ledger */}
-      <section className="border-b border-[#DCD6C8] bg-white">
+      <section id="features" className="border-b border-[#DCD6C8] bg-white">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
             {/* Step 01 */}
@@ -317,7 +311,7 @@ export default function LandingPage() {
       </section>
 
       {/* Editorial Pricing Ledger */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 space-y-12">
+      <section id="pricing" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 space-y-12">
         <div>
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -545,24 +539,23 @@ export default function LandingPage() {
               Ship your own booking studio &amp; student passbook today.
             </h2>
             <p className="text-sm text-[#C8C2B6]">
-              Press <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-xs">⌘K</code>{' '}
-              anywhere to jump across the live booking flow, student portals, and Pro studio
-              dashboard.
+              Claim your handle, connect your Google Calendar, and send your first client a private
+              magic passbook in under two minutes.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Link
-              href="/sarah-math"
+              href="/login?mode=signup"
               className="inline-flex items-center gap-1.5 rounded-xl bg-[#D94E28] px-5 py-3 text-sm font-semibold text-white hover:bg-[#B83E1D] transition"
             >
-              Try 1-Link Booking
+              Create Your Studio Free
               <ArrowUpRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/p/sl_demo_alex_94a2k"
+              href="/sarah-math"
               className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-[#F6F4EE] hover:bg-white/10 transition"
             >
-              Inspect Magic Portal
+              View Sample Studio
             </Link>
           </div>
         </div>

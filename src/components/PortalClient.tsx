@@ -2,19 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   ArrowUpRight,
   BookOpenCheck,
   CalendarPlus,
-  CheckCircle2,
   Copy,
   FileText,
   FolderArchive,
-  TrendingUp,
   Video,
   X,
-  Zap,
 } from 'lucide-react';
 import { downloadSessionIcs } from '@/lib/ics';
 import { resolveHomeworkHref } from '@/lib/notes';
@@ -46,27 +42,18 @@ function formatRelativeTiming(startsAtIso: string, nowMs: number | null): string
 export function PortalClient({
   token,
   proSlug,
-  studentName = 'Student',
-  initialHoursRemaining = 3,
-  initialTotalPaidCents = 25000,
+  proName = 'your instructor',
   initialBookings,
 }: {
   token: string;
   proSlug: string;
-  studentName?: string;
-  initialHoursRemaining?: number;
-  initialTotalPaidCents?: number;
+  proName?: string;
   initialBookings: PortalBookingDTO[];
 }) {
-  const router = useRouter();
   const todayIso = getDayIso(0);
   const tomorrowIso = getDayIso(1);
 
   const [bookings, setBookings] = useState(initialBookings);
-  const [hoursRemaining, setHoursRemaining] = useState(initialHoursRemaining);
-  const [totalPaidCents, setTotalPaidCents] = useState(initialTotalPaidCents);
-  const [renewBusy, setRenewBusy] = useState(false);
-  const [renewSuccess, setRenewSuccess] = useState<string | null>(null);
   const [viewFilter, setViewFilter] = useState<'ALL' | 'UPCOMING' | 'COMPLETED'>('ALL');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rescheduleId, setRescheduleId] = useState<string | null>(null);
@@ -81,48 +68,6 @@ export function PortalClient({
   useEffect(() => {
     setNowMs(Date.now());
   }, []);
-
-  useEffect(() => {
-    setHoursRemaining(initialHoursRemaining);
-    setTotalPaidCents(initialTotalPaidCents);
-  }, [initialHoursRemaining, initialTotalPaidCents]);
-
-  async function renewPack(hours: number, priceCents: number) {
-    setRenewBusy(true);
-    setRenewSuccess(null);
-    setFeedback(null);
-    try {
-      const res = await fetch(`/api/portal/${encodeURIComponent(token)}/renew`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hours, priceCents }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        throw new Error(
-          data && typeof data.error === 'string' ? data.error : 'Could not renew pack balance.'
-        );
-      }
-      const updatedHours =
-        typeof data?.student?.hoursRemaining === 'number'
-          ? data.student.hoursRemaining
-          : hoursRemaining + hours;
-      const updatedPaid =
-        typeof data?.student?.totalPaidCents === 'number'
-          ? data.student.totalPaidCents
-          : totalPaidCents + priceCents;
-      setHoursRemaining(updatedHours);
-      setTotalPaidCents(updatedPaid);
-      setRenewSuccess(
-        `Added +${hours} hr${hours > 1 ? 's' : ''} ($${(priceCents / 100).toFixed(0)}) to ${studentName}'s passbook · New balance: ${updatedHours} hrs`
-      );
-      router.refresh();
-    } catch (err) {
-      setFeedback(err instanceof Error ? err.message : 'Renewal failed');
-    } finally {
-      setRenewBusy(false);
-    }
-  }
 
   const activeBooking = bookings.find((b) => b.id === rescheduleId) ?? null;
 
@@ -219,151 +164,24 @@ export function PortalClient({
     }
   }
 
+  if (bookings.length === 0) {
+    return (
+      <div className="surface-card rounded-2xl p-8 text-center space-y-3">
+        <p className="text-sm text-[#575248]">
+          No sessions scheduled yet with {proName}.
+        </p>
+        <Link
+          href={`/${proSlug}?token=${encodeURIComponent(token)}`}
+          className="inline-block rounded-lg bg-[#141413] px-4 py-2 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
+        >
+          Book Your First Session
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
-      {/* Parent ROI & Score Trajectory Dossier + 1-Tap Instant Pack Renewal */}
-      <section className="surface-card overflow-hidden rounded-2xl">
-        <div className="border-b border-[#DCD6C8] bg-[#EFECE4]/70 px-5 py-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="inline-flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
-              <TrendingUp className="h-3.5 w-3.5" />
-              Parent ROI &amp; Score Trajectory Dossier
-            </div>
-            <p className="text-xs text-[#575248] mt-0.5">
-              Verified tutoring progress &amp; instant zero-login hour-pack renewal for{' '}
-              <span className="font-semibold text-[#141413]">{studentName}</span>
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 font-mono text-[11px]">
-            <span className="rounded-full border border-[#BBF7D0] bg-[#DCFCE7] px-2.5 py-0.5 font-semibold text-[#15803D]">
-              92% Drill Accuracy
-            </span>
-            <span className="rounded-full border border-[#DCD6C8] bg-white px-2.5 py-0.5 font-semibold text-[#141413]">
-              100% Attendance
-            </span>
-          </div>
-        </div>
-
-        <div className="p-5 space-y-4">
-          {/* 4-Milestone Score Trajectory */}
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-            {[
-              { label: '580 Baseline', sub: 'Initial diagnostic', tone: 'text-[#575248] bg-[#F6F4EE]' },
-              { label: '650 Mid-Pack', sub: 'Session #2 mock', tone: 'text-[#141413] bg-[#F6F4EE]' },
-              { label: '710 Current', sub: '+130 pts verified', tone: 'text-[#15803D] bg-[#F0FDF4] border-[#BBF7D0]' },
-              { label: '760 Target (+180 pts)', sub: 'Finals trajectory', tone: 'text-[#D94E28] bg-[#FDF2EF] border-[#E5C6BE]' },
-            ].map((step) => (
-              <div
-                key={step.label}
-                className={`rounded-xl border border-[#DCD6C8] px-3.5 py-2.5 ${step.tone}`}
-              >
-                <div className="font-mono text-xs font-semibold">{step.label}</div>
-                <div className="mt-0.5 text-[11px] opacity-80">{step.sub}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* 1-Tap Instant Pack Renewal Autopilot Bar */}
-          <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-4 flex flex-wrap items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-[#141413]">
-                <Zap className="h-3.5 w-3.5 text-[#D94E28]" />
-                1-Tap Instant Pack Renewal Autopilot
-              </div>
-              <div className="text-xs text-[#575248]">
-                Live Ledger:{' '}
-                <strong className="font-mono text-[#141413]">{hoursRemaining} hrs remaining</strong>{' '}
-                · Total Invested:{' '}
-                <strong className="font-mono text-[#15803D]">
-                  ${(totalPaidCents / 100).toLocaleString()}
-                </strong>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                disabled={renewBusy}
-                onClick={() => renewPack(5, 25000)}
-                className="rounded-lg bg-[#D94E28] px-3.5 py-2 font-mono text-xs font-semibold text-white hover:bg-[#B83E1D] disabled:opacity-50 transition"
-              >
-                {renewBusy ? 'Renewing...' : '1-Tap Renew 5-Hour Pack ($250)'}
-              </button>
-              <button
-                type="button"
-                disabled={renewBusy}
-                onClick={() => renewPack(1, 5500)}
-                className="rounded-lg border border-[#141413] bg-white px-3 py-2 font-mono text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] disabled:opacity-50 transition"
-              >
-                +1 Hr Quick Top-Up ($55)
-              </button>
-            </div>
-          </div>
-
-          {renewSuccess && (
-            <div className="flex items-center gap-2 rounded-xl border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-2.5 text-xs font-semibold text-[#15803D]">
-              <CheckCircle2 className="h-4 w-4 shrink-0" />
-              <span>{renewSuccess}</span>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {bookings.length === 0 ? (
-        <div className="surface-card rounded-2xl p-8 text-center space-y-3">
-          <p className="text-sm text-[#575248]">No sessions scheduled yet.</p>
-          <Link
-            href={`/${proSlug}?token=${encodeURIComponent(token)}`}
-            className="inline-block rounded-lg bg-[#141413] px-4 py-2 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
-          >
-            Book Your First Session
-          </Link>
-        </div>
-      ) : (
-        <>
-          {/* Curriculum Mastery & Milestone Strip */}
-          <section className="surface-card rounded-2xl p-4 sm:p-5 space-y-3.5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
-              Curriculum Mastery &amp; Milestones
-            </div>
-            <p className="text-xs text-[#575248] mt-0.5">
-              Live topic progress synced from completed tutoring sessions
-            </p>
-          </div>
-          <Link
-            href="/notes/sat-module-2-drill"
-            className="inline-flex items-center gap-1 rounded-lg bg-[#141413] px-3 py-1.5 font-mono text-[11px] font-semibold text-[#F6F4EE] hover:bg-[#D94E28] transition"
-          >
-            Open Interactive Drill Studio →
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {[
-            { topic: 'Quadratics & Vertex Form', score: '92%', pct: 92, barClass: 'bg-[#15803D]' },
-            { topic: 'Linear Systems & Inequalities', score: '88%', pct: 88, barClass: 'bg-[#15803D]' },
-            { topic: 'Timed Section Pacing', score: 'Active', pct: 74, barClass: 'bg-[#D94E28]' },
-          ].map((m) => (
-            <div
-              key={m.topic}
-              className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE]/75 p-3.5 space-y-2"
-            >
-              <div className="flex items-center justify-between gap-2 text-xs">
-                <span className="font-semibold text-[#141413] truncate">{m.topic}</span>
-                <span className="shrink-0 font-mono text-[11px] font-semibold text-[#15803D]">
-                  {m.score}
-                </span>
-              </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#DCD6C8]">
-                <div className={`h-full rounded-full ${m.barClass}`} style={{ width: `${m.pct}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Study Vault & Homework Archive Shelf */}
       {vaultItems.length > 0 && (
         <section className="surface-card rounded-2xl p-4 sm:p-5 space-y-3">
@@ -757,8 +575,6 @@ export function PortalClient({
             </div>
           );
         })
-      )}
-        </>
       )}
     </div>
   );

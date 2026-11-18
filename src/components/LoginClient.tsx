@@ -1,63 +1,148 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
+  ArrowRight,
   ArrowUpRight,
   CalendarCheck2,
   CheckCircle2,
   KeyRound,
-  LayoutDashboard,
-  Link2,
   Sparkles,
+  UserPlus,
 } from 'lucide-react';
 import { AppTopBar } from '@/components/AppTopBar';
 
-const DEMO_TUTOR_EMAIL = 'sarah@slotlink.app';
+const SAMPLE_EDUCATOR_EMAIL = 'sarah@slotlink.app';
 
-export function LoginClient({ notice }: { notice?: string }) {
+const NICHE_PRESETS = [
+  { label: 'Piano & Music', tagline: 'Piano & Music Instructor' },
+  { label: 'Language & IELTS', tagline: 'Spanish & IELTS Coach' },
+  { label: 'Personal Fitness', tagline: 'Personal Fitness Coach' },
+  { label: 'STEM & Test Prep', tagline: 'STEM & Test Prep Tutor' },
+];
+
+function slugifyHandle(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 50);
+}
+
+export function LoginClient({
+  notice,
+  initialMode = 'signin',
+}: {
+  notice?: string;
+  initialMode?: 'signin' | 'signup';
+}) {
   const router = useRouter();
-  const [email, setEmail] = useState(DEMO_TUTOR_EMAIL);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
+
+  // Sign In state
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  // Create Studio state
+  const [name, setName] = useState('');
+  const [signupEmail, setSignupEmail] = useState('');
+  const [tagline, setTagline] = useState('');
+  const [slug, setSlug] = useState('');
+  const [slugTouched, setSlugTouched] = useState(false);
+  const [singlePriceDollars, setSinglePriceDollars] = useState('60');
+  const [packPriceDollars, setPackPriceDollars] = useState('275');
+  const [timezone, setTimezone] = useState('America/New_York');
+  const [signupError, setSignupError] = useState<string | null>(null);
+  const [signupLoading, setSignupLoading] = useState(false);
+
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
+
+  useEffect(() => {
+    try {
+      const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (detected) setTimezone(detected);
+    } catch {}
+  }, []);
+
+  function handleNameChange(value: string) {
+    setName(value);
+    if (!slugTouched) {
+      setSlug(slugifyHandle(value));
+    }
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
+    setLoginError(null);
+    setLoginLoading(true);
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: loginEmail }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Sign in failed');
+      if (!res.ok) {
+        throw new Error(typeof data.error === 'string' ? data.error : 'Sign in failed');
+      }
       router.push('/dashboard');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Sign in failed');
+      setLoginError(err instanceof Error ? err.message : 'Sign in failed');
     } finally {
-      setLoading(false);
+      setLoginLoading(false);
     }
   }
 
-  function handleQuickFillDemo() {
-    setEmail(DEMO_TUTOR_EMAIL);
-    setError(null);
+  async function handleSignup(e: React.FormEvent) {
+    e.preventDefault();
+    setSignupError(null);
+    setSignupLoading(true);
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email: signupEmail,
+          slug: slugifyHandle(slug),
+          tagline,
+          timezone,
+          singlePriceDollars: Number(singlePriceDollars) || 60,
+          packPriceDollars: Number(packPriceDollars) || 275,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(
+          typeof data.error === 'string' ? data.error : 'Could not create your studio'
+        );
+      }
+      router.push('/dashboard');
+      router.refresh();
+    } catch (err) {
+      setSignupError(err instanceof Error ? err.message : 'Could not create your studio');
+    } finally {
+      setSignupLoading(false);
+    }
   }
 
   return (
     <div className="min-h-screen bg-[#F6F4EE] bg-grid-pattern text-[#141413]">
       <AppTopBar
-        badge="PRO AUTH"
+        badge="STUDIO ACCESS"
         rightSlot={
           <Link
             href="/sarah-math"
             className="hidden sm:inline-flex items-center gap-1 rounded-lg border border-[#DCD6C8] bg-white px-3 py-1.5 text-xs font-medium text-[#141413] hover:bg-[#EFECE4] transition"
           >
-            View Live Booking Page
+            View Sample Booking Page
             <ArrowUpRight className="h-3.5 w-3.5 text-[#D94E28]" />
           </Link>
         }
@@ -66,101 +151,313 @@ export function LoginClient({ notice }: { notice?: string }) {
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
         <div className="mb-8 max-w-2xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#D5CFC0] bg-white px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-[#575248]">
-            <KeyRound className="h-3.5 w-3.5 text-[#D94E28]" />
-            Educator Access &amp; Sandbox
+            {mode === 'signup' ? (
+              <UserPlus className="h-3.5 w-3.5 text-[#D94E28]" />
+            ) : (
+              <KeyRound className="h-3.5 w-3.5 text-[#D94E28]" />
+            )}
+            {mode === 'signup' ? 'Launch In 60 Seconds' : 'Educator Studio Access'}
           </div>
           <h1 className="mt-4 font-serif text-4xl tracking-tight text-[#141413] sm:text-5xl">
-            Step into Sarah Chen&rsquo;s <span className="italic text-[#D94E28]">Pro Studio.</span>
+            {mode === 'signup' ? (
+              <>
+                Launch your private{' '}
+                <span className="italic text-[#D94E28]">booking studio.</span>
+              </>
+            ) : (
+              <>
+                Sign in to your{' '}
+                <span className="italic text-[#D94E28]">SlotLink Studio.</span>
+              </>
+            )}
           </h1>
           <p className="mt-2.5 text-sm leading-relaxed text-[#575248]">
-            Sign in with Google Calendar to sync real FreeBusy slots, or launch an instant email
-            session with the pre-seeded tutor workspace.
+            {mode === 'signup'
+              ? 'Claim your personal booking slug, configure your hourly and 5-session pack pricing, and start sharing client passbooks with zero commissions.'
+              : 'Access your upcoming lessons, mark sessions complete to update client hour packs, and manage your public booking page.'}
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+        <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
           {/* Left: Auth Card */}
           <section className="surface-card rounded-2xl p-6 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between border-b border-[#EFECE4] pb-4">
-              <div>
-                <div className="font-mono text-[10px] uppercase tracking-widest text-[#6E685C]">
-                  Session Credentials
-                </div>
-                <h2 className="mt-0.5 text-lg font-semibold text-[#141413]">Pro Sign In</h2>
+            {/* Mode Switcher */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#EFECE4] pb-4">
+              <div
+                role="tablist"
+                aria-label="Studio authentication mode"
+                className="inline-flex rounded-xl border border-[#DCD6C8] bg-[#EFECE4] p-1 text-xs font-semibold"
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={mode === 'signin'}
+                  onClick={() => setMode('signin')}
+                  className={`rounded-lg px-3.5 py-1.5 transition ${
+                    mode === 'signin'
+                      ? 'bg-[#141413] text-[#F6F4EE] shadow-sm'
+                      : 'text-[#575248] hover:text-[#141413]'
+                  }`}
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={mode === 'signup'}
+                  onClick={() => setMode('signup')}
+                  className={`rounded-lg px-3.5 py-1.5 transition ${
+                    mode === 'signup'
+                      ? 'bg-[#141413] text-[#F6F4EE] shadow-sm'
+                      : 'text-[#575248] hover:text-[#141413]'
+                  }`}
+                >
+                  Create Your Studio
+                </button>
               </div>
               <span className="rounded-full border border-[#BBF7D0] bg-[#DCFCE7] px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#15803D]">
-                14-Day Trial Ready
+                14-Day Free Trial
               </span>
             </div>
 
             {notice === 'google_unconfigured' && (
               <div className="rounded-xl border border-[#FDE68A] bg-[#FEF3C7] p-3.5 text-xs text-[#92400E] leading-relaxed">
                 Google Calendar OAuth credentials are not configured in{' '}
-                <code className="font-mono font-semibold">.env</code> yet. Use the quick-fill demo
-                account (<code className="font-mono font-semibold">{DEMO_TUTOR_EMAIL}</code>) below to
-                inspect the full Pro Dashboard immediately.
+                <code className="font-mono font-semibold">.env</code> yet. You can create a new
+                studio in the <strong>Create Your Studio</strong> tab or sign in with your studio
+                email below.
               </div>
             )}
 
-            <a
-              href="/api/integrations/google/connect"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#141413] px-4 py-3 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
-            >
-              <CalendarCheck2 className="h-4 w-4 text-[#F3B09A]" />
-              Continue with Google Calendar
-            </a>
+            {mode === 'signup' ? (
+              <form onSubmit={handleSignup} className="space-y-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="signup-name"
+                      className="mb-1.5 block text-xs font-medium text-[#575248]"
+                    >
+                      Your Full Name
+                    </label>
+                    <input
+                      id="signup-name"
+                      type="text"
+                      required
+                      placeholder="David Miller"
+                      value={name}
+                      onChange={(e) => handleNameChange(e.target.value)}
+                      className="surface-input w-full rounded-lg px-3.5 py-2.5 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="signup-email"
+                      className="mb-1.5 block text-xs font-medium text-[#575248]"
+                    >
+                      Work Email
+                    </label>
+                    <input
+                      id="signup-email"
+                      type="email"
+                      required
+                      placeholder="david@example.com"
+                      value={signupEmail}
+                      onChange={(e) => setSignupEmail(e.target.value)}
+                      className="surface-input w-full rounded-lg px-3.5 py-2.5 text-sm"
+                    />
+                  </div>
+                </div>
 
-            <div className="relative flex items-center py-0.5">
-              <div className="flex-grow border-t border-[#DCD6C8]" />
-              <span className="mx-3 shrink-0 font-mono text-[10px] uppercase tracking-widest text-[#6E685C]">
-                or email session
-              </span>
-              <div className="flex-grow border-t border-[#DCD6C8]" />
-            </div>
+                <div>
+                  <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+                    <label
+                      htmlFor="signup-tagline"
+                      className="text-xs font-medium text-[#575248]"
+                    >
+                      What Do You Teach or Coach?
+                    </label>
+                    <div className="flex flex-wrap gap-1">
+                      {NICHE_PRESETS.map((preset) => (
+                        <button
+                          key={preset.label}
+                          type="button"
+                          onClick={() => setTagline(preset.tagline)}
+                          className="rounded-md border border-[#DCD6C8] bg-[#F6F4EE] px-2 py-0.5 font-mono text-[10px] font-medium text-[#575248] hover:border-[#141413] hover:text-[#141413] transition"
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <input
+                    id="signup-tagline"
+                    type="text"
+                    required
+                    placeholder="Conservatory Piano Instructor"
+                    value={tagline}
+                    onChange={(e) => setTagline(e.target.value)}
+                    className="surface-input w-full rounded-lg px-3.5 py-2.5 text-sm"
+                  />
+                </div>
 
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <div className="mb-1.5 flex items-center justify-between gap-2">
-                  <label htmlFor="login-email" className="text-xs font-medium text-[#575248]">
-                    Tutor Email
+                <div>
+                  <label
+                    htmlFor="signup-slug"
+                    className="mb-1.5 block text-xs font-medium text-[#575248]"
+                  >
+                    Your Public 1-Link Handle
                   </label>
+                  <div className="flex items-center overflow-hidden rounded-lg border border-[#CEC7B6] bg-[#EFECE4]/50 focus-within:border-[#141413] focus-within:bg-white transition">
+                    <span className="border-r border-[#DCD6C8] bg-[#EFECE4] px-3 py-2.5 font-mono text-xs text-[#6E685C]">
+                      slotlink.app/
+                    </span>
+                    <input
+                      id="signup-slug"
+                      type="text"
+                      required
+                      pattern="[a-z0-9-]+"
+                      placeholder="david-piano"
+                      value={slug}
+                      onChange={(e) => {
+                        setSlugTouched(true);
+                        setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'));
+                      }}
+                      className="w-full bg-transparent px-3 py-2.5 font-mono text-sm text-[#141413] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label
+                      htmlFor="signup-single-price"
+                      className="mb-1.5 block text-xs font-medium text-[#575248]"
+                    >
+                      1-on-1 Session ($ / 60m)
+                    </label>
+                    <input
+                      id="signup-single-price"
+                      type="number"
+                      min="5"
+                      max="1000"
+                      required
+                      value={singlePriceDollars}
+                      onChange={(e) => setSinglePriceDollars(e.target.value)}
+                      className="surface-input w-full rounded-lg px-3.5 py-2.5 font-mono text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="signup-pack-price"
+                      className="mb-1.5 block text-xs font-medium text-[#575248]"
+                    >
+                      5-Session Pack ($)
+                    </label>
+                    <input
+                      id="signup-pack-price"
+                      type="number"
+                      min="20"
+                      max="5000"
+                      required
+                      value={packPriceDollars}
+                      onChange={(e) => setPackPriceDollars(e.target.value)}
+                      className="surface-input w-full rounded-lg px-3.5 py-2.5 font-mono text-sm"
+                    />
+                  </div>
+                </div>
+
+                {signupError && (
+                  <p className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-3 py-2 text-xs text-[#B91C1C]">
+                    {signupError}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={signupLoading}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#141413] px-4 py-3 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] disabled:opacity-50 transition"
+                >
+                  {signupLoading ? 'Creating Your Studio...' : 'Launch Studio & Open Dashboard'}
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </form>
+            ) : (
+              <div className="space-y-5">
+                <a
+                  href="/api/integrations/google/connect"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#141413] px-4 py-3 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
+                >
+                  <CalendarCheck2 className="h-4 w-4 text-[#F3B09A]" />
+                  Continue with Google Calendar
+                </a>
+
+                <div className="relative flex items-center py-0.5">
+                  <div className="flex-grow border-t border-[#DCD6C8]" />
+                  <span className="mx-3 shrink-0 font-mono text-[10px] uppercase tracking-widest text-[#6E685C]">
+                    or email sign in
+                  </span>
+                  <div className="flex-grow border-t border-[#DCD6C8]" />
+                </div>
+
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+                      <label htmlFor="login-email" className="text-xs font-medium text-[#575248]">
+                        Studio Email
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLoginEmail(SAMPLE_EDUCATOR_EMAIL);
+                          setLoginError(null);
+                        }}
+                        className="inline-flex items-center gap-1 rounded-full border border-[#D5CFC0] bg-[#EFECE4] px-2.5 py-0.5 font-mono text-[10px] font-medium text-[#141413] hover:border-[#D94E28] hover:text-[#D94E28] transition"
+                      >
+                        <Sparkles className="h-3 w-3 text-[#D94E28]" />
+                        Use sample educator: {SAMPLE_EDUCATOR_EMAIL}
+                      </button>
+                    </div>
+                    <input
+                      id="login-email"
+                      type="email"
+                      required
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className="surface-input w-full rounded-lg px-3.5 py-2.5 text-sm"
+                    />
+                  </div>
+
+                  {loginError && (
+                    <p className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-3 py-2 text-xs text-[#B91C1C]">
+                      {loginError}
+                    </p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loginLoading}
+                    className="w-full rounded-xl border border-[#141413] bg-white px-4 py-2.5 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] disabled:opacity-50 transition"
+                  >
+                    {loginLoading ? 'Signing in...' : 'Sign In to Dashboard'}
+                  </button>
+                </form>
+
+                <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-3.5 flex items-center justify-between gap-3 text-xs">
+                  <span className="text-[#575248]">New to SlotLink?</span>
                   <button
                     type="button"
-                    onClick={handleQuickFillDemo}
-                    className="inline-flex items-center gap-1 rounded-full border border-[#D5CFC0] bg-[#EFECE4] px-2.5 py-0.5 font-mono text-[10px] font-medium text-[#141413] hover:border-[#D94E28] hover:text-[#D94E28] transition"
+                    onClick={() => setMode('signup')}
+                    className="font-mono text-[11px] font-semibold text-[#D94E28] hover:underline"
                   >
-                    <Sparkles className="h-3 w-3 text-[#D94E28]" />
-                    Quick-fill {DEMO_TUTOR_EMAIL}
+                    Create your own studio →
                   </button>
                 </div>
-                <input
-                  id="login-email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="surface-input w-full rounded-lg px-3.5 py-2.5 text-sm"
-                />
               </div>
-
-              {error && (
-                <p className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-3 py-2 text-xs text-[#B91C1C]">
-                  {error}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-xl border border-[#141413] bg-white px-4 py-2.5 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] disabled:opacity-50 transition"
-              >
-                {loading ? 'Signing in...' : 'Sign In to Dashboard'}
-              </button>
-            </form>
+            )}
 
             <p className="border-t border-[#EFECE4] pt-4 text-[11px] leading-relaxed text-[#6E685C]">
-              By signing in, you agree to our{' '}
+              By continuing, you agree to our{' '}
               <Link href="/terms" className="underline hover:text-[#141413]">
                 Terms
               </Link>
@@ -176,99 +473,56 @@ export function LoginClient({ notice }: { notice?: string }) {
             </p>
           </section>
 
-          {/* Right: What You Can Test Inside */}
+          {/* Right: What Your Studio Includes */}
           <aside className="space-y-4">
             <div className="surface-ink rounded-2xl p-6 sm:p-7 space-y-5">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[10px] uppercase tracking-widest text-[#F3B09A]">
-                  Interactive Walkthrough
+                  Included On Every Studio
                 </span>
-                <span className="rounded-full border border-[#3B3934] bg-[#23221F] px-2.5 py-0.5 font-mono text-[10px] text-[#C8C2B6]">
-                  Pre-seeded Data
+                <span className="rounded-full border border-[#3B3934] bg-[#23221F] px-2.5 py-0.5 font-mono text-[10px] text-[#4ADE80]">
+                  0% Commission
                 </span>
               </div>
               <div>
-                <h2 className="font-serif text-2xl text-[#F6F4EE]">What You Can Test Inside</h2>
+                <h2 className="font-serif text-2xl text-[#F6F4EE]">
+                  Everything built for independent teachers
+                </h2>
                 <p className="mt-1 text-xs leading-relaxed text-[#B6B0A4]">
-                  Jump across all three surfaces of SlotLink with live PostgreSQL data already
-                  loaded for Sarah Chen&rsquo;s SAT Math studio.
+                  Works equally well for private tutoring, music lessons, language coaching, and
+                  1-on-1 consulting.
                 </p>
               </div>
 
-              <div className="space-y-3">
-                <Link
-                  href="/dashboard"
-                  className="group block rounded-xl border border-[#2F2D29] bg-[#1D1C1A] p-4 hover:border-[#D94E28]/60 transition"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <LayoutDashboard className="h-4 w-4 shrink-0 text-[#F3B09A]" />
-                      <span className="text-xs font-semibold text-[#F6F4EE]">
-                        1. Pro Studio Dashboard
-                      </span>
-                    </div>
-                    <ArrowUpRight className="h-3.5 w-3.5 text-[#9B9589] group-hover:text-[#F3B09A] transition" />
-                  </div>
-                  <p className="mt-1.5 pl-6.5 text-[11px] leading-relaxed text-[#B6B0A4]">
-                    Filter sessions, mark lessons complete with homework URLs, audit student hour
-                    balances, and preview live card changes.
-                  </p>
-                </Link>
-
-                <Link
-                  href="/sarah-math"
-                  className="group block rounded-xl border border-[#2F2D29] bg-[#1D1C1A] p-4 hover:border-[#D94E28]/60 transition"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <Link2 className="h-4 w-4 shrink-0 text-[#F3B09A]" />
-                      <span className="text-xs font-semibold text-[#F6F4EE]">
-                        2. Public 1-Link Booking
-                      </span>
-                    </div>
-                    <ArrowUpRight className="h-3.5 w-3.5 text-[#9B9589] group-hover:text-[#F3B09A] transition" />
-                  </div>
-                  <p className="mt-1.5 pl-6.5 text-[11px] leading-relaxed text-[#B6B0A4]">
-                    Book a 60-min Trial or 5-Hour SAT Pack, inspect real time-slot availability, or
-                    redeem an existing student credit.
-                  </p>
-                </Link>
-
-                <Link
-                  href="/p/sl_demo_alex_94a2k"
-                  className="group block rounded-xl border border-[#2F2D29] bg-[#1D1C1A] p-4 hover:border-[#D94E28]/60 transition"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <CheckCircle2 className="h-4 w-4 shrink-0 text-[#86EFAC]" />
-                      <span className="text-xs font-semibold text-[#F6F4EE]">
-                        3. Zero-Login Student Portal
-                      </span>
-                    </div>
-                    <ArrowUpRight className="h-3.5 w-3.5 text-[#9B9589] group-hover:text-[#86EFAC] transition" />
-                  </div>
-                  <p className="mt-1.5 pl-6.5 text-[11px] leading-relaxed text-[#B6B0A4]">
-                    Open Alex Rivera&rsquo;s passbook (<code className="font-mono">3 hrs left</code>
-                    ) to test live rescheduling, Meet join links, and archived study notes.
-                  </p>
-                </Link>
-              </div>
+              <ul className="space-y-3 text-xs text-[#E8E3D9]">
+                {[
+                  'Branded booking page at slotlink.app/you with live timezone detection',
+                  'Prepaid 5-session & custom hour packages tracked automatically',
+                  'Zero-login client magic links for hours balance, Meet links & notes',
+                  '2-way Google Calendar conflict checks & 24h reschedule protection',
+                ].map((point) => (
+                  <li key={point} className="flex items-start gap-2.5">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#4ADE80]" />
+                    <span className="leading-relaxed">{point}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
             <div className="surface-card rounded-2xl p-5 flex items-center justify-between gap-4">
               <div>
                 <div className="font-mono text-[10px] uppercase tracking-wider text-[#6E685C]">
-                  Low-Balance State
+                  Live Example Studio
                 </div>
                 <p className="mt-0.5 text-xs font-medium text-[#141413]">
-                  Inspect Maya Lin&rsquo;s 1-hour passbook alert
+                  Inspect a working public booking page at /sarah-math
                 </p>
               </div>
               <Link
-                href="/p/sl_demo_maya_77b1x"
+                href="/sarah-math"
                 className="shrink-0 rounded-lg border border-[#DCD6C8] bg-[#F6F4EE] px-3 py-1.5 font-mono text-[11px] font-medium text-[#141413] hover:bg-[#EFECE4] transition"
               >
-                Open →
+                View →
               </Link>
             </div>
           </aside>
