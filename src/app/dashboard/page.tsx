@@ -29,7 +29,7 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-[#F6F4EE] text-[#141413]">
       {/* Dedicated Educator Studio Workspace Header */}
       <header className="sticky top-0 z-40 border-b border-[#DCD6C8] bg-[#F6F4EE]/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="viewport-container flex flex-wrap items-center justify-between gap-3 py-3">
           <div className="flex items-center gap-3">
             <Link href="/dashboard" className="flex items-center gap-2.5 group">
               <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[#141413] font-mono text-xs font-semibold tracking-tight text-[#F6F4EE] transition group-hover:bg-[#D94E28]">
@@ -71,12 +71,12 @@ export default async function DashboardPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
+      <main className="viewport-container min-h-[calc(100dvh-4.5rem)] py-[clamp(1.5rem,4vh,3rem)] space-y-6">
         {/* Studio Profile Strip */}
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="font-serif text-3xl sm:text-4xl leading-none text-[#141413]">
+              <h1 className="font-serif text-fluid-h1 leading-none text-[#141413]">
                 {pro.name}
               </h1>
               <span className="rounded border border-[#D5CFC0] bg-[#EFECE4] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#575248]">

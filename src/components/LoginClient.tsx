@@ -13,6 +13,7 @@ import {
   UserPlus,
 } from 'lucide-react';
 import { AppTopBar } from '@/components/AppTopBar';
+import { ScrollAmbient3DObjects } from '@/components/StudioVectorScene';
 
 const SAMPLE_EDUCATOR_EMAIL = 'sarah@slotlink.app';
 
@@ -147,7 +148,8 @@ export function LoginClient({
   }
 
   return (
-    <div className="min-h-screen bg-[#F6F4EE] bg-grid-pattern text-[#141413]">
+    <div className="relative min-h-screen bg-[#F6F4EE] bg-editorial-mesh text-[#141413]">
+      <ScrollAmbient3DObjects />
       <AppTopBar
         badge="STUDIO ACCESS"
         rightSlot={
@@ -161,8 +163,8 @@ export function LoginClient({
         }
       />
 
-      <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
-        <div className="mb-8 max-w-2xl">
+      <main className="relative z-10 viewport-container min-h-[calc(100dvh-4.5rem)] flex flex-col justify-center py-[clamp(2rem,5vh,4.5rem)]">
+        <div className="mb-8 max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#D5CFC0] bg-white px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-[#575248]">
             {mode === 'signup' ? (
               <UserPlus className="h-3.5 w-3.5 text-[#D94E28]" />
@@ -171,7 +173,7 @@ export function LoginClient({
             )}
             {mode === 'signup' ? 'Launch In 60 Seconds' : 'Educator Studio Access'}
           </div>
-          <h1 className="mt-4 font-serif text-4xl tracking-tight text-[#141413] sm:text-5xl">
+          <h1 className="mt-4 font-serif text-fluid-h1 tracking-tight text-[#141413]">
             {mode === 'signup' ? (
               <>
                 Launch your private{' '}
@@ -486,10 +488,13 @@ export function LoginClient({
             </p>
           </section>
 
-          {/* Right: Live Interactive Studio Card Preview & Studio Checklist */}
-          <aside className="space-y-4">
+          {/* Right: Live Interactive 3D Studio Card Preview & Studio Checklist */}
+          <aside className="space-y-4 scene-3d-stage">
             {/* Live Public Studio Card Preview */}
-            <div className="surface-card rounded-2xl p-5 sm:p-6 space-y-4">
+            <div
+              className="surface-card surface-card-interactive preserve-3d rounded-2xl p-5 sm:p-6 space-y-4"
+              style={{ transform: 'rotateX(2deg) rotateY(-4deg)' }}
+            >
               <div className="flex items-center justify-between border-b border-[#EFECE4] pb-3">
                 <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
                   Live Public Studio Card Preview

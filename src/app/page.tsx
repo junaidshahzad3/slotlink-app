@@ -11,6 +11,7 @@ import {
   ScrollJourneySection,
   WorkflowComparisonScrubber,
 } from '@/components/ScrollJourneySection';
+import { ScrollAmbient3DObjects } from '@/components/StudioVectorScene';
 
 const COMPARISON_ROWS = [
   {
@@ -53,13 +54,14 @@ const COMPARISON_ROWS = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#F6F4EE] text-[#141413]">
+    <div className="relative min-h-screen bg-[#F6F4EE] text-[#141413]">
+      <ScrollAmbient3DObjects />
       <AppTopBar badge="SOLO EDUCATOR OS" />
 
-      {/* Editorial Split Hero */}
-      <section className="relative border-b border-[#DCD6C8] bg-editorial-mesh">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-center">
+      {/* Full-Viewport Editorial Split Hero */}
+      <section className="relative z-10 border-b border-[#DCD6C8] bg-editorial-mesh/95 min-h-[calc(100dvh-4.5rem)] flex items-center">
+        <div className="viewport-container py-[clamp(2.5rem,6vh,5rem)]">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-center">
             {/* Left Copy Column */}
             <div className="lg:col-span-6 space-y-6">
               <div className="inline-flex items-center gap-2 border border-[#DCD6C8] bg-white px-3 py-1 rounded-md shadow-sm">
@@ -69,7 +71,7 @@ export default function LandingPage() {
                 </span>
               </div>
 
-              <h1 className="text-4xl font-semibold tracking-tight text-[#141413] sm:text-5xl lg:text-[56px] leading-[1.06]">
+              <h1 className="text-fluid-display font-semibold tracking-tight text-[#141413]">
                 One link for bookings,{' '}
                 <span className="font-serif italic font-normal text-[#D94E28]">
                   prepaid packs,
@@ -77,7 +79,7 @@ export default function LandingPage() {
                 and client portals.
               </h1>
 
-              <p className="max-w-xl text-base leading-relaxed text-[#575248]">
+              <p className="max-w-2xl text-fluid-body text-[#575248]">
                 Replace heavy CRM suites with a crisp booking studio. Students and parents book in
                 three taps and track remaining package hours, Meet links, and homework notes on a
                 private zero-login link.
@@ -146,8 +148,8 @@ export default function LandingPage() {
       <WorkflowComparisonScrubber />
 
       {/* Architectural 3-Step Workflow Ledger */}
-      <section id="features" className="border-b border-[#DCD6C8] bg-[#F6F4EE]">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <section id="features" className="relative z-10 border-b border-[#DCD6C8] bg-[#F6F4EE]/95">
+        <div className="viewport-container py-[clamp(3rem,6vh,5rem)]">
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
             {/* Step 01 */}
             <div className="surface-card surface-card-interactive rounded-2xl p-6 flex flex-col justify-between space-y-5">
@@ -264,14 +266,14 @@ export default function LandingPage() {
       <CommissionSavingsCalculator />
 
       {/* Architectural Comparison Matrix */}
-      <section className="border-b border-[#DCD6C8] bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 space-y-8">
+      <section className="relative z-10 border-b border-[#DCD6C8] bg-white/95 viewport-section min-h-[78dvh]">
+        <div className="viewport-container space-y-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
                 Architectural Comparison
               </div>
-              <h2 className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight text-[#141413]">
+              <h2 className="mt-2 text-fluid-h2 font-semibold tracking-tight text-[#141413]">
                 Why educators leave{' '}
                 <span className="font-serif italic font-normal">
                   calendars and heavy CRMs behind.
@@ -324,14 +326,14 @@ export default function LandingPage() {
       </section>
 
       {/* Editorial Pricing Ledger */}
-      <section id="pricing" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 space-y-12">
+      <section id="pricing" className="relative z-10 viewport-container py-[clamp(3.5rem,7vh,6rem)] space-y-14">
         <div>
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
               <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
                 03 // Transparent Studio Pricing
               </div>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight text-[#141413]">
+              <h2 className="mt-2 text-fluid-h2 font-semibold tracking-tight text-[#141413]">
                 Start free for 14 days.{' '}
                 <span className="font-serif italic font-normal">
                   Keep 100% of lesson revenue.
@@ -450,7 +452,7 @@ export default function LandingPage() {
               <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
                 04 // Educator Studio Blueprints
               </div>
-              <h2 className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight text-[#141413]">
+              <h2 className="mt-2 text-fluid-h2 font-semibold tracking-tight text-[#141413]">
                 How solo specialists{' '}
                 <span className="font-serif italic font-normal">structure packs &amp; notes.</span>
               </h2>
@@ -529,7 +531,7 @@ export default function LandingPage() {
             <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
               05 // Architecture &amp; FAQ
             </div>
-            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#141413]">
+            <h2 className="text-fluid-h2 font-semibold tracking-tight text-[#141413]">
               Common questions from{' '}
               <span className="font-serif italic font-normal">independent educators.</span>
             </h2>
@@ -575,8 +577,8 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[#DCD6C8] bg-white">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-6 text-xs text-[#6E685C] sm:px-6 lg:px-8">
+      <footer className="relative z-10 border-t border-[#DCD6C8] bg-white">
+        <div className="viewport-container flex flex-wrap items-center justify-between gap-4 py-6 text-xs text-[#6E685C]">
           <div className="flex items-center gap-2">
             <span className="font-mono font-semibold text-[#141413]">SlotLink</span>
             <span>· © {new Date().getFullYear()} · Built for independent educators</span>

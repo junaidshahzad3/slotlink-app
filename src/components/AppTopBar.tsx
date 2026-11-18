@@ -43,7 +43,7 @@ export function AppTopBar({
 
   return (
     <header className="sticky top-0 z-40 surface-glass border-b border-[#DCD6C8]">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="viewport-container flex flex-wrap items-center justify-between gap-3 py-3">
         {/* Brand + Contextual Badge */}
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2.5 group">

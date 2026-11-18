@@ -64,8 +64,8 @@ export default async function PublicPortalPage({
   return (
     <div className="min-h-screen bg-[#F6F4EE] text-[#141413] flex flex-col justify-between">
       {/* White-Label Educator Booking Header (Zero SaaS Admin Navigation) */}
-      <header className="sticky top-0 z-40 border-b border-[#DCD6C8] bg-[#F6F4EE]/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+      <header className="sticky top-0 z-40 surface-glass border-b border-[#DCD6C8]">
+        <div className="viewport-container flex items-center justify-between gap-3 py-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#141413] font-mono text-xs font-semibold text-[#F6F4EE]">
               {initials || 'SL'}
@@ -83,8 +83,8 @@ export default async function PublicPortalPage({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-        <div className="surface-card overflow-hidden rounded-2xl grid grid-cols-1 lg:grid-cols-12">
+      <main className="viewport-container py-[clamp(1.75rem,4.5vh,3.5rem)]">
+        <div className="surface-card overflow-hidden rounded-2xl grid grid-cols-1 lg:grid-cols-12 min-h-[calc(100dvh-10rem)]">
           {/* Left Educator Profile Sidebar */}
           <aside className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-[#DCD6C8] bg-[#EFECE4]/70 p-6 sm:p-8 flex flex-col justify-between gap-6">
             <div className="space-y-5">
@@ -96,10 +96,36 @@ export default async function PublicPortalPage({
                   <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
                     Instructor Studio
                   </div>
-                  <h1 className="truncate font-serif text-3xl leading-tight text-[#141413]">
+                  <h1 className="truncate font-serif text-fluid-h2 leading-tight text-[#141413]">
                     {pro.name}
                   </h1>
                 </div>
+              </div>
+
+              {/* Animated SVG Vector Live Availability Radar */}
+              <div className="flex items-center justify-between rounded-xl border border-[#DCD6C8] bg-white/90 px-3.5 py-2.5 text-[11px]">
+                <div className="flex items-center gap-2.5">
+                  <svg viewBox="0 0 36 36" className="h-7 w-7 shrink-0">
+                    <circle cx="18" cy="18" r="15" fill="none" stroke="#DCD6C8" strokeWidth="1.2" />
+                    <circle
+                      cx="18"
+                      cy="18"
+                      r="10"
+                      fill="none"
+                      stroke="#15803D"
+                      strokeWidth="1.2"
+                      strokeDasharray="4 3"
+                    />
+                    <circle cx="18" cy="18" r="3.5" fill="#15803D" />
+                  </svg>
+                  <div className="font-mono">
+                    <div className="font-semibold text-[#141413]">LIVE FREEBUSY SYNC</div>
+                    <div className="text-[10px] text-[#6E685C]">{workHoursLabel}</div>
+                  </div>
+                </div>
+                <span className="rounded bg-[#DCFCE7] px-2 py-0.5 font-mono text-[10px] font-semibold text-[#15803D]">
+                  OPEN
+                </span>
               </div>
 
               <div className="text-sm font-semibold text-[#141413]">{pro.tagline}</div>

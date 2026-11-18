@@ -10,6 +10,7 @@ import {
   Check,
   Clock,
   FileText,
+  Layers,
   QrCode,
   RotateCcw,
   ShieldCheck,
@@ -17,6 +18,10 @@ import {
   Video,
   X,
 } from 'lucide-react';
+import {
+  Exploded3DPassbookPrism,
+  VectorWorkflowConduitSvg,
+} from '@/components/StudioVectorScene';
 
 interface JourneyChapter {
   index: number;
@@ -139,11 +144,15 @@ const SLOTLINK_STEPS = [
  */
 export function ScrollJourneySection() {
   const [activeChapter, setActiveChapter] = useState(0);
+  const [journeyProgress, setJourneyProgress] = useState(0);
+  const [stageMode, setStageMode] = useState<'interactive' | 'prism3d'>('interactive');
+  const [hoverTilt, setHoverTilt] = useState({ rx: 0, ry: 0 });
   const [selectedPkg, setSelectedPkg] = useState('pack5');
   const [selectedSlot, setSelectedSlot] = useState('3:00 PM');
   const [dentistBlocked, setDentistBlocked] = useState(true);
   const [simCompleted, setSimCompleted] = useState(false);
 
+  const sectionRef = useRef<HTMLElement | null>(null);
   const chapterRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -164,7 +173,28 @@ export function ScrollJourneySection() {
     for (const el of chapterRefs.current) {
       if (el) observer.observe(el);
     }
-    return () => observer.disconnect();
+
+    let rafId = 0;
+    const measureScroll = () => {
+      rafId = 0;
+      const el = sectionRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const total = Math.max(1, el.offsetHeight - window.innerHeight * 0.6);
+      const raw = (-rect.top + window.innerHeight * 0.15) / total;
+      setJourneyProgress(Math.max(0, Math.min(1, raw)));
+    };
+    const onScroll = () => {
+      if (!rafId) rafId = window.requestAnimationFrame(measureScroll);
+    };
+    measureScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', onScroll);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
   }, []);
 
   function jumpToChapter(idx: number) {
@@ -172,27 +202,44 @@ export function ScrollJourneySection() {
     chapterRefs.current[idx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
+  function handleStagePointerMove(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const nx = (e.clientX - rect.left) / rect.width - 0.5;
+    const ny = (e.clientY - rect.top) / rect.height - 0.5;
+    setHoverTilt({ rx: Number((-ny * 5).toFixed(2)), ry: Number((nx * 6).toFixed(2)) });
+  }
+
+  function resetStagePointer() {
+    setHoverTilt({ rx: 0, ry: 0 });
+  }
+
   const currentChapter = CHAPTERS[activeChapter] ?? CHAPTERS[0];
   const progressPct = Math.round(((activeChapter + 1) / CHAPTERS.length) * 100);
+  const scrollTiltX = (journeyProgress - 0.5) * -3.5 + hoverTilt.rx;
+  const scrollTiltY = (journeyProgress - 0.5) * 4.5 + hoverTilt.ry;
 
   return (
-    <section id="journey" className="border-b border-[#DCD6C8] bg-[#F6F4EE]">
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 space-y-8">
+    <section
+      id="journey"
+      ref={sectionRef}
+      className="relative z-10 border-b border-[#DCD6C8] bg-[#F6F4EE]/95"
+    >
+      <div className="viewport-container py-[clamp(3rem,7vh,6rem)] space-y-8">
         {/* Section Header */}
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="max-w-2xl">
+          <div className="max-w-3xl">
             <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
               01 // Interactive Scroll Journey
             </div>
-            <h2 className="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight text-[#141413]">
+            <h2 className="mt-2 text-fluid-h2 font-semibold tracking-tight text-[#141413]">
               Follow one lesson from{' '}
               <span className="font-serif italic font-normal text-[#D94E28]">
                 first click to study notes.
               </span>
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-[#575248]">
-              Scroll through the four chapters below—or click any pill to scrub directly through the
-              tutor and client experience live.
+            <p className="mt-2 text-fluid-body text-[#575248]">
+              Scroll through the four chapters below—or click any vector node or scrubber pill to
+              inspect the live 3D stack and interactive workflows.
             </p>
           </div>
 
@@ -230,6 +277,9 @@ export function ScrollJourneySection() {
             })}
           </div>
         </div>
+
+        {/* Animated Full-Width SVG Vector System Topology */}
+        <VectorWorkflowConduitSvg activeStep={activeChapter} onSelectStep={jumpToChapter} />
 
         {/* Split Sticky Scroll Layout */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-start">
@@ -311,10 +361,21 @@ export function ScrollJourneySection() {
             })}
           </div>
 
-          {/* Right Sticky Morphing Hardware Stage */}
-          <div className="lg:col-span-7 lg:sticky lg:top-[124px]">
-            <div className="surface-card rounded-2xl overflow-hidden border-[#141413]/20 shadow-xl">
-              {/* Dynamic Browser Chrome */}
+          {/* Right Sticky Morphing 3D Hardware Stage */}
+          <div
+            onMouseMove={handleStagePointerMove}
+            onMouseLeave={resetStagePointer}
+            className="lg:col-span-7 lg:sticky lg:top-[116px] scene-3d-stage"
+          >
+            <div
+              className="surface-card preserve-3d rounded-2xl overflow-hidden border-[#141413]/20 shadow-xl transition-transform duration-150 ease-out"
+              style={{
+                transform: `rotateX(${scrollTiltX.toFixed(2)}deg) rotateY(${scrollTiltY.toFixed(
+                  2
+                )}deg)`,
+              }}
+            >
+              {/* Dynamic Browser Chrome + 3D Mode Switcher */}
               <div className="border-b border-[#DCD6C8] bg-[#EFECE4] px-4 py-3 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-[#CEC7B6]" />
@@ -322,13 +383,44 @@ export function ScrollJourneySection() {
                   <span className="h-2.5 w-2.5 rounded-full bg-[#CEC7B6]" />
                 </div>
                 <div className="rounded-md border border-[#D5CFC0] bg-white px-3 py-1 font-mono text-[11px] text-[#141413] font-medium">
-                  {currentChapter.browserUrl}
+                  {stageMode === 'prism3d' ? 'architecture.3d/slotlink' : currentChapter.browserUrl}
                 </div>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#BBF7D0] bg-[#DCFCE7] px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#15803D]">
-                  <span className="live-dot h-1.5 w-1.5 rounded-full bg-[#15803D]" />
-                  {currentChapter.stageTag}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setStageMode((m) => (m === 'interactive' ? 'prism3d' : 'interactive'))
+                    }
+                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-semibold transition cursor-pointer ${
+                      stageMode === 'prism3d'
+                        ? 'border-[#141413] bg-[#141413] text-[#F6F4EE]'
+                        : 'border-[#DCD6C8] bg-white text-[#141413] hover:bg-[#F6F4EE]'
+                    }`}
+                  >
+                    <Layers className="h-3 w-3 text-[#D94E28]" />
+                    {stageMode === 'prism3d' ? 'Back to Live UI' : 'Inspect 3D Layers'}
+                  </button>
+                  <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-[#BBF7D0] bg-[#DCFCE7] px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#15803D]">
+                    <span className="live-dot h-1.5 w-1.5 rounded-full bg-[#15803D]" />
+                    {currentChapter.stageTag}
+                  </span>
+                </div>
               </div>
+
+              {stageMode === 'prism3d' ? (
+                <div className="bg-white p-5 sm:p-6 space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <span className="font-mono font-semibold text-[#D94E28] uppercase tracking-wider">
+                      Scroll-Driven 3D Exploded Passbook Architecture
+                    </span>
+                    <span className="font-mono text-[11px] text-[#575248]">
+                      Move pointer or scroll to separate Z-planes
+                    </span>
+                  </div>
+                  <Exploded3DPassbookPrism progress={journeyProgress} />
+                </div>
+              ) : (
+                <>
 
               {/* Morphing Chapter 0: 1-Link Studio */}
               {activeChapter === 0 && (
@@ -648,6 +740,8 @@ export function ScrollJourneySection() {
                   </div>
                 </div>
               )}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -663,14 +757,17 @@ export function WorkflowComparisonScrubber() {
   const [mode, setMode] = useState<'slotlink' | 'legacy'>('slotlink');
 
   return (
-    <section id="workflow-compare" className="border-b border-[#DCD6C8] bg-white">
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 space-y-8">
+    <section
+      id="workflow-compare"
+      className="relative z-10 border-b border-[#DCD6C8] bg-white/95 viewport-section min-h-[75dvh]"
+    >
+      <div className="viewport-container space-y-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-2xl">
             <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
               02 // Old Stack vs. 1-Link Architecture
             </div>
-            <h2 className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight text-[#141413]">
+            <h2 className="mt-2 text-fluid-h2 font-semibold tracking-tight text-[#141413]">
               See the admin difference in{' '}
               <span className="font-serif italic font-normal text-[#D94E28]">
                 every single lesson.
@@ -724,13 +821,26 @@ export function WorkflowComparisonScrubber() {
               </span>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-              {OLD_STACK_STEPS.map((item) => (
+              {OLD_STACK_STEPS.map((item, idx) => (
                 <div
                   key={item.step}
-                  className="rounded-xl border border-[#E5C6BE] bg-white p-4 space-y-2"
+                  className="relative rounded-xl border border-[#E5C6BE] bg-white p-4 space-y-2"
                 >
-                  <div className="font-mono text-[10px] font-semibold text-[#9F2D12]">
-                    STEP {item.step} · {item.tool}
+                  <div className="flex items-center justify-between font-mono text-[10px] font-semibold text-[#9F2D12]">
+                    <span>
+                      STEP {item.step} · {item.tool}
+                    </span>
+                    {idx < OLD_STACK_STEPS.length - 1 && (
+                      <svg viewBox="0 0 24 12" className="hidden lg:block w-5 h-3 text-[#9F2D12]/60">
+                        <path
+                          d="M 0 6 H 20 M 16 2 L 21 6 L 16 10"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeDasharray="3 2"
+                        />
+                      </svg>
+                    )}
                   </div>
                   <p className="text-xs leading-relaxed text-[#575248]">{item.friction}</p>
                 </div>
@@ -749,13 +859,26 @@ export function WorkflowComparisonScrubber() {
               </span>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {SLOTLINK_STEPS.map((item) => (
+              {SLOTLINK_STEPS.map((item, idx) => (
                 <div
                   key={item.step}
-                  className="rounded-xl border border-white/15 bg-white/[0.06] p-4 space-y-2"
+                  className="relative rounded-xl border border-white/15 bg-white/[0.06] p-4 space-y-2"
                 >
-                  <div className="font-mono text-[10px] font-semibold text-[#4ADE80]">
-                    STEP {item.step} · {item.surface}
+                  <div className="flex items-center justify-between font-mono text-[10px] font-semibold text-[#4ADE80]">
+                    <span>
+                      STEP {item.step} · {item.surface}
+                    </span>
+                    {idx < SLOTLINK_STEPS.length - 1 && (
+                      <svg viewBox="0 0 26 12" className="hidden lg:block w-6 h-3 text-[#4ADE80]">
+                        <path
+                          d="M 0 6 H 22 M 18 2 L 23 6 L 18 10"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          className="animate-vector-dash"
+                        />
+                      </svg>
+                    )}
                   </div>
                   <p className="text-xs leading-relaxed text-[#E5E0D4]">{item.gain}</p>
                 </div>

@@ -53,8 +53,8 @@ export default async function ClientMagicPortalPage({
   return (
     <div className="min-h-screen bg-[#F6F4EE] text-[#141413] flex flex-col justify-between">
       {/* White-Label Client Passbook Header */}
-      <header className="sticky top-0 z-40 border-b border-[#DCD6C8] bg-[#F6F4EE]/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+      <header className="sticky top-0 z-40 surface-glass border-b border-[#DCD6C8]">
+        <div className="viewport-container flex items-center justify-between gap-3 py-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#141413] font-mono text-xs font-semibold text-[#F6F4EE]">
               {proInitials || 'SL'}
@@ -77,10 +77,20 @@ export default async function ClientMagicPortalPage({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12 space-y-6">
+      <main className="viewport-container min-h-[calc(100dvh-7rem)] py-[clamp(1.75rem,4.5vh,3.5rem)] space-y-6">
         {/* Carbon Ink Student Passbook Header */}
-        <section className="surface-ink rounded-2xl p-6 sm:p-8 space-y-6">
-          <div className="flex flex-wrap items-start justify-between gap-6">
+        <section className="relative overflow-hidden surface-ink rounded-2xl p-6 sm:p-8 space-y-6">
+          {/* Decorative SVG Vector Passbook Crest */}
+          <svg
+            viewBox="0 0 220 220"
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-10 -top-12 h-52 w-52 opacity-15"
+          >
+            <circle cx="110" cy="110" r="88" fill="none" stroke="#F6F4EE" strokeWidth="1.2" strokeDasharray="6 6" />
+            <circle cx="110" cy="110" r="60" fill="none" stroke="#4ADE80" strokeWidth="1.2" />
+            <path d="M 30 110 H 190 M 110 30 V 190" stroke="#D94E28" strokeWidth="1" />
+          </svg>
+          <div className="relative flex flex-wrap items-start justify-between gap-6">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 font-mono text-sm font-semibold text-[#F6F4EE]">
                 {studentInitials || 'CL'}
@@ -90,7 +100,7 @@ export default async function ClientMagicPortalPage({
                   <span className="live-dot h-1.5 w-1.5 rounded-full bg-[#4ADE80]" />
                   Private Client Passbook
                 </div>
-                <h1 className="font-serif text-3xl sm:text-4xl text-[#F6F4EE]">{student.name}</h1>
+                <h1 className="font-serif text-fluid-h1 text-[#F6F4EE]">{student.name}</h1>
                 <p className="font-mono text-xs text-[#A8A295]">{student.email}</p>
                 <p className="pt-0.5 text-xs text-[#D8D3C8]">
                   With <span className="font-semibold text-[#F6F4EE]">{student.user.name}</span> ·{' '}

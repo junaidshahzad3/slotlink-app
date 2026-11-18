@@ -148,14 +148,40 @@ export function HeroInteractiveStage() {
   const [personaKey, setPersonaKey] = useState<'alex' | 'maya'>('alex');
   const [showHomeworkPreview, setShowHomeworkPreview] = useState<boolean>(true);
   const [deducted, setDeducted] = useState<boolean>(false);
+  const [heroTilt, setHeroTilt] = useState({ rx: 0, ry: 0 });
 
   const selectedService = HERO_SERVICES.find((s) => s.id === serviceId) ?? HERO_SERVICES[2];
   const selectedDay = HERO_DAYS.find((d) => d.id === dayId) ?? HERO_DAYS[1];
   const persona = PORTAL_PERSONAS[personaKey];
 
+  function handleHeroMove(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const nx = (e.clientX - rect.left) / rect.width - 0.5;
+    const ny = (e.clientY - rect.top) / rect.height - 0.5;
+    setHeroTilt({ rx: Number((-ny * 6).toFixed(2)), ry: Number((nx * 7).toFixed(2)) });
+  }
+
   return (
-    <div className="relative pb-10 sm:pb-14">
-      <div className="surface-card rounded-2xl overflow-hidden">
+    <div
+      onMouseMove={handleHeroMove}
+      onMouseLeave={() => setHeroTilt({ rx: 0, ry: 0 })}
+      className="relative pb-10 sm:pb-14 scene-3d-stage"
+    >
+      {/* Floating 3D Parallax Metric Pill */}
+      <div
+        className="hidden sm:inline-flex animate-float-subtle items-center gap-2 rounded-full border border-[#141413] bg-white px-3 py-1 font-mono text-[10px] font-semibold text-[#141413] shadow-md mb-3"
+        style={{ transform: 'translateZ(35px)' }}
+      >
+        <span className="h-2 w-2 rounded-full bg-[#D94E28]" />
+        INTERACTIVE 3D STUDIO STAGE · TRY CLICKING
+      </div>
+
+      <div
+        className="surface-card preserve-3d rounded-2xl overflow-hidden transition-transform duration-150 ease-out"
+        style={{
+          transform: `rotateX(${heroTilt.rx}deg) rotateY(${heroTilt.ry}deg)`,
+        }}
+      >
         {/* Browser Chrome + Live Mode Tabs */}
         <div className="border-b border-[#DCD6C8] bg-[#EFECE4] px-4 py-2.5 space-y-2.5">
           <div className="flex items-center justify-between">
@@ -611,24 +637,32 @@ export function CommissionSavingsCalculator() {
   const slotlinkAnnualCost = slotlinkMonthlyCost * 12;
   const marketplaceAnnualCut = Math.round(monthlyRev * 0.2 * 12);
   const ductTapeAnnualCost = 65 * 12;
+  const annualGross = monthlyRev * 12;
   const netSavedVsMarketplace = Math.max(0, marketplaceAnnualCut - slotlinkAnnualCost);
+  const slotlinkKeepPct = Math.max(
+    0,
+    Math.min(100, Math.round(((annualGross - slotlinkAnnualCost) / annualGross) * 1000) / 10)
+  );
 
   return (
-    <section id="calculator" className="border-b border-[#DCD6C8] bg-[#F6F4EE] bg-dot-matrix">
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+    <section
+      id="calculator"
+      className="relative z-10 border-b border-[#DCD6C8] bg-[#F6F4EE]/95 bg-dot-matrix viewport-section min-h-[82dvh]"
+    >
+      <div className="viewport-container">
         <div className="surface-card rounded-2xl p-6 sm:p-8 lg:p-10 space-y-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <div className="max-w-xl">
+            <div className="max-w-2xl">
               <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
                 Studio Economics Calculator
               </div>
-              <h2 className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight text-[#141413]">
+              <h2 className="mt-2 text-fluid-h2 font-semibold tracking-tight text-[#141413]">
                 Keep 100% of every{' '}
                 <span className="font-serif italic font-normal text-[#D94E28]">
                   prepaid lesson hour.
                 </span>
               </h2>
-              <p className="mt-1.5 text-sm text-[#575248]">
+              <p className="mt-1.5 text-fluid-body text-[#575248]">
                 See how much annual tutoring income stays in your pocket compared to 20% marketplace
                 cuts and multi-tool CRM subscriptions.
               </p>
@@ -747,6 +781,38 @@ export function CommissionSavingsCalculator() {
                 0% commission, ${slotlinkAnnualCost}/yr flat studio software, zero client passwords.
               </p>
             </div>
+          </div>
+
+          {/* Vector Take-Home Gauge Comparing Marketplace Cut vs SlotLink Net */}
+          <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-4 space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11px]">
+              <span className="font-semibold text-[#141413]">
+                ANNUAL TAKE-HOME RATIO (ON ${annualGross.toLocaleString()} GROSS)
+              </span>
+              <span className="font-semibold text-[#15803D]">
+                SlotLink keeps {slotlinkKeepPct}% vs. 80.0% on marketplaces
+              </span>
+            </div>
+            <svg viewBox="0 0 800 44" className="w-full h-9">
+              <text x="0" y="13" fontSize="9.5" fontFamily="monospace" fill="#9F2D12">
+                MARKETPLACE NET (80%)
+              </text>
+              <rect x="170" y="3" width="620" height="12" rx="4" fill="#E5C6BE" />
+              <rect x="170" y="3" width={Math.round(620 * 0.8)} height="12" rx="4" fill="#9F2D12" />
+
+              <text x="0" y="35" fontSize="9.5" fontFamily="monospace" fill="#15803D">
+                SLOTLINK NET ({slotlinkKeepPct}%)
+              </text>
+              <rect x="170" y="25" width="620" height="12" rx="4" fill="#DCFCE7" />
+              <rect
+                x="170"
+                y="25"
+                width={Math.round(620 * (slotlinkKeepPct / 100))}
+                height="12"
+                rx="4"
+                fill="#15803D"
+              />
+            </svg>
           </div>
         </div>
       </div>
