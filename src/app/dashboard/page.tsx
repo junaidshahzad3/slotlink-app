@@ -85,15 +85,19 @@ export default async function DashboardPage() {
             </div>
             <p className="mt-1.5 text-xs sm:text-sm text-[#575248]">
               {pro.tagline} ·{' '}
-              <Link
-                href={`/${pro.slug}`}
-                className="inline-flex items-center gap-0.5 font-mono font-semibold text-[#D94E28] hover:underline"
-              >
-                slotlink.app/{pro.slug}
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
+              <span className="font-mono font-semibold text-[#D94E28]">slotlink.app/{pro.slug}</span>
             </p>
           </div>
+          <Link
+            href={`/${pro.slug}`}
+            className="inline-flex items-center gap-2 rounded-full border border-[#DCD6C8] bg-white px-3.5 py-1.5 shadow-sm hover:border-[#141413] transition"
+          >
+            <span className="h-2 w-2 rounded-full bg-[#15803D]" />
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#141413]">
+              Booking Page Live · /{pro.slug}
+            </span>
+            <ArrowUpRight className="h-3.5 w-3.5 text-[#D94E28]" />
+          </Link>
         </div>
 
         <DashboardClient

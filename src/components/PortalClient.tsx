@@ -15,6 +15,11 @@ import {
 import { downloadSessionIcs } from '@/lib/ics';
 import { resolveHomeworkHref } from '@/lib/notes';
 import type { PortalBookingDTO } from '@/types/domain';
+import {
+  MagicSpotlightCard,
+  NumberTicker,
+} from '@/components/MotionPrimitives';
+import { Interactive3DCard } from '@/components/StudioVectorScene';
 
 function getDayIso(offsetDays: number): string {
   return new Date(Date.now() + offsetDays * 86_400_000).toISOString().slice(0, 10);
@@ -229,12 +234,13 @@ export function PortalClient({
         return (
           <section
             id="next-session-spotlight"
-            className="surface-card rounded-2xl border-2 border-[#141413] p-5 sm:p-6 space-y-4"
+            className="surface-card relative overflow-hidden rounded-2xl border-2 border-[#141413] p-5 sm:p-6 space-y-4"
           >
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="space-y-1.5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded bg-[#D94E28] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-white">
+                  <span className="inline-flex items-center gap-1.5 rounded bg-[#D94E28] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-white">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                     Next Session
                   </span>
                   <span className="rounded-full border border-[#BBF7D0] bg-[#DCFCE7] px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#15803D]">
@@ -392,82 +398,83 @@ export function PortalClient({
         );
       })()}
 
-      {/* Study Vault & Homework Archive Shelf */}
+      {/* Homework & Study Notes Archive */}
       {vaultItems.length > 0 && (
-        <section id="study-vault" className="surface-card rounded-2xl p-4 sm:p-5 space-y-3 scroll-mt-20">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="inline-flex items-center gap-2">
-              <FolderArchive className="h-4 w-4 text-[#D94E28]" />
-              <h2 className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#141413]">
-                Study Vault &amp; Homework Archive
-              </h2>
+        <section id="study-vault" className="scroll-mt-20">
+          <MagicSpotlightCard className="surface-card rounded-2xl p-4 sm:p-5 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="inline-flex items-center gap-2">
+                <FolderArchive className="h-4 w-4 text-[#D94E28]" />
+                <h2 className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#141413]">
+                  Homework &amp; Study Notes
+                </h2>
+              </div>
+              <span className="rounded-full border border-[#DCD6C8] bg-[#F6F4EE] px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#575248]">
+                <NumberTicker value={vaultItems.length} /> resource{vaultItems.length > 1 ? 's' : ''} saved
+              </span>
             </div>
-            <span className="rounded-full border border-[#DCD6C8] bg-[#F6F4EE] px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#575248]">
-              {vaultItems.length} resource{vaultItems.length > 1 ? 's' : ''} saved
-            </span>
-          </div>
 
-          <div className="flex gap-3 overflow-x-auto pb-1">
-            {vaultItems.map((item) => {
-              const dtLabel = new Date(item.startsAtIso).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-              });
-              const resolvedHw = resolveHomeworkHref(item.homeworkUrl);
-              return (
-                <div
-                  key={`vault-${item.id}`}
-                  className="min-w-[240px] max-w-[290px] shrink-0 rounded-xl border border-[#DCD6C8] bg-[#F6F4EE]/75 p-3.5 flex flex-col justify-between gap-2.5"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between gap-2 font-mono text-[10px] text-[#6E685C]">
-                      <span>{dtLabel}</span>
-                      <span className="truncate font-semibold text-[#141413]">
-                        {item.serviceName}
-                      </span>
+            <div className="flex gap-3 overflow-x-auto pb-1">
+              {vaultItems.map((item) => {
+                const dtLabel = new Date(item.startsAtIso).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                });
+                const resolvedHw = resolveHomeworkHref(item.homeworkUrl);
+                return (
+                  <Interactive3DCard key={`vault-${item.id}`} maxTilt={5}>
+                    <div className="h-full min-w-[240px] max-w-[290px] shrink-0 rounded-xl border border-[#DCD6C8] bg-[#F6F4EE]/75 p-3.5 flex flex-col justify-between gap-2.5">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between gap-2 font-mono text-[10px] text-[#6E685C]">
+                          <span>{dtLabel}</span>
+                          <span className="truncate font-semibold text-[#141413]">
+                            {item.serviceName}
+                          </span>
+                        </div>
+                        {item.sessionSummary && (
+                          <p className="text-xs leading-relaxed text-[#575248] line-clamp-2">
+                            {item.sessionSummary}
+                          </p>
+                        )}
+                      </div>
+
+                      {resolvedHw.href ? (
+                        resolvedHw.isInternal ? (
+                          <Link
+                            href={resolvedHw.href}
+                            className="inline-flex items-center justify-between rounded-lg border border-[#CEC7B6] bg-white px-2.5 py-1.5 font-mono text-[11px] font-semibold text-[#D94E28] hover:border-[#141413] transition"
+                          >
+                            <span className="inline-flex items-center gap-1.5">
+                              <FileText className="h-3 w-3" />
+                              Open Interactive Study Sheet
+                            </span>
+                            <ArrowUpRight className="h-3 w-3" />
+                          </Link>
+                        ) : (
+                          <a
+                            href={resolvedHw.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center justify-between rounded-lg border border-[#CEC7B6] bg-white px-2.5 py-1.5 font-mono text-[11px] font-semibold text-[#D94E28] hover:border-[#141413] transition"
+                          >
+                            <span className="inline-flex items-center gap-1.5">
+                              <FileText className="h-3 w-3" />
+                              Open Homework PDF
+                            </span>
+                            <ArrowUpRight className="h-3 w-3" />
+                          </a>
+                        )
+                      ) : (
+                        <span className="font-mono text-[10px] text-[#6E685C]">
+                          Lesson notes saved ✓
+                        </span>
+                      )}
                     </div>
-                    {item.sessionSummary && (
-                      <p className="text-xs leading-relaxed text-[#575248] line-clamp-2">
-                        {item.sessionSummary}
-                      </p>
-                    )}
-                  </div>
-
-                  {resolvedHw.href ? (
-                    resolvedHw.isInternal ? (
-                      <Link
-                        href={resolvedHw.href}
-                        className="inline-flex items-center justify-between rounded-lg border border-[#CEC7B6] bg-white px-2.5 py-1.5 font-mono text-[11px] font-semibold text-[#D94E28] hover:border-[#141413] transition"
-                      >
-                        <span className="inline-flex items-center gap-1.5">
-                          <FileText className="h-3 w-3" />
-                          Open Interactive Study Sheet
-                        </span>
-                        <ArrowUpRight className="h-3 w-3" />
-                      </Link>
-                    ) : (
-                      <a
-                        href={resolvedHw.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center justify-between rounded-lg border border-[#CEC7B6] bg-white px-2.5 py-1.5 font-mono text-[11px] font-semibold text-[#D94E28] hover:border-[#141413] transition"
-                      >
-                        <span className="inline-flex items-center gap-1.5">
-                          <FileText className="h-3 w-3" />
-                          Open Homework PDF
-                        </span>
-                        <ArrowUpRight className="h-3 w-3" />
-                      </a>
-                    )
-                  ) : (
-                    <span className="font-mono text-[10px] text-[#6E685C]">
-                      Takeaway archived ✓
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                  </Interactive3DCard>
+                );
+              })}
+            </div>
+          </MagicSpotlightCard>
         </section>
       )}
 
@@ -534,7 +541,7 @@ export function PortalClient({
           const timingLabel = b.status === 'CONFIRMED' ? formatRelativeTiming(b.startsAtIso, nowMs) : null;
 
           return (
-            <div
+            <MagicSpotlightCard
               key={b.id}
               className={`surface-card rounded-2xl p-4 sm:p-5 space-y-3.5 ${
                 isNext ? 'ring-2 ring-[#141413]' : ''
@@ -789,7 +796,7 @@ export function PortalClient({
                   </div>
                 );
               })()}
-            </div>
+            </MagicSpotlightCard>
           );
         })
       )}

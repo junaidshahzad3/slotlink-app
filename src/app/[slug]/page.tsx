@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { BookingClient } from '@/components/BookingClient';
 import { TutorShareCard } from '@/components/TutorShareCard';
 import type { PrefillStudentDTO } from '@/types/domain';
+import { MagicSpotlightCard } from '@/components/MotionPrimitives';
 
 export default async function PublicPortalPage({
   params,
@@ -94,7 +95,7 @@ export default async function PublicPortalPage({
                 </div>
                 <div className="min-w-0">
                   <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                    Instructor Studio
+                    1-on-1 Booking Page
                   </div>
                   <h1 className="truncate font-serif text-fluid-h2 leading-tight text-[#141413]">
                     {pro.name}
@@ -102,25 +103,15 @@ export default async function PublicPortalPage({
                 </div>
               </div>
 
-              {/* Animated SVG Vector Live Availability Radar */}
+              {/* Calendar Availability Pill */}
               <div className="flex items-center justify-between rounded-xl border border-[#DCD6C8] bg-white/90 px-3.5 py-2.5 text-[11px]">
                 <div className="flex items-center gap-2.5">
-                  <svg viewBox="0 0 36 36" className="h-7 w-7 shrink-0">
-                    <circle cx="18" cy="18" r="15" fill="none" stroke="#DCD6C8" strokeWidth="1.2" />
-                    <circle
-                      cx="18"
-                      cy="18"
-                      r="10"
-                      fill="none"
-                      stroke="#15803D"
-                      strokeWidth="1.2"
-                      strokeDasharray="4 3"
-                    />
-                    <circle cx="18" cy="18" r="3.5" fill="#15803D" />
-                  </svg>
-                  <div className="font-mono">
-                    <div className="font-semibold text-[#141413]">LIVE FREEBUSY SYNC</div>
-                    <div className="text-[10px] text-[#6E685C]">{workHoursLabel}</div>
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[#15803D]" />
+                  <div>
+                    <div className="font-semibold text-[#141413]">Live Calendar Availability</div>
+                    <div className="text-[10px] text-[#6E685C]">
+                      Times shown in your local timezone ({workHoursLabel})
+                    </div>
                   </div>
                 </div>
                 <span className="rounded bg-[#DCFCE7] px-2 py-0.5 font-mono text-[10px] font-semibold text-[#15803D]">
@@ -133,7 +124,7 @@ export default async function PublicPortalPage({
               {pro.bio && <p className="text-sm leading-relaxed text-[#575248]">{pro.bio}</p>}
 
               {/* Universal Studio Highlights */}
-              <div className="rounded-xl border border-[#DCD6C8] bg-white/85 p-4 space-y-2.5">
+              <MagicSpotlightCard className="rounded-xl border border-[#DCD6C8] bg-white/85 p-4 space-y-2.5">
                 <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
                   What&rsquo;s Included
                 </div>
@@ -145,7 +136,7 @@ export default async function PublicPortalPage({
                     </li>
                   ))}
                 </ul>
-              </div>
+              </MagicSpotlightCard>
 
               <TutorShareCard slug={pro.slug} name={pro.name} />
             </div>
@@ -188,14 +179,14 @@ export default async function PublicPortalPage({
                 </div>
               </div>
 
-              {/* Client Passbook Guidance & Token Lookup */}
-              <div className="surface-ink rounded-xl p-4 space-y-3">
+              {/* Returning Student Pack Lookup */}
+              <div className="surface-ink relative overflow-hidden rounded-xl p-4 space-y-3">
                 <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#A8A295]">
-                  Have a Prepaid Passbook?
+                  Already have a lesson pack?
                 </div>
                 <p className="text-xs leading-relaxed text-[#D8D3C8]">
-                  Returning clients receive a private magic link after their first booking to redeem
-                  remaining hours or reschedule in two taps.
+                  Open the private student page link from your confirmation email, or paste your
+                  pass code below to book using your remaining hours.
                 </p>
                 {prefillStudent ? (
                   <Link

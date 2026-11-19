@@ -22,10 +22,10 @@ export default async function StudySheetPage({
         <div className="viewport-container flex items-center justify-between gap-3 py-3">
           <div className="min-w-0">
             <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
-              Study Packet
+              Interactive Lesson Notes
             </div>
             <div className="truncate text-sm font-semibold text-[#141413]">
-              {sheet.courseTag} · Interactive Resource
+              {sheet.courseTag}
             </div>
           </div>
 
@@ -40,7 +40,7 @@ export default async function StudySheetPage({
       </header>
 
       <main className="viewport-container min-h-[calc(100dvh-4.5rem)] py-[clamp(2rem,5vh,4rem)] space-y-6">
-        <header className="surface-ink rounded-2xl p-6 sm:p-8 space-y-3">
+        <header className="relative overflow-hidden surface-ink rounded-2xl p-6 sm:p-8 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#F3B09A]">
               {sheet.courseTag}
@@ -52,6 +52,10 @@ export default async function StudySheetPage({
           <h1 className="font-serif text-fluid-h1 text-[#F6F4EE]">{sheet.title}</h1>
           <p className="text-xs font-mono text-[#A8A295]">{sheet.subtitle}</p>
           <p className="max-w-3xl pt-1 text-sm leading-relaxed text-[#D8D3C8]">{sheet.summary}</p>
+          <p className="text-xs font-medium text-[#4ADE80]">
+            Review the diagram and key formulas below, then test yourself with the practice
+            questions.
+          </p>
         </header>
 
         <StudySheetClient sheet={sheet} />

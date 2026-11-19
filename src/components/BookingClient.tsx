@@ -11,6 +11,12 @@ import {
 } from 'lucide-react';
 import { downloadSessionIcs } from '@/lib/ics';
 import type { PrefillStudentDTO, ServiceDTO } from '@/types/domain';
+import {
+  BorderBeam,
+  MagicSpotlightCard,
+  ShimmerButton,
+} from '@/components/MotionPrimitives';
+import { Interactive3DCard } from '@/components/StudioVectorScene';
 
 interface SlotGroup {
   label: string;
@@ -190,11 +196,14 @@ export function BookingClient({
   if (confirmed) {
     return (
       <div className="rounded-2xl border border-[#DCD6C8] bg-[#F6F4EE] p-4 sm:p-6">
-        <div className="surface-card overflow-hidden rounded-2xl">
+        <Interactive3DCard maxTilt={5}>
+        <div className="surface-card relative overflow-hidden rounded-2xl">
+          <BorderBeam tone="emerald" />
           {/* Top Green Verified Pass Header */}
           <div className="bg-[#F0FDF4] border-b border-[#BBF7D0] px-6 py-5 sm:px-8 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#BBF7D0] bg-white px-3 py-1 font-mono text-[11px] font-semibold text-[#15803D]">
+                <span className="h-2 w-2 rounded-full bg-[#15803D] animate-pulse" />
                 <CalendarCheck2 className="h-3.5 w-3.5" />
                 BOOKING CONFIRMED
               </div>
@@ -317,11 +326,12 @@ export function BookingClient({
                 ))}
               </svg>
               <span className="font-mono text-[10px] tracking-widest text-[#6E685C]">
-                SLOTLINK PASS // {bookingRef} // 128-BIT MAGIC LINK
+                Booking Reference #{bookingRef} · Private Student Page Active
               </span>
             </div>
           </div>
         </div>
+        </Interactive3DCard>
       </div>
     );
   }
@@ -342,9 +352,9 @@ export function BookingClient({
   const step3Done = Boolean(studentName.trim() && studentEmail.trim());
 
   const steps = [
-    { id: 'booking-step-1', num: '01', label: 'Session', done: step1Done, active: true },
-    { id: 'booking-step-2', num: '02', label: 'Date & Slot', done: step2Done, active: step1Done },
-    { id: 'booking-step-3', num: '03', label: 'Student Details', done: step3Done, active: step2Done },
+    { id: 'booking-step-1', num: '01', label: 'Choose Lesson', done: step1Done, active: true },
+    { id: 'booking-step-2', num: '02', label: 'Date & Time', done: step2Done, active: step1Done },
+    { id: 'booking-step-3', num: '03', label: 'Your Details', done: step3Done, active: step2Done },
   ];
 
   function jumpToStep(id: string) {
@@ -403,7 +413,7 @@ export function BookingClient({
       <div id="booking-step-1" className="scroll-mt-20">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-            01 / Select Session or Pack
+            Step 1 · Choose a Lesson or Prepaid Pack
           </span>
           <span className="rounded-full border border-[#DCD6C8] bg-[#F6F4EE] px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#141413]">
             {selectedService
@@ -430,59 +440,64 @@ export function BookingClient({
                 ? Math.round(svc.priceCents / 100 / svc.packageHrs)
                 : null;
             return (
-              <button
+              <MagicSpotlightCard
                 key={svc.id}
-                type="button"
-                onClick={() => setSelectedServiceId(svc.id)}
-                className={`rounded-xl p-4 text-left transition-all flex flex-col justify-between gap-3 ${
+                spotlightColor={active ? 'rgba(217, 78, 40, 0.14)' : 'rgba(20, 20, 19, 0.08)'}
+                className={`rounded-xl transition-all ${
                   active
                     ? 'border-2 border-[#141413] bg-[#EFECE4]/65 shadow-sm'
                     : 'border border-[#DCD6C8] bg-white hover:border-[#9E9687]'
                 }`}
               >
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="text-sm font-semibold text-[#141413]">{svc.name}</span>
-                    <span
-                      className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
-                        active
-                          ? 'border-[#141413] bg-[#141413] text-[#F6F4EE]'
-                          : 'border-[#CEC7B6] bg-white'
-                      }`}
-                    >
-                      {active && <Check className="h-2.5 w-2.5" />}
-                    </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedServiceId(svc.id)}
+                  className="h-full w-full p-4 text-left flex flex-col justify-between gap-3 cursor-pointer"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-sm font-semibold text-[#141413]">{svc.name}</span>
+                      <span
+                        className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                          active
+                            ? 'border-[#141413] bg-[#141413] text-[#F6F4EE]'
+                            : 'border-[#CEC7B6] bg-white'
+                        }`}
+                      >
+                        {active && <Check className="h-2.5 w-2.5" />}
+                      </span>
+                    </div>
+
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                      <span
+                        className={`font-mono text-sm font-semibold ${
+                          svc.priceCents === 0 ? 'text-[#15803D]' : 'text-[#141413]'
+                        }`}
+                      >
+                        {svc.priceCents === 0 ? 'FREE' : `$${(svc.priceCents / 100).toFixed(0)}`}
+                      </span>
+                      {perHr !== null && (
+                        <span className="rounded bg-[#D94E28] px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-white">
+                          BEST VALUE · ${perHr}/hr
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="mt-2 text-xs text-[#575248] line-clamp-2">{svc.description}</p>
                   </div>
 
-                  <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                    <span
-                      className={`font-mono text-sm font-semibold ${
-                        svc.priceCents === 0 ? 'text-[#15803D]' : 'text-[#141413]'
-                      }`}
-                    >
-                      {svc.priceCents === 0 ? 'FREE' : `$${(svc.priceCents / 100).toFixed(0)}`}
+                  <div className="flex flex-wrap gap-1.5 font-mono text-[10px] text-[#6E685C]">
+                    <span className="rounded border border-[#DCD6C8] bg-[#F6F4EE] px-1.5 py-0.5">
+                      {svc.durationMin} min
                     </span>
-                    {perHr !== null && (
-                      <span className="rounded bg-[#D94E28] px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-white">
-                        BEST VALUE · ${perHr}/hr
+                    {svc.packageHrs > 0 && (
+                      <span className="rounded border border-[#DCD6C8] bg-[#F6F4EE] px-1.5 py-0.5">
+                        {svc.packageHrs} hr{svc.packageHrs > 1 ? 's' : ''} pack
                       </span>
                     )}
                   </div>
-
-                  <p className="mt-2 text-xs text-[#575248] line-clamp-2">{svc.description}</p>
-                </div>
-
-                <div className="flex flex-wrap gap-1.5 font-mono text-[10px] text-[#6E685C]">
-                  <span className="rounded border border-[#DCD6C8] bg-[#F6F4EE] px-1.5 py-0.5">
-                    {svc.durationMin} min
-                  </span>
-                  {svc.packageHrs > 0 && (
-                    <span className="rounded border border-[#DCD6C8] bg-[#F6F4EE] px-1.5 py-0.5">
-                      {svc.packageHrs} hr{svc.packageHrs > 1 ? 's' : ''} pack
-                    </span>
-                  )}
-                </div>
-              </button>
+                </button>
+              </MagicSpotlightCard>
             );
           })}
         </div>
@@ -726,7 +741,7 @@ export function BookingClient({
 
       {/* Sticky Tactile Booking Summary Bar + Submit */}
       <div
-        className={`surface-elevated rounded-xl p-4 space-y-3 transition-shadow ${
+        className={`surface-elevated relative overflow-hidden rounded-xl p-4 space-y-3 transition-shadow ${
           startsAt ? 'sticky bottom-3 z-20 shadow-lg border-[#141413]/30' : ''
         }`}
       >
@@ -751,10 +766,10 @@ export function BookingClient({
           </div>
         </div>
 
-        <button
+        <ShimmerButton
           type="submit"
           disabled={submitting || !startsAt}
-          className="w-full rounded-xl bg-[#141413] px-4 py-3 text-sm font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] disabled:opacity-40 transition"
+          className="w-full rounded-xl bg-[#141413] px-4 py-3 text-sm font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] disabled:opacity-40"
         >
           {submitting
             ? 'Confirming...'
@@ -763,7 +778,7 @@ export function BookingClient({
               : `Confirm ${selectedService?.name ?? 'Session'}${
                   selectedService?.priceCents ? ` · $${(selectedService.priceCents / 100).toFixed(0)}` : ''
                 }`}
-        </button>
+        </ShimmerButton>
       </div>
     </form>
   );

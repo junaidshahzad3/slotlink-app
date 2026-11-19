@@ -20,9 +20,9 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'SlotLink — 1-Link Micro-Portal for Solo Tutors & Coaches',
+  title: 'SlotLink — Online Booking, Lesson Packs & Student Portals for Tutors',
   description:
-    'One public link for booking, package hour tracking, payments, and zero-login student portals.',
+    'One simple link for private tutors, music teachers, and 1-on-1 coaches to take bookings, track prepaid lesson packs, and share private student portals with no passwords.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

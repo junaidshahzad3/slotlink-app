@@ -5,18 +5,18 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 const TOP_NAV_LINKS = [
-  { href: '/#journey', label: 'Scroll Journey', mobileLabel: 'Journey' },
-  { href: '/#workflow-compare', label: 'Workflow Compare', mobileLabel: 'Compare' },
-  { href: '/#calculator', label: 'ROI Calculator', mobileLabel: null },
+  { href: '/#how-it-works', label: 'How It Works', mobileLabel: 'How It Works' },
+  { href: '/#calculator', label: 'Savings', mobileLabel: 'Savings' },
   { href: '/#pricing', label: 'Pricing', mobileLabel: 'Pricing' },
-  { href: '/sarah-math', label: 'Live Sample Studio', mobileLabel: 'Sample Studio' },
+  { href: '/#faq', label: 'FAQ', mobileLabel: null },
+  { href: '/sarah-math', label: 'Live Example', mobileLabel: 'Live Example' },
 ];
 
 /**
  * Sticky editorial top bar with passive document scroll progress bar and mobile jump links.
  */
 export function AppTopBar({
-  badge = 'SOLO EDUCATOR OS',
+  badge = 'FOR TUTORS & COACHES',
   rightSlot,
 }: {
   badge?: string;
@@ -85,7 +85,7 @@ export function AppTopBar({
                 href="/login?mode=signup"
                 className="inline-flex items-center gap-1.5 rounded-lg bg-[#141413] px-3.5 py-2 text-xs font-semibold text-[#F6F4EE] hover:bg-[#D94E28] transition"
               >
-                Create Studio
+                Get Started Free
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </>

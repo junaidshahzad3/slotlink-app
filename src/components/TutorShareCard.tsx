@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Check, Copy, MessageCircle, QrCode } from 'lucide-react';
+import { MagicSpotlightCard } from '@/components/MotionPrimitives';
 
 // Deterministic 15x15 editorial QR grid pattern with 3 finder squares
 const QR_MATRIX: number[][] = [
@@ -43,7 +44,7 @@ export function TutorShareCard({ slug, name }: { slug: string; name: string }) {
   }
 
   return (
-    <div className="rounded-xl border border-[#DCD6C8] bg-white/90 p-4 space-y-3">
+    <MagicSpotlightCard className="rounded-xl border border-[#DCD6C8] bg-white/90 p-4 space-y-3">
       <div className="flex items-center justify-between gap-2">
         <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#575248]">
           Share Studio Link
@@ -125,6 +126,6 @@ export function TutorShareCard({ slug, name }: { slug: string; name: string }) {
           WhatsApp
         </a>
       </div>
-    </div>
+    </MagicSpotlightCard>
   );
 }

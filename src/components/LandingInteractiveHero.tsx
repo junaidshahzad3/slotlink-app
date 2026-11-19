@@ -13,6 +13,11 @@ import {
   Sparkles,
   Video,
 } from 'lucide-react';
+import {
+  MagicSpotlightCard,
+  NumberTicker,
+  ShimmerButton,
+} from '@/components/MotionPrimitives';
 
 type StageTab = 'booking' | 'portal' | 'deduct';
 
@@ -119,20 +124,21 @@ export function HeroHandleClaimer() {
         </span>
         <input
           type="text"
-          aria-label="Claim your SlotLink handle"
-          placeholder="sarah-math"
+          aria-label="Claim your SlotLink link"
+          placeholder="your-name"
           value={handle}
           onChange={(e) => setHandle(e.target.value)}
           className="w-full min-w-0 bg-transparent font-mono text-xs font-semibold text-[#D94E28] placeholder-[#A8A295] focus:outline-none"
         />
       </div>
-      <button
+      <ShimmerButton
         type="submit"
-        className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-[#D94E28] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[#B83E1D] transition cursor-pointer"
+        variant="terracotta"
+        className="shrink-0 rounded-lg px-4 py-2.5 text-xs font-semibold"
       >
-        Claim Studio Link
+        Claim Free Link
         <ArrowRight className="h-3.5 w-3.5" />
-      </button>
+      </ShimmerButton>
     </form>
   );
 }
@@ -165,15 +171,10 @@ export function HeroInteractiveStage() {
     <div
       onMouseMove={handleHeroMove}
       onMouseLeave={() => setHeroTilt({ rx: 0, ry: 0 })}
-      className="relative pb-10 sm:pb-14 scene-3d-stage"
+      className="relative scene-3d-stage"
     >
-      {/* Floating 3D Parallax Metric Pill */}
-      <div
-        className="hidden sm:inline-flex animate-float-subtle items-center gap-2 rounded-full border border-[#141413] bg-white px-3 py-1 font-mono text-[10px] font-semibold text-[#141413] shadow-md mb-3"
-        style={{ transform: 'translateZ(35px)' }}
-      >
-        <span className="h-2 w-2 rounded-full bg-[#D94E28]" />
-        INTERACTIVE 3D STUDIO STAGE · TRY CLICKING
+      <div className="mb-2.5 flex items-center justify-between gap-2 font-mono text-[11px] font-semibold text-[#575248]">
+        <span>Interactive Preview — Click any tab to see how it works</span>
       </div>
 
       <div
@@ -194,12 +195,12 @@ export function HeroInteractiveStage() {
               {tab === 'booking'
                 ? 'slotlink.app/sarah-math'
                 : tab === 'portal'
-                  ? `slotlink.app/p/sl_demo_${personaKey}...`
+                  ? `slotlink.app/p/${personaKey === 'alex' ? 'alex-rivera' : 'maya-lin'}`
                   : 'slotlink.app/dashboard'}
             </div>
             <span className="inline-flex items-center gap-1.5 font-mono text-[10px] font-semibold text-[#15803D]">
               <span className="live-dot h-1.5 w-1.5 rounded-full bg-[#15803D]" />
-              LIVE
+              DEMO
             </span>
           </div>
 
@@ -220,7 +221,7 @@ export function HeroInteractiveStage() {
                   : 'text-[#575248] hover:text-[#141413]'
               }`}
             >
-              01 · 1-Link Studio
+              1. Booking Page
             </button>
             <button
               type="button"
@@ -233,7 +234,7 @@ export function HeroInteractiveStage() {
                   : 'text-[#575248] hover:text-[#141413]'
               }`}
             >
-              02 · Magic Passbook
+              2. Student Page
             </button>
             <button
               type="button"
@@ -246,8 +247,16 @@ export function HeroInteractiveStage() {
                   : 'text-[#575248] hover:text-[#141413]'
               }`}
             >
-              03 · 1-Tap Deduct
+              3. Teacher View
             </button>
+          </div>
+
+          <div className="rounded-lg border border-[#DCD6C8] bg-white/80 px-3 py-1.5 text-[11px] font-medium text-[#423E37]">
+            {tab === 'booking'
+              ? 'What students see when they open your booking link'
+              : tab === 'portal'
+                ? 'The private page students bookmark for hours, video links & homework (no login)'
+                : 'Mark a lesson complete to deduct 1 hour and send notes instantly'}
           </div>
         </div>
 
@@ -481,17 +490,17 @@ export function HeroInteractiveStage() {
             <div className="flex items-center justify-between border-b border-[#EFECE4] pb-3.5">
               <div>
                 <div className="font-mono text-[10px] uppercase tracking-widest text-[#D94E28]">
-                  Live Ledger Simulation
+                  Teacher Dashboard
                 </div>
                 <div className="text-sm font-semibold text-[#141413]">
-                  One tap deducts 1 hour &amp; publishes notes
+                  One click deducts 1 hour &amp; shares notes
                 </div>
               </div>
               <Link
                 href="/login?mode=signup"
                 className="rounded-md border border-[#DCD6C8] bg-[#F6F4EE] px-2.5 py-1 font-mono text-[11px] font-medium text-[#141413] hover:bg-[#EFECE4]"
               >
-                Launch Studio →
+                Create Account →
               </Link>
             </div>
 
@@ -520,19 +529,19 @@ export function HeroInteractiveStage() {
                   <button
                     type="button"
                     onClick={() => setDeducted(true)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#15803D] px-3 py-2 text-xs font-semibold text-white hover:bg-[#166534] transition"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#15803D] px-3 py-2 text-xs font-semibold text-white hover:bg-[#166534] transition cursor-pointer"
                   >
                     <Sparkles className="h-3.5 w-3.5" />
-                    Simulate Mark Complete (-1 hr)
+                    Mark Lesson Complete (-1 hr)
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={() => setDeducted(false)}
-                    className="inline-flex items-center gap-1 rounded-lg border border-[#CEC7B6] bg-white px-3 py-2 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
+                    className="inline-flex items-center gap-1 rounded-lg border border-[#CEC7B6] bg-white px-3 py-2 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] transition cursor-pointer"
                   >
                     <RotateCcw className="h-3.5 w-3.5" />
-                    Reset Simulation
+                    Reset Preview
                   </button>
                 )}
               </div>
@@ -550,7 +559,7 @@ export function HeroInteractiveStage() {
                 <div className="rounded-lg border border-[#BBF7D0] bg-[#F0FDF4] p-3 space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#15803D]">
-                      Synced to Student Magic Portal
+                      Shared to Private Student Page
                     </span>
                     <span className="inline-flex items-center gap-1 rounded border border-[#BBF7D0] bg-white px-2 py-0.5 font-mono text-[10px] font-semibold text-[#D94E28]">
                       <FileText className="h-3 w-3" />
@@ -566,59 +575,6 @@ export function HeroInteractiveStage() {
             </div>
           </div>
         )}
-      </div>
-
-      {/* Overlapping Carbon Passbook Card */}
-      <div className="surface-ink mt-4 sm:mt-0 sm:absolute sm:-bottom-4 sm:-right-4 sm:w-[345px] rounded-xl p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="font-mono text-[10px] uppercase tracking-wider text-[#A8A295]">
-              Student Magic Portal
-            </div>
-            <div className="text-sm font-semibold text-[#F6F4EE]">{persona.name}</div>
-          </div>
-          <Link
-            href={persona.href}
-            className="rounded border border-white/20 bg-white/10 px-2 py-0.5 font-mono text-[10px] text-[#F6F4EE] hover:bg-white/20"
-          >
-            Open Passbook ↗
-          </Link>
-        </div>
-
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between font-mono text-[11px]">
-            <span className="text-[#C8C2B6]">Pack Balance</span>
-            <span className={`font-semibold ${persona.statusTone}`}>
-              {tab === 'deduct' ? (deducted ? '3 of 5 hrs left' : '4 of 5 hrs left') : `${persona.hoursLeft} of 5 hrs left`}
-            </span>
-          </div>
-          <div className="grid grid-cols-5 gap-1">
-            {[0, 1, 2, 3, 4].map((idx) => {
-              const activeCount =
-                tab === 'deduct' ? (deducted ? 3 : 4) : persona.hoursLeft;
-              return (
-                <span
-                  key={idx}
-                  className={`h-1.5 rounded-sm ${
-                    idx < activeCount
-                      ? activeCount <= 1
-                        ? 'bg-[#FBBF24]'
-                        : 'bg-[#4ADE80]'
-                      : 'bg-white/15'
-                  }`}
-                />
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between rounded-lg bg-white/[0.06] border border-white/10 px-3 py-2 text-[11px]">
-          <span className="truncate text-[#F6F4EE]">{persona.nextSession}</span>
-          <span className="ml-2 inline-flex shrink-0 items-center gap-1 rounded bg-[#DCFCE7] px-1.5 py-0.5 font-mono text-[10px] font-semibold text-[#15803D]">
-            <Video className="h-2.5 w-2.5" />
-            Meet
-          </span>
-        </div>
       </div>
     </div>
   );
@@ -654,17 +610,17 @@ export function CommissionSavingsCalculator() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-2xl">
               <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                Studio Economics Calculator
+                Zero Commissions
               </div>
               <h2 className="mt-2 text-fluid-h2 font-semibold tracking-tight text-[#141413]">
-                Keep 100% of every{' '}
+                Keep 100% of your{' '}
                 <span className="font-serif italic font-normal text-[#D94E28]">
-                  prepaid lesson hour.
+                  lesson earnings.
                 </span>
               </h2>
               <p className="mt-1.5 text-fluid-body text-[#575248]">
-                See how much annual tutoring income stays in your pocket compared to 20% marketplace
-                cuts and multi-tool CRM subscriptions.
+                See how much annual teaching income stays in your pocket compared to marketplace
+                commissions and separate admin apps.
               </p>
             </div>
 
@@ -742,45 +698,49 @@ export function CommissionSavingsCalculator() {
 
           {/* 3-Column Annual Comparison */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-[#E5C6BE] bg-[#FDF2EF] p-5 space-y-2">
+            <MagicSpotlightCard className="rounded-xl border border-[#E5C6BE] bg-[#FDF2EF] p-5 space-y-2">
               <div className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#9F2D12]">
-                Marketplaces (20% Cut)
+                Tutoring Marketplaces (20% cut)
               </div>
               <div className="font-serif text-3xl text-[#9F2D12]">
-                -${marketplaceAnnualCut.toLocaleString()}
+                -$<NumberTicker value={marketplaceAnnualCut} />
                 <span className="font-mono text-xs">/yr</span>
               </div>
               <p className="text-xs leading-relaxed text-[#7C2D12]">
-                ${Math.round(monthlyRev * 0.2).toLocaleString()}/mo lost to platform booking
+                ${Math.round(monthlyRev * 0.2).toLocaleString()}/mo lost to marketplace booking
                 commissions.
               </p>
-            </div>
+            </MagicSpotlightCard>
 
-            <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-5 space-y-2">
+            <MagicSpotlightCard className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-5 space-y-2">
               <div className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#575248]">
-                Duct-Tape CRM Stack (~$65/mo)
+                Separate Calendar + Admin Apps (~$65/mo)
               </div>
               <div className="font-serif text-3xl text-[#141413]">
-                -${ductTapeAnnualCost.toLocaleString()}
+                -$<NumberTicker value={ductTapeAnnualCost} />
                 <span className="font-mono text-xs">/yr</span>
               </div>
               <p className="text-xs leading-relaxed text-[#575248]">
-                Calendar tool + bloated CRM + ~6 hrs/mo manual spreadsheet hour tracking.
+                Paid scheduler + invoicing tools + ~6 hrs/mo tracking prepaid hours in spreadsheets.
               </p>
-            </div>
+            </MagicSpotlightCard>
 
-            <div className="surface-ink rounded-xl p-5 space-y-2">
+            <MagicSpotlightCard
+              spotlightColor="rgba(74, 222, 128, 0.22)"
+              className="surface-ink rounded-xl p-5 space-y-2"
+            >
               <div className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#4ADE80]">
-                Saved With SlotLink ({tier === 'solo' ? '$12/mo' : '$19/mo'})
+                You Save With SlotLink ({tier === 'solo' ? '$12/mo' : '$19/mo'})
               </div>
               <div className="font-serif text-4xl leading-none text-[#F6F4EE]">
-                +${netSavedVsMarketplace.toLocaleString()}
+                +$<NumberTicker value={netSavedVsMarketplace} />
                 <span className="font-mono text-xs text-[#A8A295]">/yr</span>
               </div>
               <p className="text-xs leading-relaxed text-[#C8C2B6]">
-                0% commission, ${slotlinkAnnualCost}/yr flat studio software, zero client passwords.
+                0% commission, flat ${slotlinkAnnualCost}/yr plan, and private password-free student
+                pages.
               </p>
-            </div>
+            </MagicSpotlightCard>
           </div>
 
           {/* Vector Take-Home Gauge Comparing Marketplace Cut vs SlotLink Net */}

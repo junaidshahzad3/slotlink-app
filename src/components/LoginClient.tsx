@@ -13,7 +13,13 @@ import {
   UserPlus,
 } from 'lucide-react';
 import { AppTopBar } from '@/components/AppTopBar';
-import { ScrollAmbient3DObjects } from '@/components/StudioVectorScene';
+import {
+  BlurFade,
+  HeroHighlightWord,
+  MagicSpotlightCard,
+  ShimmerButton,
+} from '@/components/MotionPrimitives';
+import { Interactive3DCard } from '@/components/StudioVectorScene';
 
 const SAMPLE_EDUCATOR_EMAIL = 'sarah@slotlink.app';
 
@@ -149,15 +155,14 @@ export function LoginClient({
 
   return (
     <div className="relative min-h-screen bg-[#F6F4EE] bg-editorial-mesh text-[#141413]">
-      <ScrollAmbient3DObjects />
       <AppTopBar
-        badge="STUDIO ACCESS"
+        badge="TEACHER LOGIN"
         rightSlot={
           <Link
             href="/sarah-math"
             className="hidden sm:inline-flex items-center gap-1 rounded-lg border border-[#DCD6C8] bg-white px-3 py-1.5 text-xs font-medium text-[#141413] hover:bg-[#EFECE4] transition"
           >
-            View Sample Booking Page
+            See Live Example
             <ArrowUpRight className="h-3.5 w-3.5 text-[#D94E28]" />
           </Link>
         }
@@ -171,31 +176,32 @@ export function LoginClient({
             ) : (
               <KeyRound className="h-3.5 w-3.5 text-[#D94E28]" />
             )}
-            {mode === 'signup' ? 'Launch In 60 Seconds' : 'Educator Studio Access'}
+            For Teachers, Tutors &amp; Coaches
           </div>
           <h1 className="mt-4 font-serif text-fluid-h1 tracking-tight text-[#141413]">
             {mode === 'signup' ? (
               <>
-                Launch your private{' '}
-                <span className="italic text-[#D94E28]">booking studio.</span>
+                Create your free{' '}
+                <HeroHighlightWord>booking page.</HeroHighlightWord>
               </>
             ) : (
               <>
                 Sign in to your{' '}
-                <span className="italic text-[#D94E28]">SlotLink Studio.</span>
+                <HeroHighlightWord>teacher dashboard.</HeroHighlightWord>
               </>
             )}
           </h1>
           <p className="mt-2.5 text-sm leading-relaxed text-[#575248]">
             {mode === 'signup'
-              ? 'Claim your personal booking slug, configure your hourly and 5-session pack pricing, and start sharing client passbooks with zero commissions.'
-              : 'Access your upcoming lessons, mark sessions complete to update client hour packs, and manage your public booking page.'}
+              ? 'Claim your personal booking link, set single lesson and 5-pack prices, and start sharing private no-login pages with your students.'
+              : 'Manage upcoming lessons, mark sessions complete to deduct prepaid hours, and share study notes with students.'}
           </p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
           {/* Left: Auth Card */}
-          <section className="surface-card rounded-2xl p-6 sm:p-8 space-y-6">
+          <BlurFade>
+          <MagicSpotlightCard className="surface-card rounded-2xl p-6 sm:p-8 space-y-6">
             {/* Mode Switcher */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#EFECE4] pb-4">
               <div
@@ -387,14 +393,14 @@ export function LoginClient({
                   </p>
                 )}
 
-                <button
+                <ShimmerButton
                   type="submit"
                   disabled={signupLoading}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#141413] px-4 py-3 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] disabled:opacity-50 transition"
+                  className="w-full rounded-xl bg-[#141413] px-4 py-3 text-xs font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] disabled:opacity-50"
                 >
                   {signupLoading ? 'Creating Your Studio...' : 'Launch Studio & Open Dashboard'}
                   <ArrowRight className="h-4 w-4" />
-                </button>
+                </ShimmerButton>
               </form>
             ) : (
               <div className="space-y-5">
@@ -429,7 +435,7 @@ export function LoginClient({
                         className="inline-flex items-center gap-1 rounded-full border border-[#D5CFC0] bg-[#EFECE4] px-2.5 py-0.5 font-mono text-[10px] font-medium text-[#141413] hover:border-[#D94E28] hover:text-[#D94E28] transition"
                       >
                         <Sparkles className="h-3 w-3 text-[#D94E28]" />
-                        Use sample educator: {SAMPLE_EDUCATOR_EMAIL}
+                        Try demo account ({SAMPLE_EDUCATOR_EMAIL})
                       </button>
                     </div>
                     <input
@@ -471,6 +477,12 @@ export function LoginClient({
               </div>
             )}
 
+            <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] px-4 py-3 text-xs leading-relaxed text-[#575248]">
+              <strong className="font-semibold text-[#141413]">Are you a student or parent?</strong>{' '}
+              You do not need an account — just open the booking link or private student page your
+              teacher sent you.
+            </div>
+
             <p className="border-t border-[#EFECE4] pt-4 text-[11px] leading-relaxed text-[#6E685C]">
               By continuing, you agree to our{' '}
               <Link href="/terms" className="underline hover:text-[#141413]">
@@ -486,21 +498,28 @@ export function LoginClient({
               </Link>
               .
             </p>
-          </section>
+          </MagicSpotlightCard>
+          </BlurFade>
 
-          {/* Right: Live Interactive 3D Studio Card Preview & Studio Checklist */}
+          {/* Right: Live Preview of Public Booking Page */}
           <aside className="space-y-4 scene-3d-stage">
-            {/* Live Public Studio Card Preview */}
-            <div
+            <BlurFade delayMs={80}>
+            <Interactive3DCard>
+            <MagicSpotlightCard
+              spotlightColor="rgba(21, 128, 61, 0.14)"
               className="surface-card surface-card-interactive preserve-3d rounded-2xl p-5 sm:p-6 space-y-4"
-              style={{ transform: 'rotateX(2deg) rotateY(-4deg)' }}
             >
-              <div className="flex items-center justify-between border-b border-[#EFECE4] pb-3">
-                <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                  Live Public Studio Card Preview
-                </span>
-                <span className="rounded-md border border-[#DCD6C8] bg-[#F6F4EE] px-2 py-0.5 font-mono text-[10px] text-[#575248]">
-                  /{slug || 'your-studio'}
+              <div className="flex items-start justify-between gap-2 border-b border-[#EFECE4] pb-3">
+                <div>
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
+                    Preview of Your Public Booking Page
+                  </span>
+                  <p className="mt-0.5 text-[11px] text-[#6E685C]">
+                    This is what students see when they open your link.
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-md border border-[#DCD6C8] bg-[#F6F4EE] px-2 py-0.5 font-mono text-[10px] text-[#575248]">
+                  /{slug || 'your-name'}
                 </span>
               </div>
 
@@ -544,12 +563,25 @@ export function LoginClient({
                   <div className="mt-1 font-mono text-base font-semibold text-[#141413]">
                     ${Math.max(20, Number(packPriceDollars) || 275)}
                   </div>
-                  <div className="text-[11px] text-[#575248]">Auto passbook tracking</div>
+                  <div className="text-[11px] text-[#15803D] font-medium">
+                    Saves $
+                    {Math.max(
+                      0,
+                      Math.max(5, Number(singlePriceDollars) || 60) * 5 -
+                        Math.max(20, Number(packPriceDollars) || 275)
+                    )}{' '}
+                    vs singles
+                  </div>
                 </div>
               </div>
-            </div>
+            </MagicSpotlightCard>
+            </Interactive3DCard>
+            </BlurFade>
 
-            <div className="surface-ink rounded-2xl p-6 sm:p-7 space-y-5">
+            <MagicSpotlightCard
+              spotlightColor="rgba(74, 222, 128, 0.16)"
+              className="surface-ink rounded-2xl p-6 sm:p-7 space-y-5"
+            >
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[10px] uppercase tracking-widest text-[#F3B09A]">
                   Included On Every Studio
@@ -581,9 +613,9 @@ export function LoginClient({
                   </li>
                 ))}
               </ul>
-            </div>
+            </MagicSpotlightCard>
 
-            <div className="surface-card rounded-2xl p-5 flex items-center justify-between gap-4">
+            <MagicSpotlightCard className="surface-card rounded-2xl p-5 flex items-center justify-between gap-4">
               <div>
                 <div className="font-mono text-[10px] uppercase tracking-wider text-[#6E685C]">
                   Live Example Studio
@@ -598,7 +630,7 @@ export function LoginClient({
               >
                 View →
               </Link>
-            </div>
+            </MagicSpotlightCard>
           </aside>
         </div>
       </main>

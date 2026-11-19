@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { AlertTriangle, ArrowLeft, ArrowUpRight, Plus } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 import { PortalClient } from '@/components/PortalClient';
+import { BorderBeam, NumberTicker } from '@/components/MotionPrimitives';
 
 export default async function ClientMagicPortalPage({
   params,
@@ -80,13 +81,22 @@ export default async function ClientMagicPortalPage({
       <main className="viewport-container min-h-[calc(100dvh-7rem)] py-[clamp(1.75rem,4.5vh,3.5rem)] space-y-6">
         {/* Carbon Ink Student Passbook Header */}
         <section className="relative overflow-hidden surface-ink rounded-2xl p-6 sm:p-8 space-y-6">
-          {/* Decorative SVG Vector Passbook Crest */}
+          <BorderBeam tone="emerald" />
+          {/* Decorative Crest */}
           <svg
             viewBox="0 0 220 220"
             aria-hidden="true"
             className="pointer-events-none absolute -right-10 -top-12 h-52 w-52 opacity-15"
           >
-            <circle cx="110" cy="110" r="88" fill="none" stroke="#F6F4EE" strokeWidth="1.2" strokeDasharray="6 6" />
+            <circle
+              cx="110"
+              cy="110"
+              r="88"
+              fill="none"
+              stroke="#F6F4EE"
+              strokeWidth="1.2"
+              strokeDasharray="6 6"
+            />
             <circle cx="110" cy="110" r="60" fill="none" stroke="#4ADE80" strokeWidth="1.2" />
             <path d="M 30 110 H 190 M 110 30 V 190" stroke="#D94E28" strokeWidth="1" />
           </svg>
@@ -98,13 +108,17 @@ export default async function ClientMagicPortalPage({
               <div className="space-y-1">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-[#4ADE80]">
                   <span className="live-dot h-1.5 w-1.5 rounded-full bg-[#4ADE80]" />
-                  Private Client Passbook
+                  Private Student Page · No Login Needed
                 </div>
                 <h1 className="font-serif text-fluid-h1 text-[#F6F4EE]">{student.name}</h1>
                 <p className="font-mono text-xs text-[#A8A295]">{student.email}</p>
                 <p className="pt-0.5 text-xs text-[#D8D3C8]">
                   With <span className="font-semibold text-[#F6F4EE]">{student.user.name}</span> ·{' '}
                   {student.user.tagline}
+                </p>
+                <p className="max-w-lg pt-1 text-[11px] leading-relaxed text-[#A8A295]">
+                  Bookmark this page to check remaining lesson hours, join video calls, reschedule,
+                  or review homework.
                 </p>
               </div>
             </div>
@@ -120,7 +134,7 @@ export default async function ClientMagicPortalPage({
                       isLowBalance ? 'text-[#FBBF24]' : 'text-[#4ADE80]'
                     }`}
                   >
-                    {student.hoursRemaining} hrs left
+                    <NumberTicker value={student.hoursRemaining} /> hrs left
                   </span>
                 </div>
                 <div className="mt-2.5 grid grid-cols-5 gap-1.5">
@@ -185,7 +199,7 @@ export default async function ClientMagicPortalPage({
               </span>
               <span className="text-white/25">→</span>
               <span className={isLowBalance ? 'text-[#FBBF24]' : 'text-[#A8A295]'}>
-                {student.hoursRemaining} Pack Credits Left
+                {student.hoursRemaining} Hours Remaining
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-1.5 font-mono text-[11px]">
@@ -202,7 +216,7 @@ export default async function ClientMagicPortalPage({
                   href="#study-vault"
                   className="rounded-md border border-white/15 bg-white/10 px-2.5 py-1 text-[#F6F4EE] hover:bg-white/20 transition"
                 >
-                  Study Vault ↓
+                  Homework &amp; Notes ↓
                 </a>
               )}
             </div>
@@ -215,7 +229,7 @@ export default async function ClientMagicPortalPage({
                 Upcoming Sessions
               </div>
               <div className="mt-1 font-mono text-lg font-semibold text-[#F6F4EE]">
-                {upcomingCount}
+                <NumberTicker value={upcomingCount} />
               </div>
             </div>
             <div className="px-4 py-3">
@@ -223,7 +237,7 @@ export default async function ClientMagicPortalPage({
                 Completed Lessons
               </div>
               <div className="mt-1 font-mono text-lg font-semibold text-[#F6F4EE]">
-                {completedCount}
+                <NumberTicker value={completedCount} />
               </div>
             </div>
             <div className="px-4 py-3">
@@ -231,7 +245,7 @@ export default async function ClientMagicPortalPage({
                 Total Invested
               </div>
               <div className="mt-1 font-mono text-lg font-semibold text-[#4ADE80]">
-                ${(student.totalPaidCents / 100).toFixed(0)}
+                $<NumberTicker value={Math.round(student.totalPaidCents / 100)} />
               </div>
             </div>
           </div>

@@ -22,6 +22,11 @@ import {
 } from 'lucide-react';
 import { resolveHomeworkHref } from '@/lib/notes';
 import type { BookingDTO, ServiceDTO, StudentDTO } from '@/types/domain';
+import {
+  MagicSpotlightCard,
+  NumberTicker,
+} from '@/components/MotionPrimitives';
+import { Interactive3DCard } from '@/components/StudioVectorScene';
 
 const TIMEZONE_OPTIONS = [
   'America/New_York',
@@ -681,7 +686,7 @@ export function DashboardClient({
                 : 'text-[#575248] hover:text-[#141413]'
             }`}
           >
-            Schedule &amp; Queue ({confirmedBookings.length})
+            Upcoming Lessons ({confirmedBookings.length})
           </button>
           <button
             type="button"
@@ -694,7 +699,7 @@ export function DashboardClient({
                 : 'text-[#575248] hover:text-[#141413]'
             }`}
           >
-            Clients &amp; Pack Balances ({students.length})
+            Students &amp; Hours ({students.length})
           </button>
           <button
             type="button"
@@ -707,7 +712,7 @@ export function DashboardClient({
                 : 'text-[#575248] hover:text-[#141413]'
             }`}
           >
-            Services &amp; Settings ({services.length})
+            Packages &amp; Settings ({services.length})
           </button>
         </div>
 
@@ -729,7 +734,7 @@ export function DashboardClient({
         <>
           {/* Studio Quick-Start Launch Bar for New or Empty Studios */}
           {(bookings.length === 0 || students.length === 0) && (
-            <div className="surface-card rounded-2xl border border-[#E5C6BE] bg-[#FDF2EF]/70 p-4 sm:p-5 space-y-3">
+            <MagicSpotlightCard className="surface-card rounded-2xl border border-[#E5C6BE] bg-[#FDF2EF]/70 p-4 sm:p-5 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
@@ -769,13 +774,13 @@ export function DashboardClient({
                   <ArrowUpRight className="h-3.5 w-3.5 text-[#575248]" />
                 </button>
               </div>
-            </div>
+            </MagicSpotlightCard>
           )}
 
           {/* 4-Card Executive Bento Row */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
             {/* Carbon Ink Next Up Priority Card */}
-            <div className="surface-ink lg:col-span-5 rounded-2xl p-6 flex flex-col justify-between gap-4">
+            <div className="surface-ink relative overflow-hidden lg:col-span-5 rounded-2xl p-6 flex flex-col justify-between gap-4">
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-widest text-[#4ADE80]">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#4ADE80]" />
@@ -815,7 +820,9 @@ export function DashboardClient({
                         className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-[#F6F4EE] hover:bg-white/20 transition"
                       >
                         <Video className="h-3.5 w-3.5 text-[#4ADE80]" />
-                        Join Meet
+                        {nextBooking.meetingUrl.includes('meet.google.com')
+                          ? 'Join Google Meet'
+                          : 'Join Video Call'}
                       </a>
                     )}
                     <button
@@ -833,13 +840,13 @@ export function DashboardClient({
             </div>
 
             {/* Active Students Card */}
-            <div className="surface-card lg:col-span-2 rounded-2xl p-5 flex flex-col justify-between">
+            <MagicSpotlightCard className="surface-card lg:col-span-2 rounded-2xl p-5 flex flex-col justify-between">
               <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#6E685C]">
                 Active Students
               </span>
               <div className="mt-3 flex flex-wrap items-baseline justify-between gap-1.5">
                 <span className="font-serif text-4xl leading-none text-[#141413]">
-                  {students.length}
+                  <NumberTicker value={students.length} />
                 </span>
                 {lowBalanceCount > 0 && (
                   <span className="rounded-full border border-[#FDE68A] bg-[#FEF3C7] px-2 py-0.5 font-mono text-[10px] font-semibold text-[#B45309]">
@@ -847,14 +854,17 @@ export function DashboardClient({
                   </span>
                 )}
               </div>
-              <p className="mt-2 text-[11px] text-[#6E685C]">Magic links active</p>
-            </div>
+              <p className="mt-2 text-[11px] text-[#6E685C]">Students with private pages</p>
+            </MagicSpotlightCard>
 
             {/* Prepaid Pack Hours Card with Fulfillment Meter */}
-            <div className="surface-card lg:col-span-2 rounded-2xl p-5 flex flex-col justify-between gap-2">
+            <MagicSpotlightCard
+              spotlightColor="rgba(21, 128, 61, 0.14)"
+              className="surface-card lg:col-span-2 rounded-2xl p-5 flex flex-col justify-between gap-2"
+            >
               <div className="flex items-center justify-between gap-1">
                 <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#6E685C]">
-                  Prepaid Pack Hrs
+                  Prepaid Lesson Hours
                 </span>
                 <span className="font-mono text-[10px] font-semibold text-[#15803D]">
                   {fulfillmentPct}% used
@@ -862,7 +872,7 @@ export function DashboardClient({
               </div>
               <div className="mt-1 flex items-baseline gap-1">
                 <span className="font-serif text-4xl leading-none text-[#15803D]">
-                  {totalHours}
+                  <NumberTicker value={totalHours} />
                 </span>
                 <span className="font-mono text-xs font-semibold text-[#15803D]">hrs</span>
               </div>
@@ -877,25 +887,25 @@ export function DashboardClient({
                   {completedBookings.length} done · {totalHours}h owed
                 </p>
               </div>
-            </div>
+            </MagicSpotlightCard>
 
             {/* Collected Revenue Card */}
-            <div className="surface-card lg:col-span-3 rounded-2xl p-5 flex flex-col justify-between gap-2">
+            <MagicSpotlightCard className="surface-card lg:col-span-3 rounded-2xl p-5 flex flex-col justify-between gap-2">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#6E685C]">
-                  Collected Revenue
+                  Total Lesson Revenue
                 </span>
                 <span className="rounded-full border border-[#BBF7D0] bg-[#DCFCE7] px-2 py-0.5 font-mono text-[10px] font-semibold text-[#15803D]">
                   0% fee
                 </span>
               </div>
               <div className="font-serif text-4xl leading-none text-[#141413]">
-                ${(totalRevenueCents / 100).toLocaleString()}
+                $<NumberTicker value={Math.round(totalRevenueCents / 100)} />
               </div>
               <p className="text-[11px] text-[#6E685C]">
                 {completedBookings.length} completed lessons · {confirmedBookings.length} upcoming
               </p>
-            </div>
+            </MagicSpotlightCard>
           </div>
 
           {/* Sessions Queue */}
@@ -2136,41 +2146,43 @@ export function DashboardClient({
             </div>
 
             {/* Live Public Card Preview */}
-            <div className="surface-elevated rounded-2xl p-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                  Live Public Card Preview
-                </span>
-                <span className="font-mono text-[11px] text-[#575248]">
-                  slotlink.app/{settings.slug || 'slug'}
-                </span>
-              </div>
-              <div className="surface-card rounded-xl p-4 space-y-2.5">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#141413] font-mono text-xs font-semibold text-[#F6F4EE]">
-                    {getInitials(settings.name) || 'SL'}
-                  </div>
-                  <div>
-                    <div className="font-serif text-xl text-[#141413]">
-                      {settings.name || 'Your Name'}
-                    </div>
-                    <div className="text-xs text-[#575248]">
-                      {settings.tagline || 'Specialty Tagline'}
-                    </div>
-                  </div>
-                </div>
-                {settings.bio && <p className="text-xs text-[#575248]">{settings.bio}</p>}
-                <div className="flex flex-wrap gap-2 pt-1 font-mono text-[10px] text-[#6E685C]">
-                  <span className="rounded border border-[#DCD6C8] bg-[#F6F4EE] px-2 py-0.5">
-                    {String(settings.workStartHour).padStart(2, '0')}:00–
-                    {String(settings.workEndHour).padStart(2, '0')}:00 UTC
+            <Interactive3DCard maxTilt={5}>
+              <div className="surface-elevated relative overflow-hidden rounded-2xl p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
+                    Live Public Card Preview
                   </span>
-                  <span className="rounded border border-[#DCD6C8] bg-[#F6F4EE] px-2 py-0.5">
-                    {settings.timezone}
+                  <span className="font-mono text-[11px] text-[#575248]">
+                    slotlink.app/{settings.slug || 'slug'}
                   </span>
                 </div>
+                <div className="surface-card rounded-xl p-4 space-y-2.5">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#141413] font-mono text-xs font-semibold text-[#F6F4EE]">
+                      {getInitials(settings.name) || 'SL'}
+                    </div>
+                    <div>
+                      <div className="font-serif text-xl text-[#141413]">
+                        {settings.name || 'Your Name'}
+                      </div>
+                      <div className="text-xs text-[#575248]">
+                        {settings.tagline || 'Specialty Tagline'}
+                      </div>
+                    </div>
+                  </div>
+                  {settings.bio && <p className="text-xs text-[#575248]">{settings.bio}</p>}
+                  <div className="flex flex-wrap gap-2 pt-1 font-mono text-[10px] text-[#6E685C]">
+                    <span className="rounded border border-[#DCD6C8] bg-[#F6F4EE] px-2 py-0.5">
+                      {String(settings.workStartHour).padStart(2, '0')}:00–
+                      {String(settings.workEndHour).padStart(2, '0')}:00 UTC
+                    </span>
+                    <span className="rounded border border-[#DCD6C8] bg-[#F6F4EE] px-2 py-0.5">
+                      {settings.timezone}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
+            </Interactive3DCard>
           </div>
 
           {/* Portal Settings */}

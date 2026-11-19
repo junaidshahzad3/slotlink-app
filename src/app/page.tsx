@@ -2,68 +2,69 @@ import Link from 'next/link';
 import { ArrowRight, ArrowUpRight, Check, Minus, X } from 'lucide-react';
 import { AppTopBar } from '@/components/AppTopBar';
 import {
+  BlurFade,
+  BorderBeam,
+  HeroHighlightWord,
+  MagicSpotlightCard,
+  ShimmerLink,
+} from '@/components/MotionPrimitives';
+import {
   CommissionSavingsCalculator,
   HeroHandleClaimer,
   HeroInteractiveStage,
 } from '@/components/LandingInteractiveHero';
 import { LandingFaqAccordion } from '@/components/LandingFaqAccordion';
+import { ScrollJourneySection } from '@/components/ScrollJourneySection';
 import {
-  ScrollJourneySection,
-  WorkflowComparisonScrubber,
-} from '@/components/ScrollJourneySection';
-import {
-  AnimatedArchitectureBentoGrid,
   Interactive3DCard,
-  ScrollAmbient3DObjects,
   StudioLiveTickerMarquee,
 } from '@/components/StudioVectorScene';
 
 const COMPARISON_ROWS = [
   {
-    feature: 'Public 1-Link Booking UX',
-    slotlink: '3-tap editorial flow + live slots',
-    calendly: 'Generic slot picker only',
+    feature: 'Public Booking Page',
+    slotlink: 'Book lessons & 5-packs in 3 clicks',
+    calendly: 'Time-slot picker only',
     crm: 'Slow multi-page intake forms',
   },
   {
-    feature: 'Prepaid Hour Pack Ledger',
-    slotlink: 'Auto-tracks & 1-tap deduction',
+    feature: 'Prepaid Lesson Packs',
+    slotlink: 'Tracks remaining hours & deducts in 1 click',
     calendly: 'Manual spreadsheet tracking',
-    crm: 'Hidden inside billing menus',
+    crm: 'Buried inside billing menus',
   },
   {
-    feature: 'Student Access Friction',
-    slotlink: 'Zero-login 128-bit magic passbook',
-    calendly: 'Static confirmation email only',
-    crm: 'Username + password required',
+    feature: 'Student Experience',
+    slotlink: 'Private bookmarked page (no password needed)',
+    calendly: 'Plain confirmation email only',
+    crm: 'Students must create a password',
   },
   {
-    feature: 'Calendar Conflict Guard',
-    slotlink: '2-way Google FreeBusy + Meet',
+    feature: 'Double-Booking Protection',
+    slotlink: '2-way Google Calendar sync + video links',
     calendly: 'Basic calendar sync',
-    crm: 'Add-on integration tier',
+    crm: 'Extra add-on feature',
   },
   {
     feature: 'Homework & Study Notes',
-    slotlink: 'Built-in study vault per session',
+    slotlink: 'Attached directly to each lesson card',
     calendly: 'Not included',
-    crm: 'Buried in client Portal tabs',
+    crm: 'Separate email threads',
   },
   {
-    feature: 'Commission on Lessons',
-    slotlink: '0% (Keep 100% revenue)',
-    calendly: '0% + missing tutoring flow',
-    crm: '15%–25% marketplace cuts',
+    feature: 'Platform Fee on Lessons',
+    slotlink: '0% (Keep 100% of lesson income)',
+    calendly: '0% (Missing hour packs & notes)',
+    crm: '15%–25% marketplace cut',
   },
 ];
 
 export default function LandingPage() {
   return (
     <div className="relative min-h-screen bg-[#F6F4EE] text-[#141413]">
-      <ScrollAmbient3DObjects />
-      <AppTopBar badge="SOLO EDUCATOR OS" />
+      <AppTopBar badge="FOR TUTORS & COACHES" />
 
-      {/* Full-Viewport Editorial Split Hero */}
+      {/* Section 1: Self-Describing Hero */}
       <section className="relative z-10 border-b border-[#DCD6C8] bg-editorial-mesh/95 min-h-[calc(100dvh-4.5rem)] flex items-center">
         <div className="viewport-container py-[clamp(2.5rem,6vh,5rem)]">
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-center">
@@ -72,73 +73,73 @@ export default function LandingPage() {
               <div className="inline-flex items-center gap-2 border border-[#DCD6C8] bg-white px-3 py-1 rounded-md shadow-sm">
                 <span className="live-dot h-2 w-2 rounded-full bg-[#15803D]" />
                 <span className="font-mono text-[11px] font-medium uppercase tracking-wider text-[#141413]">
-                  00 // Zero-Bloat Scheduling &amp; Pack Ledger
+                  For Private Tutors, Music Teachers &amp; 1-on-1 Coaches
                 </span>
               </div>
 
               <h1 className="text-fluid-display font-semibold tracking-tight text-[#141413]">
-                One link for bookings,{' '}
-                <span className="font-serif italic font-normal text-[#D94E28]">
-                  prepaid packs,
-                </span>{' '}
-                and client portals.
+                Booking,{' '}
+                <HeroHighlightWord>
+                  prepaid lesson packs,
+                </HeroHighlightWord>{' '}
+                and student pages — in one link.
               </h1>
 
               <p className="max-w-2xl text-fluid-body text-[#575248]">
-                Replace heavy CRM suites with a crisp booking studio. Students and parents book in
-                three taps and track remaining package hours, Meet links, and homework notes on a
-                private zero-login link.
+                Give students one simple link to book lessons, buy multi-session packs, and open
+                their own password-free portal for remaining hours, video calls, and homework
+                notes.
               </p>
 
               <HeroHandleClaimer />
 
               <div className="flex flex-wrap items-center gap-3">
-                <Link
+                <ShimmerLink
                   href="/login?mode=signup"
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#141413] px-5 py-3 text-sm font-semibold text-[#F6F4EE] hover:bg-[#2A2A27] transition"
+                  className="rounded-lg px-5 py-3 text-sm font-semibold"
                 >
-                  Create Your Studio Free
+                  Create Your Free Page
                   <ArrowRight className="h-4 w-4" />
-                </Link>
+                </ShimmerLink>
                 <Link
-                  href="#journey"
+                  href="/sarah-math"
                   className="inline-flex items-center gap-2 rounded-lg border border-[#CEC7B6] bg-white px-5 py-3 text-sm font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
                 >
-                  Explore Scroll Journey
+                  See a Live Example
                   <ArrowUpRight className="h-4 w-4 text-[#D94E28]" />
                 </Link>
               </div>
 
-              {/* Architectural Proof Strip */}
-              <div className="grid grid-cols-3 divide-x divide-[#DCD6C8] border border-[#DCD6C8] bg-white rounded-xl pt-0.5 shadow-sm">
+              {/* Clear 3-Pillar Product Summary */}
+              <MagicSpotlightCard className="grid grid-cols-3 divide-x divide-[#DCD6C8] border border-[#DCD6C8] bg-white rounded-xl pt-0.5 shadow-sm">
                 <div className="p-3.5 sm:p-4">
-                  <div className="font-mono text-base sm:text-lg font-semibold text-[#141413]">
-                    0 Passwords
+                  <div className="font-mono text-sm sm:text-base font-semibold text-[#141413]">
+                    1. One Booking Link
                   </div>
                   <div className="mt-0.5 text-[11px] text-[#6E685C]">
-                    128-bit student magic links
+                    Syncs with Google Calendar
                   </div>
                 </div>
                 <div className="p-3.5 sm:p-4">
-                  <div className="font-mono text-base sm:text-lg font-semibold text-[#141413]">
-                    2-Way FreeBusy
+                  <div className="font-mono text-sm sm:text-base font-semibold text-[#141413]">
+                    2. Prepaid Hour Packs
                   </div>
                   <div className="mt-0.5 text-[11px] text-[#6E685C]">
-                    Live Google Calendar guard
+                    Auto-tracks hours per click
                   </div>
                 </div>
                 <div className="p-3.5 sm:p-4">
-                  <div className="font-mono text-base sm:text-lg font-semibold text-[#141413]">
-                    Auto Pack Ledger
+                  <div className="font-mono text-sm sm:text-base font-semibold text-[#141413]">
+                    3. No-Login Student Page
                   </div>
                   <div className="mt-0.5 text-[11px] text-[#6E685C]">
-                    1-tap hour deduction
+                    Video calls &amp; study notes
                   </div>
                 </div>
-              </div>
+              </MagicSpotlightCard>
             </div>
 
-            {/* Right Multi-Layer Interactive Product Stage */}
+            {/* Right Interactive Product Stage */}
             <div className="lg:col-span-6">
               <HeroInteractiveStage />
             </div>
@@ -146,296 +147,227 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Magic-UI Style Infinite Studio Telemetry Marquee */}
+      {/* Section 2: Teaching Disciplines Strip */}
       <StudioLiveTickerMarquee />
 
-      {/* Scroll-Driven 4-Chapter Product Journey */}
+      {/* Section 3: How SlotLink Works (4-Step Interactive Walkthrough) */}
       <ScrollJourneySection />
 
-      {/* Interactive Old Stack vs SlotLink Scrubber */}
-      <WorkflowComparisonScrubber />
-
-      {/* Asymmetric Animated 3D Bento Grid & Animated Beam Hub */}
-      <AnimatedArchitectureBentoGrid />
-
-      {/* Studio Economics Calculator */}
+      {/* Section 4: Zero-Commission Savings Calculator */}
       <CommissionSavingsCalculator />
 
-      {/* Architectural Comparison Matrix */}
-      <section className="relative z-10 border-b border-[#DCD6C8] bg-white/95 viewport-section min-h-[78dvh]">
+      {/* Section 5: Plain-English Comparison Matrix */}
+      <section className="relative z-10 border-b border-[#DCD6C8] bg-white/95 viewport-section min-h-[72dvh]">
         <div className="viewport-container space-y-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                Architectural Comparison
+                Why Teachers Switch
               </div>
               <h2 className="mt-2 text-fluid-h2 font-semibold tracking-tight text-[#141413]">
-                Why educators leave{' '}
+                Simpler than{' '}
                 <span className="font-serif italic font-normal">
-                  calendars and heavy CRMs behind.
+                  calendars, spreadsheets, and heavy CRMs.
                 </span>
               </h2>
             </div>
-            <span className="font-mono text-xs text-[#6E685C]">Built strictly for 1-on-1 workflows</span>
+            <span className="font-mono text-xs text-[#6E685C]">
+              Built specifically for 1-on-1 teaching
+            </span>
           </div>
 
-          <div className="surface-card overflow-hidden rounded-2xl">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-[#DCD6C8] bg-[#EFECE4] font-mono text-[11px] uppercase tracking-wider text-[#575248]">
-                    <th className="px-5 py-3.5">Capability</th>
-                    <th className="px-5 py-3.5 bg-[#141413] text-[#F6F4EE]">SlotLink Studio</th>
-                    <th className="px-5 py-3.5">Generic Calendar Links</th>
-                    <th className="px-5 py-3.5">Legacy Tutoring CRMs</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#EFECE4]">
-                  {COMPARISON_ROWS.map((row) => (
-                    <tr key={row.feature} className="hover:bg-[#F6F4EE]/55 transition">
-                      <td className="px-5 py-3.5 font-semibold text-[#141413]">{row.feature}</td>
-                      <td className="px-5 py-3.5 bg-[#F0FDF4]/60 font-medium text-[#14532D]">
-                        <span className="inline-flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 shrink-0 text-[#15803D]" />
-                          {row.slotlink}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5 text-[#575248]">
-                        <span className="inline-flex items-center gap-1.5">
-                          <Minus className="h-3.5 w-3.5 shrink-0 text-[#8C867A]" />
-                          {row.calendly}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5 text-[#575248]">
-                        <span className="inline-flex items-center gap-1.5">
-                          <X className="h-3.5 w-3.5 shrink-0 text-[#B91C1C]" />
-                          {row.crm}
-                        </span>
-                      </td>
+          <BlurFade>
+            <MagicSpotlightCard className="surface-card overflow-hidden rounded-2xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-[#DCD6C8] bg-[#EFECE4] font-mono text-[11px] uppercase tracking-wider text-[#575248]">
+                      <th className="px-5 py-3.5">What You Need</th>
+                      <th className="px-5 py-3.5 bg-[#141413] text-[#F6F4EE]">SlotLink</th>
+                      <th className="px-5 py-3.5">Basic Calendar Links</th>
+                      <th className="px-5 py-3.5">Tutoring Marketplaces</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                  </thead>
+                  <tbody className="divide-y divide-[#EFECE4]">
+                    {COMPARISON_ROWS.map((row) => (
+                      <tr key={row.feature} className="hover:bg-[#F6F4EE]/55 transition">
+                        <td className="px-5 py-3.5 font-semibold text-[#141413]">{row.feature}</td>
+                        <td className="px-5 py-3.5 bg-[#F0FDF4]/60 font-medium text-[#14532D]">
+                          <span className="inline-flex items-center gap-1.5">
+                            <Check className="h-3.5 w-3.5 shrink-0 text-[#15803D]" />
+                            {row.slotlink}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5 text-[#575248]">
+                          <span className="inline-flex items-center gap-1.5">
+                            <Minus className="h-3.5 w-3.5 shrink-0 text-[#8C867A]" />
+                            {row.calendly}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5 text-[#575248]">
+                          <span className="inline-flex items-center gap-1.5">
+                            <X className="h-3.5 w-3.5 shrink-0 text-[#B91C1C]" />
+                            {row.crm}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </MagicSpotlightCard>
+          </BlurFade>
         </div>
       </section>
 
-      {/* Editorial Pricing Ledger */}
-      <section id="pricing" className="relative z-10 viewport-container py-[clamp(3.5rem,7vh,6rem)] space-y-14">
+      {/* Pricing + FAQ + CTA */}
+      <section
+        id="pricing"
+        className="relative z-10 viewport-container py-[clamp(3.5rem,7vh,6rem)] space-y-16"
+      >
         <div>
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
               <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                03 // Transparent Studio Pricing
+                Simple Flat Pricing
               </div>
               <h2 className="mt-2 text-fluid-h2 font-semibold tracking-tight text-[#141413]">
-                Start free for 14 days.{' '}
+                Try free for 14 days.{' '}
                 <span className="font-serif italic font-normal">
                   Keep 100% of lesson revenue.
                 </span>
               </h2>
             </div>
             <p className="font-mono text-xs text-[#6E685C]">
-              Flat monthly plans · Zero per-booking commissions
+              Flat monthly pricing · Zero per-booking commissions
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* Solo Tier */}
-            <Interactive3DCard>
-            <div className="surface-card surface-card-interactive h-full rounded-2xl p-7 sm:p-8 flex flex-col justify-between space-y-6">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-semibold uppercase tracking-widest text-[#6E685C]">
-                    Solo
-                  </span>
-                  <span className="rounded border border-[#DCD6C8] bg-[#F6F4EE] px-2.5 py-0.5 font-mono text-[11px] text-[#575248]">
-                    INDEPENDENT TUTORS
-                  </span>
-                </div>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="font-serif text-5xl text-[#141413]">$12</span>
-                  <span className="font-mono text-sm text-[#6E685C]">/mo</span>
-                </div>
-                <p className="mt-2 text-sm text-[#575248]">
-                  Everything needed to replace back-and-forth scheduling and spreadsheet hour
-                  tracking.
-                </p>
+            <BlurFade delayMs={40}>
+              <Interactive3DCard maxTilt={4}>
+                <MagicSpotlightCard className="surface-card surface-card-interactive h-full rounded-2xl p-7 sm:p-8 flex flex-col justify-between space-y-6">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-semibold uppercase tracking-widest text-[#6E685C]">
+                        Solo
+                      </span>
+                      <span className="rounded border border-[#DCD6C8] bg-[#F6F4EE] px-2.5 py-0.5 font-mono text-[11px] text-[#575248]">
+                        PART-TIME TUTORS
+                      </span>
+                    </div>
+                    <div className="mt-4 flex items-baseline gap-1">
+                      <span className="font-serif text-5xl text-[#141413]">$12</span>
+                      <span className="font-mono text-sm text-[#6E685C]">/mo</span>
+                    </div>
+                    <p className="mt-2 text-sm text-[#575248]">
+                      Everything needed to replace scheduling texts and spreadsheet hour tracking.
+                    </p>
 
-                <ul className="mt-6 space-y-3 border-t border-[#EFECE4] pt-6 text-sm text-[#141413]">
-                  {[
-                    '1-Link public booking page (slotlink.app/you)',
-                    '2-way Google Calendar & Meet link sync',
-                    'Zero-login student magic portal & hour packs',
-                    'Automated email confirmations & 24h reminders',
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2.5">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#15803D]" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                    <ul className="mt-6 space-y-3 border-t border-[#EFECE4] pt-6 text-sm text-[#141413]">
+                      {[
+                        'Your public booking link (slotlink.app/you)',
+                        '2-way Google Calendar & Google Meet sync',
+                        'Password-free student pages & prepaid hour packs',
+                        'Automatic email confirmations & lesson reminders',
+                      ].map((item) => (
+                        <li key={item} className="flex items-start gap-2.5">
+                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#15803D]" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-              <Link
-                href="/login?mode=signup"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#141413] bg-white px-4 py-3 text-sm font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
-              >
-                Start Solo Trial
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            </Interactive3DCard>
+                  <Link
+                    href="/login?mode=signup"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#141413] bg-white px-4 py-3 text-sm font-semibold text-[#141413] hover:bg-[#EFECE4] transition"
+                  >
+                    Start Solo Free Trial
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </MagicSpotlightCard>
+              </Interactive3DCard>
+            </BlurFade>
 
             {/* Pro Tier */}
-            <Interactive3DCard>
-            <div className="surface-ink h-full rounded-2xl p-7 sm:p-8 flex flex-col justify-between space-y-6">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-semibold uppercase tracking-widest text-[#A8A295]">
-                    Pro
-                  </span>
-                  <span className="rounded bg-[#D94E28] px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-white">
-                    Most Popular
-                  </span>
-                </div>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="font-serif text-5xl text-[#F6F4EE]">$19</span>
-                  <span className="font-mono text-sm text-[#A8A295]">/mo</span>
-                </div>
-                <p className="mt-2 text-sm text-[#C8C2B6]">
-                  For full-time educators running multi-student cohorts, custom branding, and SMS
-                  alerts.
-                </p>
-
-                <ul className="mt-6 space-y-3 border-t border-white/10 pt-6 text-sm text-[#F6F4EE]">
-                  {[
-                    'Everything in Solo',
-                    'Custom domain support (book.yourdomain.com)',
-                    'Automated SMS reminder preferences',
-                    'Homework link & session summary publishing',
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2.5">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#4ADE80]" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                <Link
-                  href="/login?mode=signup"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#F6F4EE] px-4 py-3 text-sm font-semibold text-[#141413] hover:bg-white transition"
+            <BlurFade delayMs={120}>
+              <Interactive3DCard maxTilt={4}>
+                <MagicSpotlightCard
+                  spotlightColor="rgba(217, 78, 40, 0.22)"
+                  className="surface-ink h-full rounded-2xl p-7 sm:p-8 flex flex-col justify-between space-y-6"
                 >
-                  Start Pro Trial
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  href="/login"
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm font-medium text-[#F6F4EE] hover:bg-white/10 transition"
-                >
-                  Tutor Sign In
-                  <ArrowUpRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </div>
-            </Interactive3DCard>
-          </div>
-        </div>
+                  <BorderBeam tone="warm" />
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-semibold uppercase tracking-widest text-[#A8A295]">
+                        Pro
+                      </span>
+                      <span className="rounded bg-[#D94E28] px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-white">
+                        Most Popular
+                      </span>
+                    </div>
+                    <div className="mt-4 flex items-baseline gap-1">
+                      <span className="font-serif text-5xl text-[#F6F4EE]">$19</span>
+                      <span className="font-mono text-sm text-[#A8A295]">/mo</span>
+                    </div>
+                    <p className="mt-2 text-sm text-[#C8C2B6]">
+                      For full-time teachers who want SMS reminders, custom branding, and unlimited
+                      study sheets.
+                    </p>
 
-        {/* Educator Studio Blueprints */}
-        <div className="space-y-6 pt-4">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                04 // Educator Studio Blueprints
-              </div>
-              <h2 className="mt-2 text-fluid-h2 font-semibold tracking-tight text-[#141413]">
-                How solo specialists{' '}
-                <span className="font-serif italic font-normal">structure packs &amp; notes.</span>
-              </h2>
-            </div>
-            <Link
-              href="/notes/sat-module-2-drill"
-              className="font-mono text-xs font-semibold text-[#D94E28] hover:underline"
-            >
-              Inspect Interactive Study Sheet →
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            {[
-              {
-                tag: 'STEM · SAT & AP CALCULUS',
-                studio: 'SAT & AP Math Studio',
-                metric: '5-Hour Pack · $250 ($50/hr)',
-                volume: '$6,800 / mo take-home',
-                summary:
-                  'Combines 15-min diagnostic calls with prepaid 5-hour packs and annotated parabola/calculus study sheets.',
-                href: '/sarah-math',
-                cta: 'View Tutor Portal →',
-              },
-              {
-                tag: 'MUSIC · VIOLIN & PIANO',
-                studio: 'Conservatory Music Coach',
-                metric: '4-Lesson Audition Pack · $320',
-                volume: '$4,200 / mo take-home',
-                summary:
-                  'Replaces text-message rescheduling with automatic Google Calendar conflict blocks and practice drill links.',
-                href: '/login?mode=signup',
-                cta: 'Launch Similar Studio →',
-              },
-              {
-                tag: 'GRAD PREP · GMAT & LANGUAGE',
-                studio: 'Executive GMAT & Fluency Tutor',
-                metric: '10-Hour Cohort Pack · $950',
-                volume: '$9,500 / mo take-home',
-                summary:
-                  'Gives busy professionals zero-login magic portals with one-click .ics invites and takeaway archives.',
-                href: '/p/sl_demo_alex_94a2k',
-                cta: 'Open Magic Portal →',
-              },
-            ].map((bp) => (
-              <Interactive3DCard key={bp.studio}>
-              <div className="surface-card surface-card-interactive h-full rounded-2xl p-6 flex flex-col justify-between space-y-5">
-                <div className="space-y-3">
-                  <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                    {bp.tag}
+                    <ul className="mt-6 space-y-3 border-t border-white/10 pt-6 text-sm text-[#F6F4EE]">
+                      {[
+                        'Everything included in Solo',
+                        'Custom domain support (book.yourdomain.com)',
+                        'SMS lesson reminder options',
+                        'Homework PDF & interactive study sheet sharing',
+                      ].map((item) => (
+                        <li key={item} className="flex items-start gap-2.5">
+                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#4ADE80]" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <h3 className="font-serif text-2xl text-[#141413]">{bp.studio}</h3>
-                  <div className="space-y-1 rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-3 font-mono text-[11px]">
-                    <div className="font-semibold text-[#141413]">{bp.metric}</div>
-                    <div className="text-[#15803D]">{bp.volume}</div>
-                  </div>
-                  <p className="text-xs leading-relaxed text-[#575248]">{bp.summary}</p>
-                </div>
 
-                <Link
-                  href={bp.href}
-                  className="font-mono text-xs font-semibold text-[#141413] hover:text-[#D94E28] transition"
-                >
-                  {bp.cta}
-                </Link>
-              </div>
+                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                    <ShimmerLink
+                      href="/login?mode=signup"
+                      variant="ivory"
+                      shimmerColor="rgba(217, 78, 40, 0.24)"
+                      className="rounded-xl px-4 py-3 text-sm font-semibold"
+                    >
+                      Start Pro Free Trial
+                      <ArrowRight className="h-4 w-4" />
+                    </ShimmerLink>
+                    <Link
+                      href="/login"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm font-medium text-[#F6F4EE] hover:bg-white/10 transition"
+                    >
+                      Teacher Sign In
+                      <ArrowUpRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                </MagicSpotlightCard>
               </Interactive3DCard>
-            ))}
+            </BlurFade>
           </div>
         </div>
 
-        {/* Architectural FAQ Accordion */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 pt-4">
-          <div className="lg:col-span-4 space-y-2">
+        {/* Section 6: Frequently Asked Questions */}
+        <div id="faq" className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-start scroll-mt-24">
+          <div className="lg:col-span-4 space-y-3">
             <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-              05 // Architecture &amp; FAQ
+              Common Questions
             </div>
-            <h2 className="text-fluid-h2 font-semibold tracking-tight text-[#141413]">
-              Common questions from{' '}
-              <span className="font-serif italic font-normal">independent educators.</span>
+            <h2 className="font-serif text-3xl sm:text-4xl text-[#141413]">
+              Everything teachers &amp; parents ask first.
             </h2>
             <p className="text-sm leading-relaxed text-[#575248]">
-              Everything needed to launch your public 1-link studio and student passbooks cleanly.
+              How student pages work, how your calendar stays protected, and how lesson hours stay
+              up to date automatically.
             </p>
           </div>
           <div className="lg:col-span-8">
@@ -443,36 +375,42 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Carbon-Ink Pre-Footer CTA Banner */}
-        <div className="surface-ink rounded-2xl p-7 sm:p-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="max-w-xl space-y-2">
-            <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#F3B09A]">
-              Ready In Under 3 Minutes
+        {/* Clean Pre-Footer CTA */}
+        <BlurFade>
+          <MagicSpotlightCard
+            spotlightColor="rgba(74, 222, 128, 0.16)"
+            className="surface-ink rounded-2xl p-7 sm:p-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6"
+          >
+            <div className="max-w-xl space-y-2">
+              <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#F3B09A]">
+                Ready In Under 2 Minutes
+              </div>
+              <h2 className="font-serif text-3xl sm:text-4xl text-[#F6F4EE]">
+                Set up your booking page &amp; student portals today.
+              </h2>
+              <p className="text-sm text-[#C8C2B6]">
+                Claim your custom link, connect Google Calendar, and accept your first lesson or
+                prepaid pack right away.
+              </p>
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl text-[#F6F4EE]">
-              Ship your own booking studio &amp; student passbook today.
-            </h2>
-            <p className="text-sm text-[#C8C2B6]">
-              Claim your handle, connect your Google Calendar, and send your first client a private
-              magic passbook in under two minutes.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <Link
-              href="/login?mode=signup"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[#D94E28] px-5 py-3 text-sm font-semibold text-white hover:bg-[#B83E1D] transition"
-            >
-              Create Your Studio Free
-              <ArrowUpRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/sarah-math"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-[#F6F4EE] hover:bg-white/10 transition"
-            >
-              View Sample Studio
-            </Link>
-          </div>
-        </div>
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <ShimmerLink
+                href="/login?mode=signup"
+                variant="terracotta"
+                className="rounded-xl px-5 py-3 text-sm font-semibold"
+              >
+                Create Your Free Page
+                <ArrowUpRight className="h-4 w-4" />
+              </ShimmerLink>
+              <Link
+                href="/sarah-math"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-[#F6F4EE] hover:bg-white/10 transition"
+              >
+                See Live Example
+              </Link>
+            </div>
+          </MagicSpotlightCard>
+        </BlurFade>
       </section>
 
       {/* Footer */}
@@ -480,7 +418,7 @@ export default function LandingPage() {
         <div className="viewport-container flex flex-wrap items-center justify-between gap-4 py-6 text-xs text-[#6E685C]">
           <div className="flex items-center gap-2">
             <span className="font-mono font-semibold text-[#141413]">SlotLink</span>
-            <span>· © {new Date().getFullYear()} · Built for independent educators</span>
+            <span>· © {new Date().getFullYear()} · Built for independent teachers &amp; coaches</span>
           </div>
           <div className="flex items-center gap-5 font-medium">
             <Link href="/terms" className="hover:text-[#141413] transition">

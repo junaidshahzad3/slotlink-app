@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { MagicSpotlightCard } from '@/components/MotionPrimitives';
 
 interface FaqItem {
   id: string;
@@ -11,34 +12,34 @@ interface FaqItem {
 
 const FAQ_ITEMS: FaqItem[] = [
   {
-    id: 'magic-links',
-    question: 'How do zero-login student magic links work?',
+    id: 'private-pages',
+    question: 'How do students view their lessons without a password?',
     answer:
-      'When a student or parent books for the first time, SlotLink generates a private 128-bit secret URL (like /p/sl_demo_alex_94a2k). Bookmarking that single link lets them view prepaid hour balances, join Google Meet calls, download `.ics` invites, and study annotated session notes—without creating or forgetting another password.',
+      'When a student or parent books their first lesson, SlotLink creates a private personal page link just for them. They can bookmark that link on their phone or computer to check remaining pack hours, join video calls, download calendar invites, and read lesson notes—without creating a username or remembering a password.',
   },
   {
-    id: 'calendar-guard',
-    question: 'Does SlotLink prevent double-bookings with my personal Google Calendar?',
+    id: 'calendar-sync',
+    question: 'Does SlotLink prevent double-bookings with my Google Calendar?',
     answer:
-      'Yes. Availability queries run against both your SlotLink booking ledger and live Google Calendar FreeBusy conflicts in real time. The instant a slot is confirmed, SlotLink writes the calendar event and attaches a dedicated Google Meet link automatically.',
+      'Yes. Your booking page checks your Google Calendar in real time before showing open slots, keeping your personal appointments completely private. As soon as a student books, SlotLink adds the lesson to your calendar and attaches a dedicated video call link automatically.',
   },
   {
-    id: 'pack-deduction',
-    question: 'How are prepaid package hours tracked and deducted?',
+    id: 'pack-tracking',
+    question: 'How are prepaid lesson packages tracked and deducted?',
     answer:
-      'When someone purchases a 5-Lesson or 10-Lesson Pack on your public 1-link page, hours are credited immediately to their passbook. Whenever you click Mark Done in the Pro Dashboard, SlotLink deducts 1 hour transactionally and publishes your takeaways and homework sheet straight to their portal.',
+      'When a student chooses a 5-Lesson Pack or 10-Lesson Pack on your booking page, those hours are added to their private page automatically. Each time you finish a lesson and click Mark Lesson Complete in your dashboard, SlotLink subtracts 1 hour and shares your notes directly with the student.',
   },
   {
-    id: 'homework-ics',
-    question: 'Can students open interactive study notes and export calendar invites?',
+    id: 'homework-notes',
+    question: 'Can I share homework, worksheets, and study notes?',
     answer:
-      'Yes. Confirmation boarding passes and student portal cards include one-click RFC 5545 `.ics` downloads for Apple, Google, or Outlook Calendars, alongside interactive Study Sheets (`/notes/...`) featuring SVG whiteboard diagrams, formula ledgers, and self-check practice problems.',
+      'Yes. When marking any lesson complete, you can write a quick lesson summary and attach either a worksheet link or one of SlotLink’s built-in interactive study sheets with visual diagrams, key formulas, and self-check practice questions.',
   },
   {
     id: 'reschedule-policy',
     question: 'What happens if a student needs to reschedule or cancel?',
     answer:
-      'Students can open their magic passbook anytime to pick a different live slot or cancel. SlotLink enforces your reschedule cutoff guard cleanly, updates Google Calendar events automatically, and logs the change on your 7-Day Studio Grid.',
+      'Students can open their private page anytime to pick a new open slot or cancel a booking. SlotLink enforces your 24-hour notice window automatically so you never get last-minute surprises, and updates your Google Calendar right away.',
   },
 ];
 
@@ -50,17 +51,15 @@ export function LandingFaqAccordion() {
       {FAQ_ITEMS.map((item, idx) => {
         const isOpen = item.id === openId;
         return (
-          <div
+          <MagicSpotlightCard
             key={item.id}
-            className={`surface-card rounded-xl overflow-hidden transition ${
-              isOpen ? 'border-[#141413]' : ''
-            }`}
+            className={`surface-card rounded-xl transition ${isOpen ? 'border-[#141413]' : ''}`}
           >
             <button
               type="button"
               aria-expanded={isOpen}
               onClick={() => setOpenId(isOpen ? '' : item.id)}
-              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left hover:bg-[#F6F4EE]/60 transition"
+              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left hover:bg-[#F6F4EE]/60 transition cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <span className="font-mono text-[11px] font-semibold text-[#D94E28]">
@@ -69,17 +68,19 @@ export function LandingFaqAccordion() {
                 <span className="text-sm font-semibold text-[#141413]">{item.question}</span>
               </div>
               <ChevronDown
-                className={`h-4 w-4 shrink-0 text-[#575248] transition-transform ${
+                className={`h-4 w-4 shrink-0 text-[#575248] transition-transform duration-300 ${
                   isOpen ? 'rotate-180 text-[#D94E28]' : ''
                 }`}
               />
             </button>
-            {isOpen && (
-              <div className="border-t border-[#EFECE4] bg-[#F6F4EE]/55 px-5 py-4 pl-12 text-sm leading-relaxed text-[#575248]">
-                {item.answer}
+            <div className="accordion-grid" data-open={isOpen ? 'true' : 'false'}>
+              <div className="accordion-grid-inner">
+                <div className="border-t border-[#EFECE4] bg-[#F6F4EE]/55 px-5 py-4 pl-12 text-sm leading-relaxed text-[#575248]">
+                  {item.answer}
+                </div>
               </div>
-            )}
-          </div>
+            </div>
+          </MagicSpotlightCard>
         );
       })}
     </div>

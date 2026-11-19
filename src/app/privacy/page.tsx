@@ -8,8 +8,8 @@ const PRIVACY_SECTIONS = [
   },
   {
     number: 'SECTION 02',
-    heading: 'Google Calendar Scopes',
-    body: 'Google Calendar tokens are used strictly for checking FreeBusy availability and creating or removing session events you authorize.',
+    heading: 'Google Calendar Access',
+    body: 'Google Calendar permissions are used strictly to check your calendar availability and add or update booked lessons.',
   },
   {
     number: 'SECTION 03',

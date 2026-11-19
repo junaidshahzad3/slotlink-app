@@ -10,18 +10,14 @@ import {
   Check,
   Clock,
   FileText,
-  Layers,
   QrCode,
   RotateCcw,
   ShieldCheck,
   Sparkles,
   Video,
-  X,
 } from 'lucide-react';
-import {
-  Exploded3DPassbookPrism,
-  VectorWorkflowConduitSvg,
-} from '@/components/StudioVectorScene';
+import { VectorWorkflowConduitSvg } from '@/components/StudioVectorScene';
+import { BorderBeam, MagicSpotlightCard } from '@/components/MotionPrimitives';
 
 interface JourneyChapter {
   index: number;
@@ -42,110 +38,94 @@ interface JourneyChapter {
 const CHAPTERS: JourneyChapter[] = [
   {
     index: 0,
-    pillLabel: '01 · Share 1-Link',
-    telemetry: 'CHAPTER 01 // ZERO-FRICTION INTAKE',
-    metricBadge: '< 20s booking',
+    pillLabel: '1. Share Your Link',
+    telemetry: 'STEP 1 OF 4',
+    metricBadge: 'Books in under 20s',
     headline: 'Drop one clean link. Replace',
-    headlineItalic: 'back-and-forth DMs.',
-    problemEliminated: 'Eliminates 8-message scheduling threads & account creation drop-offs.',
-    outcome: 'Clients choose single lessons or discounted 5-packs and lock a slot in three taps.',
+    headlineItalic: 'back-and-forth texts.',
+    problemEliminated: 'Replaces long scheduling messages and confusing sign-up forms.',
+    outcome: 'Students pick a single lesson or discounted 5-pack and book a time in three clicks.',
     bullets: [
-      'Custom public handle (slotlink.app/you) works in WhatsApp, Instagram, and email signatures',
-      'Bundled 1-on-1 & multi-hour pack options side by side with clear per-hour savings',
-      'Built-in mobile QR studio card for in-person whiteboard or hallway scans',
+      'Your personal booking link (slotlink.app/your-name) fits in email signatures and texts',
+      'Show single sessions and prepaid lesson packs side by side with clear hourly savings',
+      'Built-in mobile QR card so in-person students can scan and rebook in seconds',
     ],
-    ctaLabel: 'Open Live Studio Page →',
+    ctaLabel: 'Open Live Booking Page →',
     ctaHref: '/sarah-math',
     browserUrl: 'slotlink.app/sarah-math',
-    stageTag: 'LIVE BOOKING STUDIO',
+    stageTag: 'BOOKING PAGE',
   },
   {
     index: 1,
-    pillLabel: '02 · 2-Way GCal Guard',
-    telemetry: 'CHAPTER 02 // REAL-TIME CONFLICT SHIELD',
-    metricBadge: '0 double bookings',
-    headline: 'Live FreeBusy queries guard',
+    pillLabel: '2. Calendar Sync',
+    telemetry: 'STEP 2 OF 4',
+    metricBadge: 'No double bookings',
+    headline: 'Live Google Calendar checks guard',
     headlineItalic: 'every personal hour.',
-    problemEliminated: 'Eliminates accidental double-bookings & stale screenshots of calendars.',
-    outcome: 'Personal Google Calendar events automatically block matching booking slots in real time.',
+    problemEliminated: 'Replaces manual calendar checks and accidental overlapping bookings.',
+    outcome: 'Personal Google Calendar appointments automatically hide conflicting booking times.',
     bullets: [
-      'Reads live Google FreeBusy windows across your configured teaching hours',
-      'Generates instant Google Meet or private fallback video rooms on confirmation',
-      'Detects overlapping lessons transactionally so two students can never book the same slot',
+      'Checks your real Google Calendar availability across the teaching hours you choose',
+      'Adds a Google Meet or private video room automatically on every booking',
+      'Locks each confirmed time slot immediately so two students can never book the same hour',
     ],
-    ctaLabel: 'Claim & Sync Calendar →',
+    ctaLabel: 'Connect Google Calendar →',
     ctaHref: '/login?mode=signup',
-    browserUrl: 'gcal.sync/sarah-math',
-    stageTag: 'CONFLICT GUARD ACTIVE',
+    browserUrl: 'calendar.google.com/sync',
+    stageTag: 'CALENDAR SYNC',
   },
   {
     index: 2,
-    pillLabel: '03 · Magic Passbook',
-    telemetry: 'CHAPTER 03 // ZERO-PASSWORD CLIENT PORTAL',
-    metricBadge: '128-bit link',
-    headline: 'Every client gets a living',
-    headlineItalic: 'prepaid passbook.',
-    problemEliminated: 'Eliminates "how many hours do I have left?" & forgotten Meet URL texts.',
-    outcome: 'One private magic link tracks pack balance, video rooms, .ics downloads & 24h reschedules.',
+    pillLabel: '3. Student Page',
+    telemetry: 'STEP 3 OF 4',
+    metricBadge: 'No password needed',
+    headline: 'Every student gets a private',
+    headlineItalic: 'all-in-one lesson page.',
+    problemEliminated: 'Replaces "how many hours do I have left?" and "what is the Zoom link?" texts.',
+    outcome: 'One private bookmarked page shows remaining hours, video links, and rescheduling.',
     bullets: [
-      'Zero passwords for busy parents and working professionals—bookmarkable on mobile',
-      '24-hour protected reschedule & cancel policy enforces cutoff windows automatically',
-      'Instant .ics calendar export and one-click Join Video Call button per session',
+      'No passwords for busy parents or adult learners — just open their private link',
+      'Automatic 24-hour notice protection when students reschedule or cancel online',
+      'One-click calendar downloads (.ics) and Join Video Call button for every lesson',
     ],
-    ctaLabel: 'Inspect Demo Passbook →',
+    ctaLabel: 'See Sample Student Page →',
     ctaHref: '/p/sl_demo_alex_94a2k',
-    browserUrl: 'slotlink.app/p/sl_demo_alex_94a2k',
-    stageTag: 'CLIENT MAGIC PASSBOOK',
+    browserUrl: 'slotlink.app/p/alex-rivera',
+    stageTag: 'STUDENT PAGE',
   },
   {
     index: 3,
-    pillLabel: '04 · 1-Tap Deduct & Notes',
-    telemetry: 'CHAPTER 04 // ATOMIC LEDGER & STUDY VAULT',
-    metricBadge: '40ms portal sync',
-    headline: 'End a session in one tap.',
-    headlineItalic: 'Publish takeaways live.',
-    problemEliminated: 'Eliminates manual Excel tracking & buried email attachments after lessons.',
-    outcome: 'Marking a lesson complete deducts 1 pack hour atomically and publishes study sheets.',
+    pillLabel: '4. Complete & Notes',
+    telemetry: 'STEP 4 OF 4',
+    metricBadge: 'Instant note sharing',
+    headline: 'Finish a lesson in one click.',
+    headlineItalic: 'Share homework live.',
+    problemEliminated: 'Replaces spreadsheets for counting hours and digging through old emails for PDFs.',
+    outcome: 'Marking a lesson complete subtracts 1 pack hour and shares notes to the student page.',
     bullets: [
-      'One click decrements package balance safely inside a transactional ledger update',
-      'Attaches interactive in-app study sheets or external PDFs directly to the session card',
-      'Triggers low-balance alerts cleanly so returning clients top up before running dry',
+      'One click updates the student’s prepaid hour balance without manual math',
+      'Attach lesson summaries, homework PDFs, or interactive study sheets per lesson',
+      'Highlights low balances automatically so students know when to book a fresh pack',
     ],
-    ctaLabel: 'Launch Your Tutor Studio →',
+    ctaLabel: 'Create Your Free Account →',
     ctaHref: '/login?mode=signup',
     browserUrl: 'slotlink.app/dashboard',
-    stageTag: 'STUDIO LEDGER SYNC',
+    stageTag: 'TEACHER WRAP-UP',
   },
 ];
 
 const JOURNEY_PACKAGES = [
   { id: 'intro', name: '15m Intro Call', price: 'FREE', tag: 'Intake', dur: '15 min' },
-  { id: 'single', name: '1-on-1 Session', price: '$55', tag: 'Single', dur: '60 min' },
-  { id: 'pack5', name: '5-Hour Pack', price: '$250', tag: 'Best · $50/hr', dur: '5 hrs' },
-];
-
-const OLD_STACK_STEPS = [
-  { step: '01', tool: 'WhatsApp / iMessage', friction: '6+ replies to compare timezones (~5m)' },
-  { step: '02', tool: 'Google Calendar', friction: 'Manual event creation & copy-paste invites (~2m)' },
-  { step: '03', tool: 'Venmo / Stripe Links', friction: 'Chasing prepaid balances manually (~3m)' },
-  { step: '04', tool: 'Google Sheets', friction: 'Remembering to subtract hours post-call (~2m)' },
-  { step: '05', tool: 'Gmail Threads', friction: 'Resending lost homework PDFs & Zoom URLs (~2m)' },
-];
-
-const SLOTLINK_STEPS = [
-  { step: '01', surface: 'Public /[slug] Studio', gain: 'Client picks pack & live open slot in <20s' },
-  { step: '02', surface: '2-Way FreeBusy Shield', gain: 'Zero overlaps + automatic video room URL' },
-  { step: '03', surface: 'Magic /p/[token]', gain: 'Client self-serves reschedules, .ics & hours' },
-  { step: '04', surface: '1-Tap Studio Complete', gain: 'Atomic -1 hr ledger + instant study sheet sync' },
+  { id: 'single', name: '1-on-1 Lesson', price: '$55', tag: 'Single', dur: '60 min' },
+  { id: 'pack5', name: '5-Lesson Pack', price: '$250', tag: 'Best · $50/hr', dur: '5 hrs' },
 ];
 
 /**
- * Scroll-driven 4-chapter product journey with sticky morphing simulator stage.
+ * Scroll-driven 4-chapter product walkthrough with sticky interactive stage.
  */
 export function ScrollJourneySection() {
   const [activeChapter, setActiveChapter] = useState(0);
   const [journeyProgress, setJourneyProgress] = useState(0);
-  const [stageMode, setStageMode] = useState<'interactive' | 'prism3d'>('interactive');
   const [hoverTilt, setHoverTilt] = useState({ rx: 0, ry: 0 });
   const [selectedPkg, setSelectedPkg] = useState('pack5');
   const [selectedSlot, setSelectedSlot] = useState('3:00 PM');
@@ -220,7 +200,7 @@ export function ScrollJourneySection() {
 
   return (
     <section
-      id="journey"
+      id="how-it-works"
       ref={sectionRef}
       className="relative z-10 border-b border-[#DCD6C8] bg-[#F6F4EE]/95"
     >
@@ -229,22 +209,22 @@ export function ScrollJourneySection() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-3xl">
             <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-              01 // Interactive Scroll Journey
+              How SlotLink Works
             </div>
             <h2 className="mt-2 text-fluid-h2 font-semibold tracking-tight text-[#141413]">
-              Follow one lesson from{' '}
+              Follow one student from{' '}
               <span className="font-serif italic font-normal text-[#D94E28]">
-                first click to study notes.
+                first booking to finished lesson.
               </span>
             </h2>
             <p className="mt-2 text-fluid-body text-[#575248]">
-              Scroll through the four chapters below—or click any vector node or scrubber pill to
-              inspect the live 3D stack and interactive workflows.
+              Everything a private teacher needs in four simple steps — no messy texts,
+              spreadsheets, or forgotten video links.
             </p>
           </div>
 
           <div className="surface-card rounded-xl px-4 py-2.5 font-mono text-xs flex items-center gap-3">
-            <span className="text-[#6E685C]">JOURNEY PROGRESS</span>
+            <span className="text-[#6E685C]">WALKTHROUGH</span>
             <span className="font-semibold text-[#141413]">{progressPct}%</span>
             <div className="h-1.5 w-20 overflow-hidden rounded-full bg-[#EFECE4]">
               <div
@@ -278,7 +258,7 @@ export function ScrollJourneySection() {
           </div>
         </div>
 
-        {/* Animated Full-Width SVG Vector System Topology */}
+        {/* 4-Step Visual Workflow Bar */}
         <VectorWorkflowConduitSvg activeStep={activeChapter} onSelectStep={jumpToChapter} />
 
         {/* Split Sticky Scroll Layout */}
@@ -296,86 +276,93 @@ export function ScrollJourneySection() {
                     chapterRefs.current[ch.index] = el;
                   }}
                   onClick={() => setActiveChapter(ch.index)}
-                  className={`surface-card rounded-2xl p-6 min-h-[320px] flex flex-col justify-between transition-all cursor-pointer ${
-                    isActive
-                      ? 'chapter-card-active bg-white'
-                      : 'opacity-80 hover:opacity-100 bg-white/85'
-                  }`}
                 >
-                  <div className="space-y-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                        {ch.telemetry}
-                      </span>
-                      <span
-                        className={`rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-semibold ${
-                          isActive
-                            ? 'border-[#BBF7D0] bg-[#DCFCE7] text-[#15803D]'
-                            : 'border-[#DCD6C8] bg-[#F6F4EE] text-[#575248]'
-                        }`}
+                  <MagicSpotlightCard
+                    spotlightColor={
+                      isActive ? 'rgba(217, 78, 40, 0.14)' : 'rgba(21, 128, 61, 0.1)'
+                    }
+                    className={`surface-card rounded-2xl p-6 min-h-[320px] flex flex-col justify-between transition-all cursor-pointer ${
+                      isActive
+                        ? 'chapter-card-active bg-white'
+                        : 'opacity-80 hover:opacity-100 bg-white/85'
+                    }`}
+                  >
+                    <div className="space-y-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
+                          {ch.telemetry}
+                        </span>
+                        <span
+                          className={`rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-semibold ${
+                            isActive
+                              ? 'border-[#BBF7D0] bg-[#DCFCE7] text-[#15803D]'
+                              : 'border-[#DCD6C8] bg-[#F6F4EE] text-[#575248]'
+                          }`}
+                        >
+                          {ch.metricBadge}
+                        </span>
+                      </div>
+
+                      <h3 className="font-serif text-2xl sm:text-3xl leading-tight text-[#141413]">
+                        {ch.headline}{' '}
+                        <span className="italic text-[#D94E28]">{ch.headlineItalic}</span>
+                      </h3>
+
+                      <div className="rounded-xl border border-[#EFECE4] bg-[#F6F4EE]/80 p-3 space-y-1 text-xs">
+                        <div className="text-[#9F2D12] font-medium">{ch.problemEliminated}</div>
+                        <div className="text-[#14532D] font-semibold">{ch.outcome}</div>
+                      </div>
+
+                      <ul className="space-y-2 text-xs text-[#575248]">
+                        {ch.bullets.map((bullet) => (
+                          <li key={bullet} className="flex items-start gap-2">
+                            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#15803D]" />
+                            <span>{bullet}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="pt-4 mt-4 border-t border-[#EFECE4] flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          jumpToChapter(ch.index);
+                        }}
+                        className="font-mono text-[11px] font-semibold text-[#6E685C] hover:text-[#141413]"
                       >
-                        {ch.metricBadge}
-                      </span>
+                        Show This Step
+                      </button>
+                      <Link
+                        href={ch.ctaHref}
+                        className="inline-flex items-center gap-1 font-mono text-xs font-semibold text-[#D94E28] hover:underline"
+                      >
+                        {ch.ctaLabel}
+                      </Link>
                     </div>
-
-                    <h3 className="font-serif text-2xl sm:text-3xl leading-tight text-[#141413]">
-                      {ch.headline}{' '}
-                      <span className="italic text-[#D94E28]">{ch.headlineItalic}</span>
-                    </h3>
-
-                    <div className="rounded-xl border border-[#EFECE4] bg-[#F6F4EE]/80 p-3 space-y-1 text-xs">
-                      <div className="text-[#9F2D12] font-medium">{ch.problemEliminated}</div>
-                      <div className="text-[#14532D] font-semibold">{ch.outcome}</div>
-                    </div>
-
-                    <ul className="space-y-2 text-xs text-[#575248]">
-                      {ch.bullets.map((bullet) => (
-                        <li key={bullet} className="flex items-start gap-2">
-                          <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#15803D]" />
-                          <span>{bullet}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="pt-4 mt-4 border-t border-[#EFECE4] flex items-center justify-between">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        jumpToChapter(ch.index);
-                      }}
-                      className="font-mono text-[11px] font-semibold text-[#6E685C] hover:text-[#141413]"
-                    >
-                      Focus Stage
-                    </button>
-                    <Link
-                      href={ch.ctaHref}
-                      className="inline-flex items-center gap-1 font-mono text-xs font-semibold text-[#D94E28] hover:underline"
-                    >
-                      {ch.ctaLabel}
-                    </Link>
-                  </div>
+                  </MagicSpotlightCard>
                 </div>
               );
             })}
           </div>
 
-          {/* Right Sticky Morphing 3D Hardware Stage */}
+          {/* Right Sticky Morphing Stage */}
           <div
             onMouseMove={handleStagePointerMove}
             onMouseLeave={resetStagePointer}
             className="lg:col-span-7 lg:sticky lg:top-[116px] scene-3d-stage"
           >
             <div
-              className="surface-card preserve-3d rounded-2xl overflow-hidden border-[#141413]/20 shadow-xl transition-transform duration-150 ease-out"
+              className="surface-card preserve-3d relative rounded-2xl overflow-hidden border-[#141413]/20 shadow-xl transition-transform duration-150 ease-out"
               style={{
                 transform: `rotateX(${scrollTiltX.toFixed(2)}deg) rotateY(${scrollTiltY.toFixed(
                   2
                 )}deg)`,
               }}
             >
-              {/* Dynamic Browser Chrome + 3D Mode Switcher */}
+              <BorderBeam tone="warm" />
+              {/* Browser Chrome */}
               <div className="border-b border-[#DCD6C8] bg-[#EFECE4] px-4 py-3 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-[#CEC7B6]" />
@@ -383,46 +370,15 @@ export function ScrollJourneySection() {
                   <span className="h-2.5 w-2.5 rounded-full bg-[#CEC7B6]" />
                 </div>
                 <div className="rounded-md border border-[#D5CFC0] bg-white px-3 py-1 font-mono text-[11px] text-[#141413] font-medium">
-                  {stageMode === 'prism3d' ? 'architecture.3d/slotlink' : currentChapter.browserUrl}
+                  {currentChapter.browserUrl}
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setStageMode((m) => (m === 'interactive' ? 'prism3d' : 'interactive'))
-                    }
-                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-semibold transition cursor-pointer ${
-                      stageMode === 'prism3d'
-                        ? 'border-[#141413] bg-[#141413] text-[#F6F4EE]'
-                        : 'border-[#DCD6C8] bg-white text-[#141413] hover:bg-[#F6F4EE]'
-                    }`}
-                  >
-                    <Layers className="h-3 w-3 text-[#D94E28]" />
-                    {stageMode === 'prism3d' ? 'Back to Live UI' : 'Inspect 3D Layers'}
-                  </button>
-                  <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-[#BBF7D0] bg-[#DCFCE7] px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#15803D]">
-                    <span className="live-dot h-1.5 w-1.5 rounded-full bg-[#15803D]" />
-                    {currentChapter.stageTag}
-                  </span>
-                </div>
+                <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-[#BBF7D0] bg-[#DCFCE7] px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#15803D]">
+                  <span className="live-dot h-1.5 w-1.5 rounded-full bg-[#15803D]" />
+                  {currentChapter.stageTag}
+                </span>
               </div>
 
-              {stageMode === 'prism3d' ? (
-                <div className="bg-white p-5 sm:p-6 space-y-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <span className="font-mono font-semibold text-[#D94E28] uppercase tracking-wider">
-                      Scroll-Driven 3D Exploded Passbook Architecture
-                    </span>
-                    <span className="font-mono text-[11px] text-[#575248]">
-                      Move pointer or scroll to separate Z-planes
-                    </span>
-                  </div>
-                  <Exploded3DPassbookPrism progress={journeyProgress} />
-                </div>
-              ) : (
-                <>
-
-              {/* Morphing Chapter 0: 1-Link Studio */}
+              {/* Step 1: 1-Link Booking Page */}
               {activeChapter === 0 && (
                 <div className="bg-white p-6 space-y-5">
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#EFECE4] pb-4">
@@ -435,7 +391,7 @@ export function ScrollJourneySection() {
                           Sarah Chen
                         </div>
                         <div className="mt-1 text-xs text-[#6E685C]">
-                          SAT &amp; AP Calculus · 1-Link Booking Studio
+                          SAT &amp; AP Calculus · Online Booking Page
                         </div>
                       </div>
                     </div>
@@ -476,7 +432,7 @@ export function ScrollJourneySection() {
 
                   <div className="space-y-2">
                     <div className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#6E685C]">
-                      Instant UTC / Local Time Slot Picker
+                      Available Times (Shown in Student&apos;s Local Timezone)
                     </div>
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                       {['1:00 PM', '3:00 PM', '4:30 PM', '6:00 PM'].map((slot) => (
@@ -502,29 +458,29 @@ export function ScrollJourneySection() {
                       <strong>
                         {JOURNEY_PACKAGES.find((p) => p.id === selectedPkg)?.name} · {selectedSlot}
                       </strong>{' '}
-                      (Zero signup required)
+                      (No student signup required)
                     </span>
                     <Link
                       href="/sarah-math"
                       className="inline-flex items-center gap-1 rounded-lg bg-[#141413] px-3 py-1.5 font-semibold text-[#F6F4EE] hover:bg-[#D94E28] transition"
                     >
-                      Try Full Flow
+                      Try Live Page
                       <ArrowRight className="h-3.5 w-3.5" />
                     </Link>
                   </div>
                 </div>
               )}
 
-              {/* Morphing Chapter 1: Interactive 2-Way Google Calendar Conflict Simulator */}
+              {/* Step 2: Interactive 2-Way Google Calendar Conflict Shield */}
               {activeChapter === 1 && (
                 <div className="bg-white p-6 space-y-5">
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#EFECE4] pb-4">
                     <div>
                       <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                        Interactive Conflict Guard Simulator
+                        Try Adding a Personal Appointment
                       </div>
                       <h4 className="mt-1 font-serif text-2xl text-[#141413]">
-                        2-Way FreeBusy Calendar Shield
+                        2-Way Google Calendar Sync
                       </h4>
                     </div>
                     <button
@@ -537,8 +493,8 @@ export function ScrollJourneySection() {
                       }`}
                     >
                       {dentistBlocked
-                        ? 'Toggle: Clear 2:00 PM Dentist Event'
-                        : 'Simulate Personal Dentist Event at 2:00 PM'}
+                        ? 'Remove 2:00 PM Dentist Event'
+                        : 'Add 2:00 PM Dentist Event'}
                     </button>
                   </div>
 
@@ -549,7 +505,7 @@ export function ScrollJourneySection() {
                         <span>1:00 PM – 2:00 PM</span>
                       </div>
                       <span className="rounded bg-white px-2.5 py-0.5 text-[11px] font-semibold text-[#15803D] border border-[#BBF7D0]">
-                        OPEN · GCal Free ✓
+                        AVAILABLE ✓
                       </span>
                     </div>
 
@@ -568,7 +524,7 @@ export function ScrollJourneySection() {
                         </span>
                       </div>
                       <span className="rounded bg-white px-2.5 py-0.5 text-[11px] font-semibold border border-current/20">
-                        {dentistBlocked ? 'BLOCKED AUTOMATICALLY' : 'OPEN ✓'}
+                        {dentistBlocked ? 'BLOCKED AUTOMATICALLY' : 'AVAILABLE ✓'}
                       </span>
                     </div>
 
@@ -578,7 +534,7 @@ export function ScrollJourneySection() {
                         <span>3:00 PM – 4:00 PM · Auto Video Room Attached</span>
                       </div>
                       <span className="rounded bg-white px-2.5 py-0.5 text-[11px] font-semibold text-[#15803D] border border-[#BBF7D0]">
-                        TRANSACTION LOCKED
+                        VIDEO LINK READY
                       </span>
                     </div>
                   </div>
@@ -586,14 +542,14 @@ export function ScrollJourneySection() {
                   <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] px-4 py-3 text-xs text-[#575248] flex items-center gap-2.5">
                     <ShieldCheck className="h-4 w-4 shrink-0 text-[#15803D]" />
                     <span>
-                      PostgreSQL `$transaction` conflict checks + Google Calendar FreeBusy prevent
-                      race conditions even if two students click book at the same millisecond.
+                      SlotLink checks your Google Calendar automatically so personal appointments
+                      stay private and two students can never book the same hour.
                     </span>
                   </div>
                 </div>
               )}
 
-              {/* Morphing Chapter 2: Zero-Login Client Magic Passbook */}
+              {/* Step 3: Private Student Page */}
               {activeChapter === 2 && (
                 <div className="bg-white p-6 space-y-5">
                   <div className="surface-ink rounded-2xl p-5 space-y-4">
@@ -601,7 +557,7 @@ export function ScrollJourneySection() {
                       <div>
                         <div className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#4ADE80]">
                           <span className="live-dot h-1.5 w-1.5 rounded-full bg-[#4ADE80]" />
-                          ZERO-LOGIN MAGIC PASSBOOK
+                          PRIVATE STUDENT PAGE · NO PASSWORD
                         </div>
                         <h4 className="mt-2 font-serif text-3xl text-[#F6F4EE]">Alex Rivera</h4>
                         <p className="font-mono text-xs text-[#A8A295]">
@@ -612,14 +568,14 @@ export function ScrollJourneySection() {
                         href="/p/sl_demo_alex_94a2k"
                         className="inline-flex items-center gap-1 rounded-lg bg-[#F6F4EE] px-3 py-2 text-xs font-semibold text-[#141413] hover:bg-white transition"
                       >
-                        Open Live Portal
+                        Open Live Student Page
                         <ArrowUpRight className="h-3.5 w-3.5" />
                       </Link>
                     </div>
 
                     <div className="rounded-xl border border-white/15 bg-white/[0.06] p-3.5 space-y-2">
                       <div className="flex items-center justify-between font-mono text-xs">
-                        <span className="text-[#C8C2B6]">Prepaid Pack LED Meter</span>
+                        <span className="text-[#C8C2B6]">Prepaid Lesson Balance</span>
                         <span className="font-semibold text-[#4ADE80]">3 of 5 hrs remaining</span>
                       </div>
                       <div className="grid grid-cols-5 gap-1.5">
@@ -639,32 +595,32 @@ export function ScrollJourneySection() {
                     <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-3.5 space-y-1">
                       <Video className="h-4 w-4 text-[#15803D]" />
                       <div className="font-semibold text-[#141413]">One-Tap Join Call</div>
-                      <p className="text-[#575248]">Direct Google Meet / Jitsi room inside card.</p>
+                      <p className="text-[#575248]">Direct Google Meet / video link on card.</p>
                     </div>
                     <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-3.5 space-y-1">
                       <CalendarPlus className="h-4 w-4 text-[#D94E28]" />
-                      <div className="font-semibold text-[#141413]">Universal .ics Export</div>
-                      <p className="text-[#575248]">Apple, Outlook &amp; Google Calendar compatible.</p>
+                      <div className="font-semibold text-[#141413]">Calendar Invite (.ics)</div>
+                      <p className="text-[#575248]">Apple, Outlook &amp; Google Calendar ready.</p>
                     </div>
                     <div className="rounded-xl border border-[#DCD6C8] bg-[#F6F4EE] p-3.5 space-y-1">
                       <CalendarCheck2 className="h-4 w-4 text-[#141413]" />
-                      <div className="font-semibold text-[#141413]">24h Guardrail</div>
-                      <p className="text-[#575248]">Self-serve reschedule with policy protection.</p>
+                      <div className="font-semibold text-[#141413]">24h Notice Rule</div>
+                      <p className="text-[#575248]">Students can reschedule ahead of cutoff.</p>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Morphing Chapter 3: 1-Tap Deduct & Study Vault Sync */}
+              {/* Step 4: Teacher Lesson Wrap-Up */}
               {activeChapter === 3 && (
                 <div className="bg-white p-6 space-y-5">
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#EFECE4] pb-4">
                     <div>
                       <div className="font-mono text-[10px] font-semibold uppercase tracking-widest text-[#D94E28]">
-                        Interactive Tutor Studio Drawer
+                        Teacher Lesson Wrap-Up
                       </div>
                       <h4 className="mt-1 font-serif text-2xl text-[#141413]">
-                        Complete Session &amp; Publish Homework
+                        Complete Lesson &amp; Share Notes
                       </h4>
                     </div>
                     {!simCompleted ? (
@@ -683,7 +639,7 @@ export function ScrollJourneySection() {
                         className="inline-flex items-center gap-1.5 rounded-lg border border-[#CEC7B6] bg-white px-3 py-2 text-xs font-semibold text-[#141413] hover:bg-[#EFECE4] transition cursor-pointer"
                       >
                         <RotateCcw className="h-3.5 w-3.5" />
-                        Reset Drawer
+                        Reset Preview
                       </button>
                     )}
                   </div>
@@ -703,7 +659,7 @@ export function ScrollJourneySection() {
                         </span>
                       </div>
                       <span className="font-mono font-semibold text-[#15803D]">
-                        {simCompleted ? '4 hrs → 3 hrs left (-1 hr atomic)' : '4 of 5 hrs remaining'}
+                        {simCompleted ? '4 hrs → 3 hrs left (-1 hr)' : '4 of 5 hrs remaining'}
                       </span>
                     </div>
 
@@ -714,10 +670,10 @@ export function ScrollJourneySection() {
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="inline-flex items-center gap-1.5 font-mono font-semibold text-[#D94E28]">
                           <FileText className="h-3.5 w-3.5" />
-                          sat-module-2-drill
+                          SAT Module 2 Quadratic Drill
                         </span>
                         <span className="font-mono text-[11px] text-[#15803D]">
-                          {simCompleted ? 'Synced to Client Passbook in 40ms ✓' : 'Ready to publish'}
+                          {simCompleted ? 'Shared to student page instantly ✓' : 'Ready to share'}
                         </span>
                       </div>
                     </div>
@@ -734,158 +690,15 @@ export function ScrollJourneySection() {
                       href="/login?mode=signup"
                       className="inline-flex items-center gap-1.5 rounded-lg bg-[#141413] px-4 py-2 text-xs font-semibold text-[#F6F4EE] hover:bg-[#D94E28] transition"
                     >
-                      Create Free Tutor Account
+                      Create Free Teacher Account
                       <ArrowRight className="h-3.5 w-3.5" />
                     </Link>
                   </div>
                 </div>
               )}
-                </>
-              )}
             </div>
           </div>
         </div>
-      </div>
-    </section>
-  );
-}
-
-/**
- * Interactive workflow toggle comparing fragmented 5-tool admin stacks vs SlotLink 1-Link flow.
- */
-export function WorkflowComparisonScrubber() {
-  const [mode, setMode] = useState<'slotlink' | 'legacy'>('slotlink');
-
-  return (
-    <section
-      id="workflow-compare"
-      className="relative z-10 border-b border-[#DCD6C8] bg-white/95 viewport-section min-h-[75dvh]"
-    >
-      <div className="viewport-container space-y-8">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="max-w-2xl">
-            <div className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#D94E28]">
-              02 // Old Stack vs. 1-Link Architecture
-            </div>
-            <h2 className="mt-2 text-fluid-h2 font-semibold tracking-tight text-[#141413]">
-              See the admin difference in{' '}
-              <span className="font-serif italic font-normal text-[#D94E28]">
-                every single lesson.
-              </span>
-            </h2>
-          </div>
-
-          <div
-            role="tablist"
-            aria-label="Compare teaching workflow"
-            className="inline-flex rounded-xl border border-[#DCD6C8] bg-[#EFECE4] p-1 font-mono text-xs font-semibold"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === 'legacy'}
-              onClick={() => setMode('legacy')}
-              className={`rounded-lg px-3.5 py-2 transition cursor-pointer ${
-                mode === 'legacy'
-                  ? 'bg-[#9F2D12] text-white shadow-sm'
-                  : 'text-[#575248] hover:text-[#141413]'
-              }`}
-            >
-              Old 5-Tool Stack (~14m/lesson)
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === 'slotlink'}
-              onClick={() => setMode('slotlink')}
-              className={`rounded-lg px-3.5 py-2 transition cursor-pointer ${
-                mode === 'slotlink'
-                  ? 'bg-[#141413] text-[#F6F4EE] shadow-sm'
-                  : 'text-[#575248] hover:text-[#141413]'
-              }`}
-            >
-              SlotLink Flow (~15s/lesson)
-            </button>
-          </div>
-        </div>
-
-        {mode === 'legacy' ? (
-          <div className="rounded-2xl border border-[#E5C6BE] bg-[#FDF2EF]/75 p-6 sm:p-8 space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="inline-flex items-center gap-2 font-mono text-xs font-semibold text-[#9F2D12]">
-                <X className="h-4 w-4" />
-                THE 5-TOOL DUCT-TAPE STACK
-              </div>
-              <span className="rounded-full border border-[#E5C6BE] bg-white px-3 py-1 font-mono text-xs font-semibold text-[#9F2D12]">
-                ~14 mins wasted admin per session
-              </span>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-              {OLD_STACK_STEPS.map((item, idx) => (
-                <div
-                  key={item.step}
-                  className="relative rounded-xl border border-[#E5C6BE] bg-white p-4 space-y-2"
-                >
-                  <div className="flex items-center justify-between font-mono text-[10px] font-semibold text-[#9F2D12]">
-                    <span>
-                      STEP {item.step} · {item.tool}
-                    </span>
-                    {idx < OLD_STACK_STEPS.length - 1 && (
-                      <svg viewBox="0 0 24 12" className="hidden lg:block w-5 h-3 text-[#9F2D12]/60">
-                        <path
-                          d="M 0 6 H 20 M 16 2 L 21 6 L 16 10"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeDasharray="3 2"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                  <p className="text-xs leading-relaxed text-[#575248]">{item.friction}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="surface-ink rounded-2xl p-6 sm:p-8 space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="inline-flex items-center gap-2 font-mono text-xs font-semibold text-[#4ADE80]">
-                <Check className="h-4 w-4" />
-                THE SLOTLINK 1-LINK JOURNEY
-              </div>
-              <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 font-mono text-xs font-semibold text-[#4ADE80]">
-                ~15 secs total admin · Zero passwords
-              </span>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {SLOTLINK_STEPS.map((item, idx) => (
-                <div
-                  key={item.step}
-                  className="relative rounded-xl border border-white/15 bg-white/[0.06] p-4 space-y-2"
-                >
-                  <div className="flex items-center justify-between font-mono text-[10px] font-semibold text-[#4ADE80]">
-                    <span>
-                      STEP {item.step} · {item.surface}
-                    </span>
-                    {idx < SLOTLINK_STEPS.length - 1 && (
-                      <svg viewBox="0 0 26 12" className="hidden lg:block w-6 h-3 text-[#4ADE80]">
-                        <path
-                          d="M 0 6 H 22 M 18 2 L 23 6 L 18 10"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.6"
-                          className="animate-vector-dash"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                  <p className="text-xs leading-relaxed text-[#E5E0D4]">{item.gain}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );
